@@ -13,6 +13,9 @@ from ds_store import *
 
 from . import colors, badge
 
+###FIXME: Make arrange_by work for icon view.
+###FIXME: Check the window coordinate format.
+
 _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
 
 class DMGError(Exception):
