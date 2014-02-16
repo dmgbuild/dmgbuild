@@ -12,6 +12,10 @@ The default values *are* visible from within your settings file, if
 you want to examine or alter them rather than replacing them
 completely.
 
+If any ``-D key=value`` settings have been made on the command line,
+they are visible in a dictionary named ``defines`` within the settings
+file.
+
 Disk Image Settings
 -------------------
 
@@ -127,6 +131,7 @@ Window Settings
    hwb(300,0,0)      HWB (Hue Whiteness Blackness) color
    cmyk(0,1,0,0)     CMYK (Cyan Magenta Yellow Black) color
    goldenrod         X11/SVG named color
+   builtin-arrow     A simple blue arrow image (retina enabled)
    /foo/bar/baz.png  The path to an image file
    ================  ================================================
 
@@ -187,5 +192,144 @@ Window Settings
 Icon View Settings
 ------------------
 
+.. py:data:: arrange_by
 
-   
+   If set, indicates that the Finder should arrange the icons in the
+   icon view according to the specified field.  Allowable settings
+   are:
+
+   +------------------+
+   | Field name       |
+   +==================+
+   | name             |
+   +------------------+
+   | date-modified    |
+   +------------------+
+   | date-created     |
+   +------------------+
+   | date-added       |
+   +------------------+
+   | date-last-opened |
+   +------------------+
+   | size             |
+   +------------------+
+   | kind             |
+   +------------------+
+   | label            |
+   +------------------+
+
+   Any other value disables automatic icon arrangement (which is the
+   default, since the main use-case for ``dmgbuild`` is building
+   application distribution images, where icon positioning is an
+   important part of the design).
+
+.. py:data:: grid_offset
+
+   Specifies the grid offset for automatic arrangement.
+
+.. py:data:: grid-spacing
+
+   Specifies the grid spacing for automatic arrangement.
+
+.. py:data:: scroll_position
+
+   An (x, y) tuple specifying the scroll position; this is only
+   relevant if you position icons outside of the window area.
+
+.. py:data:: label_pos
+
+   Specifies the position of the icons' labels.  Choose 'bottom' or
+   'right' (defaults to 'bottom').
+
+.. py:data:: text_size
+
+   Specifies the point size of the label text.  Default is 16pt.
+
+.. py:data:: icon_size
+
+   Specifies the size of icon to use.  Default is 128pt.
+
+.. py:data:: icon_locations
+
+   If :data:`arrange_by` is not set, a dictionary mapping the names of
+   items in the root of the volume to an (x, y) tuple specifying their
+   location in points.
+
+List View Settings
+------------------
+
+In list view, the following columns are available:
+
+   +------------------+
+   | Field name       |
+   +==================+
+   | name             |
+   +------------------+
+   | date-modified    |
+   +------------------+
+   | date-created     |
+   +------------------+
+   | date-added       |
+   +------------------+
+   | date-last-opened |
+   +------------------+
+   | size             |
+   +------------------+
+   | kind             |
+   +------------------+
+   | label            |
+   +------------------+
+   | version          |
+   +------------------+
+   | comments         |
+   +------------------+
+
+.. py:data:: list_icon_size
+
+   Sets the size of the icon in list view.  Default is 16pt.
+
+.. py:data:: list_text_size
+
+   Sets the size of the text in list view.  Default is 12pt.
+
+.. py:data:: list_scroll_position
+
+   Specifies the scroll position, assuming there are enough items to
+   make the view scroll.
+
+.. py:data:: list_sort_by
+
+   Specifies which column the Finder should sort the display by.
+   Defaults to 'name'.
+
+.. py:data:: list_use_relative_dates
+
+   If ``True``, formats dates using words like "Today" or "Yesterday"
+   where possible; otherwise they will be displayed as a full date.
+   Defaults to ``True``.
+
+.. py:data:: list_calculate_all_sizes
+
+   If ``True``, forces the Finder to compute all of the item sizes;
+   normally this is set to ``False`` because it can be expensive
+   calculating the sizes of deeply nested folders.  Defaults to
+   ``False``.
+
+.. py:data:: list_columns
+
+   A list or tuple of strings containing the names of columns, in the
+   order you want them to appear.
+
+.. py:data:: list_column_widths
+
+   A dictionary specifying the width, in points, for each of the
+   columns.  There are default widths for every column, so you may not
+   need to set this variable in practice.
+
+.. py:data:: list_column_sort_directions
+
+   A dictionary specifying the sort direction (either 'ascending', or
+   'descending') for each column.  Again, there are individual
+   defaults for each column, so you may not need to touch this unless
+   you wish to override the default behaviour.
+
