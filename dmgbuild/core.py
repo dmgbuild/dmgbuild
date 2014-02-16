@@ -14,8 +14,6 @@ from ds_store import *
 
 from . import colors, badge
 
-###FIXME: Check the window coordinate format.
-
 _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
 
 class DMGError(Exception):
@@ -62,7 +60,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         'show_item_info': False,
         'label_pos': 'bottom',
         'text_size': 16.0,
-        'icon_size': 64.0,
+        'icon_size': 128.0,
         'include_icon_view_settings': 'auto',
         'include_list_view_settings': 'auto',
         'list_icon_size': 16.0,
