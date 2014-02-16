@@ -7,13 +7,13 @@ import biplist
 import shutil
 import stat
 import re
+import pkg_resources
 
 from mac_alias import *
 from ds_store import *
 
 from . import colors, badge
 
-###FIXME: Make arrange_by work for icon view.
 ###FIXME: Check the window coordinate format.
 
 _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
@@ -47,7 +47,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         'symlinks': {},
         'icon': None,
         'badge_icon': None,
-        'background': None,
+        'background': 'builtin-arrow',
         'show_status_bar': False,
         'show_tab_view': False,
         'show_toolbar': False,
@@ -123,6 +123,17 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         'ShowSidebar': settings['show_sidebar']
         }
 
+    arrange_options = {
+        'name': 'name',
+        'date-modified': 'dateModified',
+        'date-created': 'dateCreated',
+        'date-added': 'dateAdded',
+        'date-last-opened': 'dateLastOpened',
+        'size': 'size',
+        'kind': 'kind',
+        'label': 'label',
+        }
+
     icvp = {
         'viewOptionsVersion': 1,
         'backgroundType': 0,
@@ -132,7 +143,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         'gridOffsetX': settings['grid_offset'][0],
         'gridOffsetY': settings['grid_offset'][1],
         'gridSpacing': settings['grid_spacing'],
-        'arrangeBy': 'none',
+        'arrangeBy': arrange_options.get(settings['arrange_by'], 'none'),
         'showIconPreview': settings['show_icon_preview'],
         'showItemInfo': settings['show_item_info'],
         'labelOnBottom': settings['label_pos'] == 'bottom',
@@ -143,27 +154,6 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         }
 
     background = settings['background']
-
-    if isinstance(background, basestring):
-        if colors.isAColor(background):
-            c = colors.parseColor(background).to_rgb()
-
-            icvp['backgroundType'] = 1
-            icvp['backgroundColorRed'] = c.r
-            icvp['backgroundColorGreen'] = c.g
-            icvp['backgroundColorBlue'] = c.b
-        elif os.path.exists(background):
-            basename = os.path.basename(background)
-            _, kind = os.path.splitext(basename)
-            path_in_image = os.path.join(mount_point, '.background' + kind)
-            shutil.copyfile(background, path_in_image)
-
-            alias = Alias.for_file(path_in_image)
-        
-            icvp['backgroundType'] = 2
-            icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
-        else:
-            raise ValueError('background file "%s" not found' % background)
 
     columns = {
         'name': 'name',
@@ -298,8 +288,10 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         raise DMGError('Unable to attach disk image')
 
     try:
-        device = output['system-entities'][0]['dev-entry']
-        mount_point = output['system-entities'][0]['mount-point']
+        for info in output['system-entities']:
+            if info.get('mount-point', None):
+                device = info['dev-entry']
+                mount_point = info['mount-point']
 
         icon = settings['icon']
         badge_icon = settings['badge_icon']
@@ -312,6 +304,40 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         if icon or badge_icon:
             subprocess.call(['/usr/bin/SetFile', '-a', 'C', mount_point])
         
+        if not isinstance(background, basestring):
+            pass
+        elif background == 'builtin-arrow':
+            tiffdata = pkg_resources.resource_string('dmgbuild', 
+                                                     'resources/background.tiff')
+            path_in_image = os.path.join(mount_point, '.background.tiff')
+            
+            with open(path_in_image, 'w') as f:
+                f.write(tiffdata)
+
+            alias = Alias.for_file(path_in_image)
+
+            icvp['backgroundType'] = 2
+            icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
+        elif colors.isAColor(background):
+            c = colors.parseColor(background).to_rgb()
+
+            icvp['backgroundType'] = 1
+            icvp['backgroundColorRed'] = c.r
+            icvp['backgroundColorGreen'] = c.g
+            icvp['backgroundColorBlue'] = c.b
+        elif os.path.exists(background):
+            basename = os.path.basename(background)
+            _, kind = os.path.splitext(basename)
+            path_in_image = os.path.join(mount_point, '.background' + kind)
+            shutil.copyfile(background, path_in_image)
+
+            alias = Alias.for_file(path_in_image)
+        
+            icvp['backgroundType'] = 2
+            icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
+        else:
+            raise ValueError('background file "%s" not found' % background)
+
         for f in settings['files']:
             basename = os.path.basename(f)
             f_in_image = os.path.join(mount_point, basename)

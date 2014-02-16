@@ -7,6 +7,9 @@ setup(name='dmgbuild',
       author_email='alastair@alastairs-place.net',
       url='http://alastairs-place.net/projects/dmgbuild',
       packages=['dmgbuild'],
+      package_data = {
+        'dmgbuild': ['resources/*']
+      },
       scripts=['scripts/dmgbuild'],
       install_requires=['ds_store>=1.0.0',
                         'mac_alias>=1.0.0']

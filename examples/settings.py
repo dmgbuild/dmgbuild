@@ -38,8 +38,8 @@ badge_icon = '/Applications/TextEdit.app/Contents/Resources/Edit.icns'
 
 # Where to put the icons
 icon_locations = {
-    'TextEdit.app': (100, 100),
-    'Applications': (300, 100)
+    'TextEdit.app': (140, 200),
+    'Applications': (500, 200)
     }
 
 # .. Window configuration ......................................................
@@ -55,6 +55,7 @@ icon_locations = {
 #    hwb(300,0,0)     - HWB (hue whiteness blackness) color
 #    cmyk(0,1,0,0)    - CMYK color
 #    goldenrod        - X11/SVG named color
+#    builtin-arrow    - A simple built-in background with a blue arrow
 #    /foo/bar/baz.png - The path to an image file
 #
 # The hue component in hsl() and hwb() may include a unit; it defaults to
@@ -63,7 +64,7 @@ icon_locations = {
 #
 # Other color components may be expressed either in the range 0 to 1, or
 # as percentages (e.g. 60% is equivalent to 0.6).
-background = 'powderblue'
+background = 'builtin-arrow'
 
 show_status_bar = False
 show_tab_view = False
@@ -73,7 +74,7 @@ show_sidebar = False
 sidebar_width = 180
 
 # Window position in ((x, y), (w, h)) format
-window_rect = ((100, 100), (640, 512))
+window_rect = ((100, 100), (640, 460))
 
 # Select the default view; must be one of
 #
@@ -100,7 +101,7 @@ grid_spacing = 120
 scroll_position = (0, 0)
 label_pos = 'bottom' # or 'right'
 text_size = 16
-icon_size = 64
+icon_size = 128
 
 # .. List view configuration ...................................................
 
