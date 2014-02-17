@@ -32,7 +32,7 @@ def badge_disk_icon(badge_file, output_file):
     scale = 1.0
     
     # Perspective transform
-    corners = ((0.2, 0.95), (0.8, 0.95), (0.9, 0.35), (0.1, 0.35))
+    corners = ((0.2, 0.95), (0.8, 0.95), (0.85, 0.35), (0.15, 0.35))
 
     # Translation
     position = (0.5, 0.5)
