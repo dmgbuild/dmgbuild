@@ -159,7 +159,13 @@ Window Settings
 
 .. py:data:: window_rect
 
-   The position of the window in ``((x, y), (w, h))`` format.
+   The position of the window in ``((x, y), (w, h))`` format, with y
+   co-ordinates running from bottom to top.  The Finder makes sure that the
+   window will be on the user's display, so if you want your window at the top
+   left of the display you could use ``(0, 100000)`` as the x, y
+   co-ordinates.  Unfortunately it doesn't appear to be possible to position
+   the window relative to the top left or relative to the centre of the user's
+   screen.
 
 .. py:data:: default_view
 
