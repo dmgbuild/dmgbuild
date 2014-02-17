@@ -94,7 +94,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
             'version': 'ascending',
             'comments': 'ascending',
             },
-        'window_rect': ((100, 100), (640, 512)),
+        'window_rect': ((100, 100), (640, 280)),
         'default_view': 'icon-view',
         'icon_locations': {},
         'defines': defines
@@ -305,8 +305,9 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         if not isinstance(background, basestring):
             pass
         elif background == 'builtin-arrow':
-            tiffdata = pkg_resources.resource_string('dmgbuild', 
-                                                     'resources/background.tiff')
+            tiffdata = pkg_resources.resource_string(
+                'dmgbuild', 
+                'resources/builtin-arrow.tiff')
             path_in_image = os.path.join(mount_point, '.background.tiff')
             
             with open(path_in_image, 'w') as f:
