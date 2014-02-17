@@ -34,7 +34,7 @@ Contents:
 
    usage
    settings
-
+   example
 
 Indices and tables
 ==================
