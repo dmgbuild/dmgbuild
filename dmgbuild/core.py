@@ -8,6 +8,9 @@ import shutil
 import stat
 import re
 import pkg_resources
+import tokenize
+import six
+import sys
 
 from mac_alias import *
 from ds_store import *
@@ -33,6 +36,21 @@ def hdiutil(cmd, *args, **kwargs):
         results = output
     retcode = p.wait()
     return retcode, results
+
+# On Python 2 we can just execfile() it, but Python 3 deprecated that
+def load_settings(filename, globs, locs):
+    if sys.version_info[0] == 2:
+        execfile(filename, globs, locs)
+    else:
+        encoding = 'utf-8'
+        with open(filename, 'rb') as fp:
+            try:
+                encoding = tokenize.detect_encoding(fp.readline)[0]
+            except SyntaxError:
+                pass
+    
+        with open(filename, 'r', encoding=encoding) as fp:
+            exec(compile(fp.read(), filename, 'exec'), globs, locs)
 
 def build_dmg(filename, volume_name, settings_file=None, defines={}):
     settings = {
@@ -102,7 +120,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
     
     # Execute the settings file
     if settings_file:
-        execfile(settings_file, settings, settings)
+        load_settings(settings_file, settings, settings)
 
     # Set up the finder data
     bounds = settings['window_rect']
@@ -223,7 +241,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
             }
 
     n = len(settings['list_columns'])
-    for k in columns.iterkeys():
+    for k in six.iterkeys(columns):
         if cndx.get(k, None) is None:
             cndx[k] = n
             width = default_widths[k]
@@ -345,7 +363,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
             else:
                 shutil.copyfile(f, f_in_image)
 
-        for name,target in settings['symlinks'].iteritems():
+        for name,target in six.iteritems(settings['symlinks']):
             name_in_image = os.path.join(mount_point, name)
             os.symlink(target, name_in_image)
     
@@ -364,7 +382,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
                 d['.']['lsvp'] = lsvp
             d['.']['icvl'] = icvl
 
-            for k,v in settings['icon_locations'].iteritems():
+            for k,v in six.iteritems(settings['icon_locations']):
                 d[k]['Iloc'] = v
     except:
         # Always try to detach
