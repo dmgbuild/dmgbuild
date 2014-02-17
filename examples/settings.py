@@ -1,11 +1,30 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import biplist
+import os.path
+
 #
 # Example settings file for dmgbuild
 #
 
 # Use like this: dmgbuild -s settings.py "Test Volume" test.dmg
+
+# You can actually use this file for your own application (not just TextEdit)
+# by doing e.g.
+#
+#   dmgbuild -s settings.py -D app=/path/to/My.app "My Application" MyApp.dmg
+
+# .. Useful stuff ..............................................................
+
+application = defines.get('app', '/Applications/TextEdit.app')
+appname = os.path.basename(application)
+
+def icon_from_app(app_path):
+    plist_path = os.path.join(app_path, 'Contents', 'Info.plist')
+    plist = biplist.readPlist(plist_path)
+    icon_name = plist['CFBundleIconFile']
+    return os.path.join(app_path, 'Contents', 'Resources', icon_name)
 
 # .. Basics ....................................................................
 
@@ -22,7 +41,7 @@ format = defines.get('format', 'UDBZ')
 size = defines.get('size', '100M')
 
 # Files to include
-files = [ '/Applications/TextEdit.app' ]
+files = [ application ]
 
 # Symlinks to create
 symlinks = { 'Applications': '/Applications' }
@@ -34,12 +53,12 @@ symlinks = { 'Applications': '/Applications' }
 # will be used to badge the system's Removable Disk icon
 #
 #icon = '/path/to/icon.icns'
-badge_icon = '/Applications/TextEdit.app/Contents/Resources/Edit.icns'
+badge_icon = icon_from_app(application)
 
 # Where to put the icons
 icon_locations = {
-    'TextEdit.app': (140, 200),
-    'Applications': (500, 200)
+    appname:        (140, 120),
+    'Applications': (500, 120)
     }
 
 # .. Window configuration ......................................................
@@ -74,7 +93,7 @@ show_sidebar = False
 sidebar_width = 180
 
 # Window position in ((x, y), (w, h)) format
-window_rect = ((100, 100), (640, 460))
+window_rect = ((100, 100), (640, 280))
 
 # Select the default view; must be one of
 #
