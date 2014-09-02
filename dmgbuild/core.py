@@ -1,17 +1,28 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import subprocess
 import os.path
-import biplist
+import pkg_resources
+import re
 import shutil
 import stat
-import re
-import pkg_resources
-import tokenize
-import six
+import subprocess
 import sys
+import tokenize
 
+try:
+    {}.iteritems
+    iteritems = lambda x: x.iteritems()
+    iterkeys = lambda x: x.iterkeys()
+except AttributeError:
+    iteritems = lambda x: x.items()
+    iterkeys = lambda x: x.keys()
+try:
+    unicode
+except NameError:
+    unicode = str
+
+import biplist
 from mac_alias import *
 from ds_store import *
 
@@ -114,14 +125,16 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
             },
         'window_rect': ((100, 100), (640, 280)),
         'default_view': 'icon-view',
-        'icon_locations': {},
-        'defines': defines
+        'icon_locations': {}
         }
     
     # Execute the settings file
     if settings_file:
         load_settings(settings_file, settings, settings)
-
+    
+    # Overlay the defines
+    settings.update(defines)
+    
     # Set up the finder data
     bounds = settings['window_rect']
     
@@ -241,7 +254,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
             }
 
     n = len(settings['list_columns'])
-    for k in six.iterkeys(columns):
+    for k in iterkeys(columns):
         if cndx.get(k, None) is None:
             cndx[k] = n
             width = default_widths[k]
@@ -320,7 +333,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         if icon or badge_icon:
             subprocess.call(['/usr/bin/SetFile', '-a', 'C', mount_point])
         
-        if not isinstance(background, basestring):
+        if not isinstance(background, (str, unicode)):
             pass
         elif background == 'builtin-arrow':
             tiffdata = pkg_resources.resource_string(
@@ -362,8 +375,9 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
                 shutil.copytree(f, f_in_image, symlinks=True)
             else:
                 shutil.copyfile(f, f_in_image)
+                shutil.copymode(f, f_in_image)
 
-        for name,target in six.iteritems(settings['symlinks']):
+        for name,target in iteritems(settings['symlinks']):
             name_in_image = os.path.join(mount_point, name)
             os.symlink(target, name_in_image)
     
@@ -382,7 +396,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
                 d['.']['lsvp'] = lsvp
             d['.']['icvl'] = icvl
 
-            for k,v in six.iteritems(settings['icon_locations']):
+            for k,v in iteritems(settings['icon_locations']):
                 d[k]['Iloc'] = v
     except:
         # Always try to detach
