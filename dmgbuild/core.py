@@ -125,15 +125,13 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
             },
         'window_rect': ((100, 100), (640, 280)),
         'default_view': 'icon-view',
-        'icon_locations': {}
+        'icon_locations': {},
+        'defines': defines
         }
     
     # Execute the settings file
     if settings_file:
         load_settings(settings_file, settings, settings)
-    
-    # Overlay the defines
-    settings.update(defines)
     
     # Set up the finder data
     bounds = settings['window_rect']
