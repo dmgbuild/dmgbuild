@@ -17,6 +17,7 @@ def badge_disk_icon(badge_file, output_file):
     url = CFURLCreateWithFileSystemPath(None, badge_file,
                                         kCFURLPOSIXPathStyle, False)
     badge = CGImageSourceCreateWithURL(url, None)
+    assert badge is not None, 'Unable to process image file: %s' % badge_file
     badgeCount = CGImageSourceGetCount(badge)
     
     # Set up a destination for our target

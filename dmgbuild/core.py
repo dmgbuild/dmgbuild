@@ -398,13 +398,14 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
                 d[k]['Iloc'] = v
     except:
         # Always try to detach
-        hdiutil('detach', device, plist=False)
+        hdiutil('detach', '-force', device, plist=False)
         raise
     
     ret, output = hdiutil('detach', device, plist=False)
 
     if ret:
-        raise DMGError('Unable to detach device')
+        hdiutil('detach', '-force', device, plist=False)
+        raise DMGError('Unable to detach device cleanly')
     
     ret, output = hdiutil('convert', tempname,
                           '-format', settings['format'],
