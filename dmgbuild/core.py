@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os.path
+import os
 import pkg_resources
 import re
 import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 import tokenize
 
 try:
@@ -63,7 +64,7 @@ def load_settings(filename, globs, locs):
         with open(filename, 'r', encoding=encoding) as fp:
             exec(compile(fp.read(), filename, 'exec'), globs, locs)
 
-def build_dmg(filename, volume_name, settings_file=None, defines={}):
+def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDPI=True):
     settings = {
         # Actual settings
         'filename': filename,
@@ -353,9 +354,43 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
             icvp['backgroundColorRed'] = c.r
             icvp['backgroundColorGreen'] = c.g
             icvp['backgroundColorBlue'] = c.b
-        elif os.path.exists(background):
-            basename = os.path.basename(background)
-            _, kind = os.path.splitext(basename)
+        
+        elif os.path.isfile(background):
+            
+            # look to see if there are HiDPI resources available
+            
+            if lookForHiDPI is True:
+                name, extension = os.path.splitext(os.path.basename(background))
+                orderdImages = [background]
+                imageDirectory = os.path.dirname(background)
+                for canidateName in os.listdir(imageDirectory):
+                    hasScale = re.match(
+                        '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
+                        canidateName)
+                    if hasScale and name == hasScale.group('name') and \ 
+                        extension == hasScale.group('extension'):
+                            scale = int(hasScale.group('scale'))
+                            if len(orderdImages) < scale:
+                                orderdImages += [None] * (scale - len(orderdImages))
+                            orderdImages[scale - 1] = os.path.join(imageDirectory, canidateName)
+                
+                if len(orderdImages) > 1:
+                    # compile the grouped tiff
+                    backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
+                    background = backgroundFile.name
+                    output = tempfile.TemporaryFile(mode='w+')
+                    try:
+                        subprocess.check_call(
+                            ['/usr/bin/tiffutil', '-cathidpicheck'] +
+                            filter(None, orderdImages) +
+                            ['-out', background], stdout=output, stderr=output)
+                    except Exception as e:
+                        output.seek(0)
+                        raise ValueError(
+                            'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
+                            % (background, str(e), output.read()))
+            
+            _, kind = os.path.splitext(background)
             path_in_image = os.path.join(mount_point, '.background' + kind)
             shutil.copyfile(background, path_in_image)
 
