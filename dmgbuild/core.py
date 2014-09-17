@@ -367,7 +367,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                     hasScale = re.match(
                         '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
                         canidateName)
-                    if hasScale and name == hasScale.group('name') and \ 
+                    if hasScale and name == hasScale.group('name') and \
                         extension == hasScale.group('extension'):
                             scale = int(hasScale.group('scale'))
                             if len(orderdImages) < scale:
