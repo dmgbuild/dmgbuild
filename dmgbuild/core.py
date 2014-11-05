@@ -65,7 +65,7 @@ def load_settings(filename, globs, locs):
 
 def build_dmg(filename, volume_name, settings_file=None, defines={}):
     settings = {
-        # Actual settings
+        # Default settings
         'filename': filename,
         'volume_name': volume_name,
         'format': 'UDBZ',
@@ -84,7 +84,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         'arrange_by': None,
         'grid_offset': (0, 0),
         'grid_spacing': 120.0,
-        'scroll_position': (0, 0),
+        'scroll_position': (0.0, 0.0),
         'show_icon_preview': False,
         'show_item_info': False,
         'label_pos': 'bottom',
@@ -167,15 +167,15 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
         'backgroundColorRed': 1.0,
         'backgroundColorGreen': 1.0,
         'backgroundColorBlue': 1.0,
-        'gridOffsetX': settings['grid_offset'][0],
-        'gridOffsetY': settings['grid_offset'][1],
-        'gridSpacing': settings['grid_spacing'],
-        'arrangeBy': arrange_options.get(settings['arrange_by'], 'none'),
-        'showIconPreview': settings['show_icon_preview'],
-        'showItemInfo': settings['show_item_info'],
+        'gridOffsetX': float(settings['grid_offset'][0]),
+        'gridOffsetY': float(settings['grid_offset'][1]),
+        'gridSpacing': float(settings['grid_spacing']),
+        'arrangeBy': str(arrange_options.get(settings['arrange_by'], 'none')),
+        'showIconPreview': settings['show_icon_preview'] == True,
+        'showItemInfo': settings['show_item_info'] == True,
         'labelOnBottom': settings['label_pos'] == 'bottom',
-        'textSize': settings['text_size'],
-        'iconSize': settings['icon_size'],
+        'textSize': float(settings['text_size']),
+        'iconSize': float(settings['icon_size']),
         'scrollPositionX': settings['scroll_position'][0],
         'scrollPositionY': settings['scroll_position'][1]
         }
@@ -224,8 +224,8 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}):
     lsvp = {
         'viewOptionsVersion': 1,
         'sortColumn': columns.get(settings['list_sort_by'], 'name'),
-        'textSize': settings['list_text_size'],
-        'iconSize': settings['list_icon_size'],
+        'textSize': float(settings['list_text_size']),
+        'iconSize': float(settings['list_icon_size']),
         'showIconPreview': settings['show_icon_preview'],
         'scrollPositionX': settings['list_scroll_position'][0],
         'scrollPositionY': settings['list_scroll_position'][1],
