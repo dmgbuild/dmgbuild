@@ -66,7 +66,7 @@ def load_settings(filename, globs, locs):
 
 def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDPI=True):
     settings = {
-        # Actual settings
+        # Default settings
         'filename': filename,
         'volume_name': volume_name,
         'format': 'UDBZ',
@@ -85,7 +85,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'arrange_by': None,
         'grid_offset': (0, 0),
         'grid_spacing': 120.0,
-        'scroll_position': (0, 0),
+        'scroll_position': (0.0, 0.0),
         'show_icon_preview': False,
         'show_item_info': False,
         'label_pos': 'bottom',
@@ -168,15 +168,15 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'backgroundColorRed': 1.0,
         'backgroundColorGreen': 1.0,
         'backgroundColorBlue': 1.0,
-        'gridOffsetX': settings['grid_offset'][0],
-        'gridOffsetY': settings['grid_offset'][1],
-        'gridSpacing': settings['grid_spacing'],
-        'arrangeBy': arrange_options.get(settings['arrange_by'], 'none'),
-        'showIconPreview': settings['show_icon_preview'],
-        'showItemInfo': settings['show_item_info'],
+        'gridOffsetX': float(settings['grid_offset'][0]),
+        'gridOffsetY': float(settings['grid_offset'][1]),
+        'gridSpacing': float(settings['grid_spacing']),
+        'arrangeBy': str(arrange_options.get(settings['arrange_by'], 'none')),
+        'showIconPreview': settings['show_icon_preview'] == True,
+        'showItemInfo': settings['show_item_info'] == True,
         'labelOnBottom': settings['label_pos'] == 'bottom',
-        'textSize': settings['text_size'],
-        'iconSize': settings['icon_size'],
+        'textSize': float(settings['text_size']),
+        'iconSize': float(settings['icon_size']),
         'scrollPositionX': settings['scroll_position'][0],
         'scrollPositionY': settings['scroll_position'][1]
         }
@@ -225,8 +225,8 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     lsvp = {
         'viewOptionsVersion': 1,
         'sortColumn': columns.get(settings['list_sort_by'], 'name'),
-        'textSize': settings['list_text_size'],
-        'iconSize': settings['list_icon_size'],
+        'textSize': float(settings['list_text_size']),
+        'iconSize': float(settings['list_icon_size']),
         'showIconPreview': settings['show_icon_preview'],
         'scrollPositionX': settings['list_scroll_position'][0],
         'scrollPositionY': settings['list_scroll_position'][1],
@@ -351,9 +351,9 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             c = colors.parseColor(background).to_rgb()
 
             icvp['backgroundType'] = 1
-            icvp['backgroundColorRed'] = c.r
-            icvp['backgroundColorGreen'] = c.g
-            icvp['backgroundColorBlue'] = c.b
+            icvp['backgroundColorRed'] = float(c.r)
+            icvp['backgroundColorGreen'] = float(c.g)
+            icvp['backgroundColorBlue'] = float(c.b)
         
         elif os.path.isfile(background):
             
@@ -361,20 +361,20 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             
             if lookForHiDPI is True:
                 name, extension = os.path.splitext(os.path.basename(background))
-                orderdImages = [background]
+                orderedImages = [background]
                 imageDirectory = os.path.dirname(background)
-                for canidateName in os.listdir(imageDirectory):
+                for candidateName in os.listdir(imageDirectory):
                     hasScale = re.match(
                         '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
-                        canidateName)
+                        candidateName)
                     if hasScale and name == hasScale.group('name') and \
                         extension == hasScale.group('extension'):
                             scale = int(hasScale.group('scale'))
-                            if len(orderdImages) < scale:
-                                orderdImages += [None] * (scale - len(orderdImages))
-                            orderdImages[scale - 1] = os.path.join(imageDirectory, canidateName)
+                            if len(orderedImages) < scale:
+                                orderedImages += [None] * (scale - len(orderedImages))
+                            orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
                 
-                if len(orderdImages) > 1:
+                if len(orderedImages) > 1:
                     # compile the grouped tiff
                     backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
                     background = backgroundFile.name
@@ -382,7 +382,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                     try:
                         subprocess.check_call(
                             ['/usr/bin/tiffutil', '-cathidpicheck'] +
-                            filter(None, orderdImages) +
+                            filter(None, orderedImages) +
                             ['-out', background], stdout=output, stderr=output)
                     except Exception as e:
                         output.seek(0)
