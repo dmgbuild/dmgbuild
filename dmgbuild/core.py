@@ -363,6 +363,8 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                 name, extension = os.path.splitext(os.path.basename(background))
                 orderedImages = [background]
                 imageDirectory = os.path.dirname(background)
+                if imageDirectory == '':
+                    imageDirectory = '.'
                 for candidateName in os.listdir(imageDirectory):
                     hasScale = re.match(
                         '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
