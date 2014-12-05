@@ -43,27 +43,34 @@ def badge_disk_icon(badge_file, output_file):
         width = props['PixelWidth']
         height = props['PixelHeight']
         dpi = props['DPIWidth']
-    
+        depth = props['Depth']
+        
         # Choose the best sized badge image
         bestWidth = None
         bestHeight = None
         bestBadge = None
+        bestDepth = None
         bestDPI = None
         for m in range(badgeCount):
             badgeProps = CGImageSourceCopyPropertiesAtIndex(badge, m, None)
             badgeWidth = badgeProps['PixelWidth']
             badgeHeight = badgeProps['PixelHeight']
             badgeDPI = badgeProps['DPIWidth']
-        
+            badgeDepth = badgeProps['Depth']
+            
             if bestBadge is None or (badgeWidth <= width
                                     and (bestWidth > width
                                         or badgeWidth > bestWidth
                                         or (badgeWidth == bestWidth
-                                            and badgeDPI == dpi))):
+                                            and badgeDPI == dpi
+                                            and badgeDepth <= depth
+                                            and (bestDepth is None
+                                                 or badgeDepth > bestDepth)))):
                 bestBadge = m
                 bestWidth = badgeWidth
                 bestHeight = badgeHeight
                 bestDPI = badgeDPI
+                bestDepth = badgeDepth
 
         badgeImage = CGImageSourceCreateImageAtIndex(badge, bestBadge, None)
         badgeCI = CIImage.imageWithCGImage_(badgeImage)
