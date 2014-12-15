@@ -291,10 +291,10 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     volume_name = settings['volume_name']
     
     # Construct a writeable image to start with
-    dirname,basename = os.path.split(filename)
-    if dirname == '':
-        dirname = '.'
-    tempname = os.path.join(dirname, 'tmp-' + basename)
+    dirname, basename = os.path.split(os.path.realpath(filename))
+    if not basename.endswith('.dmg'):
+        basename += '.dmg'
+    writableFile = tempfile.NamedTemporaryFile(dir=dirname, prefix='.temp', suffix=basename)
 
     ret, output = hdiutil('create',
                           '-ov',
@@ -302,7 +302,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                           '-fs', 'HFS+',
                           '-fsargs', '-c c=64,a=16,e=16',
                           '-size', settings['size'],
-                          tempname)
+                          writableFile.name)
 
     if ret:
         raise DMGError('Unable to create disk image')
@@ -311,7 +311,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                           '-nobrowse',
                           '-owners', 'off',
                           '-noidme',
-                          tempname)
+                          writableFile.name)
 
     if ret:
         raise DMGError('Unable to attach disk image')
@@ -445,13 +445,10 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         hdiutil('detach', '-force', device, plist=False)
         raise DMGError('Unable to detach device cleanly')
     
-    ret, output = hdiutil('convert', tempname,
+    ret, output = hdiutil('convert', writableFile.name,
                           '-format', settings['format'],
                           '-ov',
                           '-o', filename)
 
     if ret:
         raise DMGError('Unable to convert')
-    
-    os.remove(tempname)
-    
