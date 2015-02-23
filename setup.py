@@ -25,6 +25,7 @@ setup(name='dmgbuild',
       scripts=['scripts/dmgbuild'],
       install_requires=['ds_store >= 1.0.1',
                         'mac_alias >= 1.0.0',
-                        'six >= 1.4.1'],
+                        'six >= 1.4.1',
+                        'pyobjc-framework-Quartz >= 3.0.4'],
       provides=['dmgbuild']
 )
