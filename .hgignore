@@ -1,0 +1,10 @@
+syntax: glob
+*~
+*.pyc
+.DS_Store
+
+syntax:regexp
+^dmgbuild.egg-info/
+^doc/_build/
+^dist/
+^build/
