@@ -3,7 +3,7 @@ Usage
 
 Typical usage looks like this::
 
-  dmgbuild -c settings.py "Volume Name" output.dmg
+  dmgbuild -s settings.py "Volume Name" output.dmg
 
 The (optional) ``settings.py`` file specifies the attributes that
 control the appearance of the disk image.  The other arguments give
