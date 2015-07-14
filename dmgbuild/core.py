@@ -405,13 +405,10 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             raise ValueError('background file "%s" not found' % background)
 
         for f in settings['files']:
-            basename = os.path.basename(f)
+            basename = os.path.basename(f.rstrip('/'))
             f_in_image = os.path.join(mount_point, basename)
-            if stat.S_ISDIR(os.stat(f).st_mode):
-                shutil.copytree(f, f_in_image, symlinks=True)
-            else:
-                shutil.copyfile(f, f_in_image)
-                shutil.copymode(f, f_in_image)
+            # use system ditto command to preserve code signing, etc.
+            subprocess.call(['/usr/bin/ditto', f, f_in_image])
 
         for name,target in iteritems(settings['symlinks']):
             name_in_image = os.path.join(mount_point, name)
