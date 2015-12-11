@@ -233,9 +233,13 @@ Icon View Settings
 
    Specifies the grid offset for automatic arrangement.
 
-.. py:data:: grid-spacing
+.. py:data:: grid_spacing
 
    Specifies the grid spacing for automatic arrangement.
+
+   .. warning:: As of Mac OS X 10.10 Yosemite, Finder checks to make sure
+                that grid_spacing is less than 100.  If it is over that
+                value, it will reject the saved settings.
 
 .. py:data:: scroll_position
 

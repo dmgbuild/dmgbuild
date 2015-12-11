@@ -120,7 +120,7 @@ include_list_view_settings = 'auto'
 
 arrange_by = None
 grid_offset = (0, 0)
-grid_spacing = 120
+grid_spacing = 100
 scroll_position = (0, 0)
 label_pos = 'bottom' # or 'right'
 text_size = 16
