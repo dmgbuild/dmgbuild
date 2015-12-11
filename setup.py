@@ -1,8 +1,18 @@
 # -*- coding: utf-8 -*-
+import sys
 from setuptools import setup
 
 with open('README.rst', 'rb') as f:
     long_desc = f.read().decode('utf-8')
+
+# We have to be able to install on Linux to build the docs, even though
+# dmgbuild presently won't work there because there's no SetFile
+requires=['ds_store >= 1.0.1',
+          'mac_alias >= 1.0.0',
+          'six >= 1.4.1']
+
+if sys.platform.startswith('darwin'):
+    requires.append('pyobjc-framework-Quartz >= 3.0.4')
 
 setup(name='dmgbuild',
       version='1.0.0',
@@ -23,9 +33,6 @@ setup(name='dmgbuild',
         'dmgbuild': ['resources/*']
       },
       scripts=['scripts/dmgbuild'],
-      install_requires=['ds_store >= 1.0.1',
-                        'mac_alias >= 1.0.0',
-                        'six >= 1.4.1',
-                        'pyobjc-framework-Quartz >= 3.0.4'],
+      install_requires=requires,
       provides=['dmgbuild']
 )

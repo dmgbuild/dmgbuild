@@ -27,7 +27,12 @@ import biplist
 from mac_alias import *
 from ds_store import *
 
-from . import colors, badge
+from . import colors
+
+try:
+    from . import badge
+except ImportError:
+    badge = None
 
 _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
 
@@ -323,7 +328,10 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                 mount_point = info['mount-point']
 
         icon = settings['icon']
-        badge_icon = settings['badge_icon']
+        if badge:
+            badge_icon = settings['badge_icon']
+        else:
+            badge_icon = None
         icon_target_path = os.path.join(mount_point, '.VolumeIcon.icns')
         if icon:
             shutil.copyfile(icon, icon_target_path)
