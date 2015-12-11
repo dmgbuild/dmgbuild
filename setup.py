@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
 
-with open('README.rst', 'r') as f:
+with open('README.rst', 'rb') as f:
     long_desc = f.read().decode('utf-8')
 
 setup(name='dmgbuild',
