@@ -439,6 +439,9 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
 
             for k,v in iteritems(settings['icon_locations']):
                 d[k]['Iloc'] = v
+
+        # Delete .Trashes, if it gets created
+        shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)
     except:
         # Always try to detach
         hdiutil('detach', '-force', device, plist=False)
