@@ -15,7 +15,7 @@ if sys.platform.startswith('darwin'):
     requires.append('pyobjc-framework-Quartz >= 3.0.4')
 
 setup(name='dmgbuild',
-      version='1.0.0',
+      version='1.1.0',
       description='Mac OS X command line utility to build disk images',
       long_description=long_desc,
       author='Alastair Houghton',
