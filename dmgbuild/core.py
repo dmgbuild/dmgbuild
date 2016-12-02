@@ -340,19 +340,22 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
 
         if icon or badge_icon:
             subprocess.call(['/usr/bin/SetFile', '-a', 'C', mount_point])
+
+        background_bmk = None
         
         if not isinstance(background, (str, unicode)):
             pass
         elif background == 'builtin-arrow':
             tiffdata = pkg_resources.resource_string(
-                'dmgbuild', 
+                'dmgbuild',
                 'resources/builtin-arrow.tiff')
             path_in_image = os.path.join(mount_point, '.background.tiff')
-            
+
             with open(path_in_image, 'w') as f:
                 f.write(tiffdata)
 
             alias = Alias.for_file(path_in_image)
+            background_bmk = Bookmark.for_file(path_in_image)
 
             icvp['backgroundType'] = 2
             icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
@@ -363,7 +366,6 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             icvp['backgroundColorRed'] = float(c.r)
             icvp['backgroundColorGreen'] = float(c.g)
             icvp['backgroundColorBlue'] = float(c.b)
-        
         elif os.path.isfile(background):
             
             # look to see if there are HiDPI resources available
@@ -406,7 +408,8 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             shutil.copyfile(background, path_in_image)
 
             alias = Alias.for_file(path_in_image)
-        
+            background_bmk = Bookmark.for_file(path_in_image)
+
             icvp['backgroundType'] = 2
             icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
         else:
@@ -421,11 +424,11 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         for name,target in iteritems(settings['symlinks']):
             name_in_image = os.path.join(mount_point, name)
             os.symlink(target, name_in_image)
-    
+
         userfn = settings.get('create_hook', None)
         if callable(userfn):
             userfn(mount_point, settings)
-        
+
         image_dsstore = os.path.join(mount_point, '.DS_Store')
 
         with DSStore.open(image_dsstore, 'w+') as d:
@@ -433,6 +436,8 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             d['.']['bwsp'] = bwsp
             if include_icon_view_settings:
                 d['.']['icvp'] = icvp
+                if background_bmk:
+                    d['.']['pBBk'] = background_bmk
             if include_list_view_settings:
                 d['.']['lsvp'] = lsvp
             d['.']['icvl'] = icvl
