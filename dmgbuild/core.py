@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import tokenize
+import json
 
 try:
     {}.iteritems
@@ -55,9 +56,9 @@ def hdiutil(cmd, *args, **kwargs):
     return retcode, results
 
 # On Python 2 we can just execfile() it, but Python 3 deprecated that
-def load_settings(filename, globs, locs):
+def load_settings(filename, settings):
     if sys.version_info[0] == 2:
-        execfile(filename, globs, locs)
+        execfile(filename, settings, settings)
     else:
         encoding = 'utf-8'
         with open(filename, 'rb') as fp:
@@ -65,9 +66,60 @@ def load_settings(filename, globs, locs):
                 encoding = tokenize.detect_encoding(fp.readline)[0]
             except SyntaxError:
                 pass
-    
+
         with open(filename, 'r', encoding=encoding) as fp:
-            exec(compile(fp.read(), filename, 'exec'), globs, locs)
+            exec(compile(fp.read(), filename, 'exec'), settings, settings)
+
+def load_json(filename, settings):
+    """Read an appdmg .json spec.  Uses the defaults for appdmg, rather than
+       the usual defaults for dmgbuild. """
+
+    with open(filename, 'r') as fp:
+        json_data = json.load(fp)
+
+    if 'title' not in json_data:
+        raise ValueError('missing \'title\' in JSON settings file')
+    if 'contents' not in json_data:
+        raise ValueError('missing \'contents\' in JSON settings file')
+
+    settings['volume_name'] = json_data['title']
+    settings['icon'] = json_data.get('icon', None)
+    bk = json_data.get('background', None)
+    if bk is None:
+        bk = json_data.get('background-color', None)
+    if bk is not None:
+        settings['background'] = bk
+    settings['icon_size'] = json_data.get('icon-size', 80)
+    wnd = settings.get('window', { 'position': (100, 100),
+                                   'size': (640, 480) })
+    settings['window_rect'] = (wnd.get('position', (100, 100)),
+                               wnd.get('size', (640, 480)))
+    settings['format'] = json_data.get('format', 'UDZO')
+    files = []
+    symlinks = {}
+    icon_locations = {}
+    for fileinfo in settings.get('contents', []):
+        if 'path' not in fileinfo:
+            raise ValueError('missing \'path\' in contents in JSON settings file')
+        if 'x' not in fileinfo:
+            raise ValueError('missing \'x\' in contents in JSON settings file')
+        if 'y' not in fileinfo:
+            raise ValueError('missing \'y\' in contents in JSON settings file')
+
+        kind = fileinfo.get('type', 'file')
+        path = fileinfo['path']
+        name = fileinfo.get('name', os.path.basename(path.rstrip('/')))
+        if kind == 'file':
+            files.append((path, name))
+        elif kind == 'link':
+            symlinks[name] = path
+        elif kind == 'position':
+            pass
+        icon_locations[name] = (fileinfo['x'], fileinfo['y'])
+
+    settings['files'] = files
+    settings['symlinks'] = symlinks
+    settings['icon_locations'] = icon_locations
 
 def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDPI=True):
     settings = {
@@ -134,14 +186,18 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'icon_locations': {},
         'defines': defines
         }
-    
+
     # Execute the settings file
     if settings_file:
-        load_settings(settings_file, settings, settings)
-    
+        # We now support JSON settings files using appdmg's format
+        if settings_file.endswith('.json'):
+            load_json(settings_file, settings)
+        else:
+            load_settings(settings_file, settings)
+
     # Set up the finder data
     bounds = settings['window_rect']
-    
+
     bwsp = {
         b'ShowStatusBar': settings['show_status_bar'],
         b'WindowBounds': b'{{%s, %s}, {%s, %s}}' % (bounds[0][0],
@@ -416,8 +472,13 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             raise ValueError('background file "%s" not found' % background)
 
         for f in settings['files']:
-            basename = os.path.basename(f.rstrip('/'))
-            f_in_image = os.path.join(mount_point, basename)
+            if isinstance(f, tuple):
+                f_in_image = os.path.join(mount_point, f[1])
+                f = f[0]
+            else:
+                basename = os.path.basename(f.rstrip('/'))
+                f_in_image = os.path.join(mount_point, basename)
+
             # use system ditto command to preserve code signing, etc.
             subprocess.call(['/usr/bin/ditto', f, f_in_image])
 
