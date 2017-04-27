@@ -127,7 +127,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'filename': filename,
         'volume_name': volume_name,
         'format': 'UDBZ',
-        'size': '100M',
+        'size': None,
         'files': [],
         'symlinks': {},
         'icon': None,
@@ -357,12 +357,30 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         basename += '.dmg'
     writableFile = tempfile.NamedTemporaryFile(dir=dirname, prefix='.temp', suffix=basename)
 
+    total_size = settings['size']
+    if total_size == None:
+        # Start with a size of 128MB - this way we don't need to calculate the size of the
+        # background image, volume icon, and .DS_Store file (and 128 MB should be well sufficient
+        # for even the most outlandish image sizes, like an uncompressed 5K multi-resolution TIFF)
+        total_size = 128 * 1024 * 1024
+        for path, name in settings['files']:
+            if not os.path.islink(path) and os.path.isdir(path):
+                for dirpath, dirnames, filenames in os.walk(path):
+                    for f in filenames:
+                        fp = os.path.join(dirpath, f)
+                        total_size += os.lstat(fp).st_size
+            else:
+                total_size += os.lstat(path).st_size
+        def roundup(x, n):
+            return x if x % n == 0 else x + n - x % n
+        total_size = str(max(roundup(total_size, 1024) / 1024, 1024)) + 'K'
+
     ret, output = hdiutil('create',
                           '-ov',
                           '-volname', volume_name,
                           '-fs', 'HFS+',
                           '-fsargs', '-c c=64,a=16,e=16',
-                          '-size', settings['size'],
+                          '-size', total_size,
                           writableFile.name)
 
     if ret:
@@ -518,6 +536,8 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     if ret:
         hdiutil('detach', '-force', device, plist=False)
         raise DMGError('Unable to detach device cleanly')
+
+    subprocess.call(['hdiutil', 'resize', '-quiet', '-sectors', 'min', writableFile.name])
     
     ret, output = hdiutil('convert', writableFile.name,
                           '-format', settings['format'],
