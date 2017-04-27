@@ -98,7 +98,7 @@ def load_json(filename, settings):
     files = []
     symlinks = {}
     icon_locations = {}
-    for fileinfo in settings.get('contents', []):
+    for fileinfo in json_data.get('contents', []):
         if 'path' not in fileinfo:
             raise ValueError('missing \'path\' in contents in JSON settings file')
         if 'x' not in fileinfo:
