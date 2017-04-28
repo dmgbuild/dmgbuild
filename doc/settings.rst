@@ -61,14 +61,15 @@ Disk Image Settings
 
 .. py:data:: size
 
-   Specifies the size of the filesystem within the image.  You should
-   set this large enough to hold the files you intend to copy into the
-   image.  The syntax is the same as for the ``-size`` argument to
-   ``hdiutil``, i.e. you can use the suffixes 'b', 'k', 'm', 'g', 't',
-   'p' and 'e' for bytes, kilobytes, megabytes, gigabytes, terabytes,
-   exabytes and petabytes respectively.
+   If defined, specifies the size of the filesystem within the image.
+   If this is not defined, ``dmgbuild`` will attempt to determine a
+   reasonable size for the image.
 
-   Defaults to '100M'
+   If you set this, you should set it large enough to hold the files you
+   intend to copy into the image.  The syntax is the same as for the ``-size``
+   argument to ``hdiutil``, i.e. you can use the suffixes 'b', 'k', 'm', 'g',
+   't', 'p' and 'e' for bytes, kilobytes, megabytes, gigabytes, terabytes,
+   exabytes and petabytes respectively.
 
 Content Settings
 ----------------
@@ -343,3 +344,87 @@ In list view, the following columns are available:
    defaults for each column, so you may not need to touch this unless
    you wish to override the default behaviour.
 
+License Settings
+----------------
+
+``dmgbuild`` can attach license text to your disk image; this will be
+displayed automatically when the user tries to open your disk image.
+
+Note that license text is either RTF, or it must be encoded in the legacy Mac
+encoding matching its language; ``dmgbuild`` will *try* to do this, but the
+built-in set of codecs in Python doesn't cover all the Mac encodings, so in
+some cases you will need to encode the data and use a byte string.
+
+.. py:data:: license
+
+   If defined, a dictionary specifying the details of the license to display.
+   It has the following keys:
+
+   +------------------+----------+-------------------------------------------+
+   | Key              | Optional | Value                                     |
+   +==================+==========+===========================================+
+   | default-language | No       | The name of the default language to       |
+   |                  |          | display if there is no license matching   |
+   |                  |          | the system language.                      |
+   +------------------+----------+-------------------------------------------+
+   | licenses         | No       | A dictionary mapping language names to    |
+   |                  |          | license text (either RTF data or plain    |
+   |                  |          | text).                                    |
+   +------------------+----------+-------------------------------------------+
+   | buttons          | Yes      | A dictionary mapping language names to    |
+   |                  |          | a sequence of user interface strings.     |
+   +------------------+----------+-------------------------------------------+
+
+   Supported languages are:
+
+     English, French, German, Italian, Dutch, Swedish, Spanish, Danish,
+     Portuguese, Norwegian, Hebrew, Japanese, Arabic, Finnish, Greek,
+     Icelandic, Maltese, Turkish, Croatian, TradChinese, Urdu, Hindi, Thai,
+     Korean, Lithuanian, Polish, Hungarian, Estonian, Latvian,
+     Sami, Faroese, Farsi, Persian, Russian, SimpChinese, Flemish, IrishGaelic,
+     Albanian, Romanian, Czech, Slovak, Slovenian, Yiddish, Serbian, Macedonian,
+     Bulgarian, Ukrainian, Byelorussian, Belorussian, Uzbek, Kazakh, Azerbaijani,
+     AzerbaijanAr, Armenian, Georgian, Moldavian, Kirghiz, Tajiki, Turkmen,
+     Mongolian, MongolianCyr, Pashto, Kurdish, Kashmiri, Sindhi, Tibetan, Nepali,
+     Sanskrit, Marathi, Bengali, Assamese, Gujarati, Punjabi, Oriya, Malayalam,
+     Kannada, Tamil, Telugu, Sinhalese, Burmese, Khmer, Lao, Vietnamese,
+     Indonesian, Tagalog, MalayRoman, MalayArabic, Amharic, Tigrinya, Oromo,
+     Somali, Swahili, Kinyarwanda, Ruanda, Rundi, Nyanja, Chewa, Malagasy,
+     Esperanto, Welsh, Basque, Catalan, Latin, Quechua, Guarani, Aymara, Tatar,
+     Uighur, Dzongkha, JavaneseRom, SundaneseRom, Galician, Afrikaans, Breton,
+     Inuktitut, ScottishGaelic, ManxGaelic, IrishGaelicScript, Tongan,
+     GreekAncient, Greenlandic, AzerbaijanRoman, Nynorsk
+
+   The user interface strings are as follows:
+
+   +-------+-----------------------+-----------------------------------------+
+   | Index | Comment               | Typical English text                    |
+   +=======+=======================+=========================================+
+   |   0   | Language name         | English                                 |
+   +-------+-----------------------+-----------------------------------------+
+   |   1   | Agree button label    | Agree                                   |
+   +-------+-----------------------+-----------------------------------------+
+   |   2   | Disagree button label | Disagree                                |
+   +-------+-----------------------+-----------------------------------------+
+   |   3   | Print button label    | Print                                   |
+   +-------+-----------------------+-----------------------------------------+
+   |   4   | Save button label     | Save                                    |
+   +-------+-----------------------+-----------------------------------------+
+   |   5   | Instruction text      | If you agree with the terms of this     |
+   |       |                       | license, press "Agree" to install the   |
+   |       |                       | software.  If you do not agree, press   |
+   |       |                       | "Disagree".                             |
+   +-------+-----------------------+-----------------------------------------+
+
+   There are built-in user interface strings for the following languages:
+
+     English, German, Spanish, French, Italian, Japanese, Dutch,
+     Swedish, Portuguese, SimpChinese, TradChinese, Danish, Finnish, Korean,
+     Norwegian
+
+   For other languages, if you don't specify a suitable set, ``dmgbuild`` will
+   use the English defaults instead.
+
+   ``dmgbuild`` will auto-detect RTF data by looking for the string ``{\rtf1``
+   at the start of the data.  If it does not find this string, it will assume
+   that you have supplied plain text.
