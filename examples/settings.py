@@ -41,8 +41,8 @@ def icon_from_app(app_path):
 # Volume format (see hdiutil create -help)
 format = defines.get('format', 'UDBZ')
 
-# Volume size (must be large enough for your files)
-size = defines.get('size', '100M')
+# Volume size
+size = defines.get('size', None)
 
 # Files to include
 files = [ application ]
@@ -172,3 +172,81 @@ list_column_sort_directions = {
     'version': 'ascending',
     'comments': 'ascending',
     }
+
+# .. License configuration .....................................................
+
+# Text in the license configuration is stored in the resources, which means
+# it gets stored in a legacy Mac encoding according to the language.  dmgbuild
+# will *try* to convert Unicode strings to the appropriate encoding, *but*
+# you should be aware that Python doesn't support all of the necessary encodings;
+# in many cases you will need to encode the text yourself and use byte strings
+# instead here.
+
+# Supported language names are:
+#
+#  English, French, German, Italian, Dutch, Swedish, Spanish, Danish,
+#  Portuguese, Norwegian, Hebrew, Japanese, Arabic, Finnish, Greek,
+#  Icelandic, Maltese, Turkish, Croatian, TradChinese, Urdu, Hindi, Thai,
+#  Korean, Lithuanian, Polish, Hungarian, Estonian, Latvian,
+#  Sami, Faroese, Farsi, Persian, Russian, SimpChinese, Flemish, IrishGaelic,
+#  Albanian, Romanian, Czech, Slovak, Slovenian, Yiddish, Serbian, Macedonian,
+#  Bulgarian, Ukrainian, Byelorussian, Belorussian, Uzbek, Kazakh, Azerbaijani,
+#  AzerbaijanAr, Armenian, Georgian, Moldavian, Kirghiz, Tajiki, Turkmen,
+#  Mongolian, MongolianCyr, Pashto, Kurdish, Kashmiri, Sindhi, Tibetan, Nepali,
+#  Sanskrit, Marathi, Bengali, Assamese, Gujarati, Punjabi, Oriya, Malayalam,
+#  Kannada, Tamil, Telugu, Sinhalese, Burmese, Khmer, Lao, Vietnamese,
+#  Indonesian, Tagalog, MalayRoman, MalayArabic, Amharic, Tigrinya, Oromo,
+#  Somali, Swahili, Kinyarwanda, Ruanda, Rundi, Nyanja, Chewa, Malagasy,
+#  Esperanto, Welsh, Basque, Catalan, Latin, Quechua, Guarani, Aymara, Tatar,
+#  Uighur, Dzongkha, JavaneseRom, SundaneseRom, Galician, Afrikaans, Breton,
+#  Inuktitut, ScottishGaelic, ManxGaelic, IrishGaelicScript, Tongan,
+#  GreekAncient, Greenlandic, AzerbaijanRoman, Nynorsk
+
+# license = {
+#     'default-language': 'English',
+#     'licenses': {
+#         # For each language, the text of the license.  This can be plain text,
+#         # or RTF (in which case it must start "{\rtf1").  If you're using RTF,
+#         # watch out for Python escaping (or read it from a file).
+#         'English': b'''{\\rtf1\\ansi\\ansicpg1252\\cocoartf1504\\cocoasubrtf820
+# {\\fonttbl\\f0\\fnil\\fcharset0 Helvetica-Bold;\\f1\\fnil\\fcharset0 Helvetica;}
+# {\\colortbl;\\red255\\green255\\blue255;\\red0\\green0\\blue0;}
+# {\\*\\expandedcolortbl;;\\cssrgb\\c0\\c0\\c0;}
+# \\paperw11905\\paperh16837\\margl1133\\margr1133\\margb1133\\margt1133
+# \\deftab720
+# \\pard\\pardeftab720\\sa160\\partightenfactor0
+
+# \\f0\\b\\fs60 \\cf2 \\expnd0\\expndtw0\\kerning0
+# \\up0 \\nosupersub \\ulnone \\outl0\\strokewidth0 \\strokec2 Test License\\
+# \\pard\\pardeftab720\\sa160\\partightenfactor0
+
+# \\fs36 \\cf2 \\strokec2 What is this?\\
+# \\pard\\pardeftab720\\sa160\\partightenfactor0
+
+# \\f1\\b0\\fs22 \\cf2 \\strokec2 This is the English license. It says what you are allowed to do with this software.\\
+# \\
+# }''',
+#     },
+#     'buttons': {
+#         # For each language, text for the buttons on the licensing window.
+#         #
+#         # Default buttons and text are built-in for the following languages:
+#         #
+#         #   English, German, Spanish, French, Italian, Japanese, Dutch,
+#         #   Swedish, Portuguese, SimpChinese, TradChinese, Danish, Finnish,
+#         #   Korean, Norwegian
+#         #
+#         # You don't need to specify them for those languages; if you fail to
+#         # specify them for some other language, English will be used instead.
+
+#         'English': (
+#             b'English',
+#             b'Agree',
+#             b'Disagree',
+#             b'Print',
+#             b'Save',
+#             b'If you agree with the terms of this license, press "Agree" to '
+#             b'install the software.  If you do not agree, press "Disagree".'
+#         ),
+#     },
+# }

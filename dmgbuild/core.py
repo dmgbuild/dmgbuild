@@ -29,6 +29,7 @@ from mac_alias import *
 from ds_store import *
 
 from . import colors
+from . import licensing
 
 try:
     from . import badge
@@ -95,6 +96,7 @@ def load_json(filename, settings):
     settings['window_rect'] = (wnd.get('position', (100, 100)),
                                wnd.get('size', (640, 480)))
     settings['format'] = json_data.get('format', 'UDZO')
+    settings['license'] = json_data.get('license', None)
     files = []
     symlinks = {}
     icon_locations = {}
@@ -184,6 +186,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'window_rect': ((100, 100), (640, 280)),
         'default_view': 'icon-view',
         'icon_locations': {},
+        'license': None,
         'defines': defines
         }
 
@@ -350,30 +353,41 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
 
     filename = settings['filename']
     volume_name = settings['volume_name']
-    
+
     # Construct a writeable image to start with
     dirname, basename = os.path.split(os.path.realpath(filename))
     if not basename.endswith('.dmg'):
         basename += '.dmg'
-    writableFile = tempfile.NamedTemporaryFile(dir=dirname, prefix='.temp', suffix=basename)
+    writableFile = tempfile.NamedTemporaryFile(dir=dirname, prefix='.temp',
+                                               suffix=basename)
 
     total_size = settings['size']
     if total_size == None:
-        # Start with a size of 128MB - this way we don't need to calculate the size of the
-        # background image, volume icon, and .DS_Store file (and 128 MB should be well sufficient
-        # for even the most outlandish image sizes, like an uncompressed 5K multi-resolution TIFF)
+        # Start with a size of 128MB - this way we don't need to calculate the
+        # size of the background image, volume icon, and .DS_Store file (and
+        # 128 MB should be well sufficient for even the most outlandish image
+        # sizes, like an uncompressed 5K multi-resolution TIFF)
         total_size = 128 * 1024 * 1024
-        for path, name in settings['files']:
+
+        def roundup(x, n):
+            return x if x % n == 0 else x + n - x % n
+
+        for path in settings['files']:
+            if isinstance(path, tuple):
+                path = path[0]
+
             if not os.path.islink(path) and os.path.isdir(path):
                 for dirpath, dirnames, filenames in os.walk(path):
                     for f in filenames:
                         fp = os.path.join(dirpath, f)
-                        total_size += os.lstat(fp).st_size
+                        total_size += roundup(os.lstat(fp).st_size, 4096)
             else:
-                total_size += os.lstat(path).st_size
-        def roundup(x, n):
-            return x if x % n == 0 else x + n - x % n
-        total_size = str(max(roundup(total_size, 1024) / 1024, 1024)) + 'K'
+                total_size += roundup(os.lstat(path).st_size, 4096)
+
+        for name,target in iteritems(settings['symlinks']):
+            total_size += 4096
+
+        total_size = str(max(total_size / 1024, 1024)) + 'K'
 
     ret, output = hdiutil('create',
                           '-ov',
@@ -416,7 +430,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             subprocess.call(['/usr/bin/SetFile', '-a', 'C', mount_point])
 
         background_bmk = None
-        
+
         if not isinstance(background, (str, unicode)):
             pass
         elif background == 'builtin-arrow':
@@ -441,9 +455,9 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             icvp['backgroundColorGreen'] = float(c.g)
             icvp['backgroundColorBlue'] = float(c.b)
         elif os.path.isfile(background):
-            
+
             # look to see if there are HiDPI resources available
-            
+
             if lookForHiDPI is True:
                 name, extension = os.path.splitext(os.path.basename(background))
                 orderedImages = [background]
@@ -460,7 +474,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                             if len(orderedImages) < scale:
                                 orderedImages += [None] * (scale - len(orderedImages))
                             orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
-                
+
                 if len(orderedImages) > 1:
                     # compile the grouped tiff
                     backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
@@ -530,15 +544,23 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         # Always try to detach
         hdiutil('detach', '-force', device, plist=False)
         raise
-    
+
     ret, output = hdiutil('detach', device, plist=False)
 
     if ret:
         hdiutil('detach', '-force', device, plist=False)
         raise DMGError('Unable to detach device cleanly')
 
-    subprocess.call(['hdiutil', 'resize', '-quiet', '-sectors', 'min', writableFile.name])
-    
+    # Shrink the output to the minimum possible size
+    ret, output = hdiutil('resize',
+                          '-quiet',
+                          '-sectors', 'min',
+                          writableFile.name,
+                          plist=False)
+
+    if ret:
+        raise DMGError('Unable to shrink')
+
     ret, output = hdiutil('convert', writableFile.name,
                           '-format', settings['format'],
                           '-ov',
@@ -546,3 +568,16 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
 
     if ret:
         raise DMGError('Unable to convert')
+
+    if settings['license']:
+        ret, output = hdiutil('unflatten', filename, plist=False)
+
+        if ret:
+            raise DMGError('Unable to unflatten to add license')
+
+        licensing.add_license(filename, settings['license'])
+
+        ret, output = hdiutil('flatten', filename, plist=False)
+
+        if ret:
+            raise DMGError('Unable to flatten after adding license')
