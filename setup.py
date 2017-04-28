@@ -8,8 +8,7 @@ with open('README.rst', 'rb') as f:
 # We have to be able to install on Linux to build the docs, even though
 # dmgbuild presently won't work there because there's no SetFile
 requires=['ds_store >= 1.1.0',
-          'mac_alias >= 2.0.1',
-          'six >= 1.4.1']
+          'mac_alias >= 2.0.1']
 
 if sys.platform.startswith('darwin'):
     requires.append('pyobjc-framework-Quartz >= 3.0.4')
