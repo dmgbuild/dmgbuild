@@ -238,7 +238,7 @@ Icon View Settings
 
    Specifies the grid spacing for automatic arrangement.
 
-   .. warning:: As of Mac OS X 10.10 Yosemite, Finder checks to make sure
+   .. warning:: As of Mac OS X Yosemite (v10.10), Finder checks to make sure
                 that grid_spacing is less than 100.  If it is over that
                 value, it will reject the saved settings.
 
