@@ -96,6 +96,7 @@ def load_json(filename, settings):
     settings['window_rect'] = (wnd.get('position', (100, 100)),
                                wnd.get('size', (640, 480)))
     settings['format'] = json_data.get('format', 'UDZO')
+    settings['compression_level'] = json_data.get('compression_level', None)
     settings['license'] = json_data.get('license', None)
     files = []
     symlinks = {}
@@ -129,6 +130,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'filename': filename,
         'volume_name': volume_name,
         'format': 'UDBZ',
+        'compression_level': None,
         'size': None,
         'files': [],
         'symlinks': {},
@@ -555,10 +557,20 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     if ret:
         raise DMGError('Unable to shrink')
 
+    key_prefix = {'UDZO': 'zlib', 'UDBZ': 'bzip2', 'ULFO': 'lzfse'}
+    compression_level = settings['compression_level']
+    if settings['format'] in key_prefix and compression_level:
+        compression_args = [
+            '-imagekey',
+            key_prefix[settings['format']] + '-level=' + str(compression_level)
+        ]
+    else:
+        compression_args = []
+
     ret, output = hdiutil('convert', writableFile.name,
                           '-format', settings['format'],
                           '-ov',
-                          '-o', filename)
+                          '-o', filename, *compression_args)
 
     if ret:
         raise DMGError('Unable to convert')
