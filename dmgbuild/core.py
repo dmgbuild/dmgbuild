@@ -564,14 +564,14 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         raise DMGError('Unable to convert')
 
     if settings['license']:
-        ret, output = hdiutil('unflatten', filename, plist=False)
+        ret, output = hdiutil('unflatten', '-quiet', filename, plist=False)
 
         if ret:
             raise DMGError('Unable to unflatten to add license')
 
         licensing.add_license(filename, settings['license'])
 
-        ret, output = hdiutil('flatten', filename, plist=False)
+        ret, output = hdiutil('flatten', '-quiet', filename, plist=False)
 
         if ret:
             raise DMGError('Unable to flatten after adding license')
