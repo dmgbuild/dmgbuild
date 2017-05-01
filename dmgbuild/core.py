@@ -134,7 +134,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'symlinks': {},
         'icon': None,
         'badge_icon': None,
-        'background': 'builtin-arrow',
+        'background': None,
         'show_status_bar': False,
         'show_tab_view': False,
         'show_toolbar': False,
@@ -433,20 +433,6 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
 
         if not isinstance(background, (str, unicode)):
             pass
-        elif background == 'builtin-arrow':
-            tiffdata = pkg_resources.resource_string(
-                'dmgbuild',
-                'resources/builtin-arrow.tiff')
-            path_in_image = os.path.join(mount_point, '.background.tiff')
-
-            with open(path_in_image, 'w') as f:
-                f.write(tiffdata)
-
-            alias = Alias.for_file(path_in_image)
-            background_bmk = Bookmark.for_file(path_in_image)
-
-            icvp['backgroundType'] = 2
-            icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
         elif colors.isAColor(background):
             c = colors.parseColor(background).to_rgb()
 
@@ -454,54 +440,62 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             icvp['backgroundColorRed'] = float(c.r)
             icvp['backgroundColorGreen'] = float(c.g)
             icvp['backgroundColorBlue'] = float(c.b)
-        elif os.path.isfile(background):
+        else:
+            if os.path.isfile(background):
+                # look to see if there are HiDPI resources available
 
-            # look to see if there are HiDPI resources available
+                if lookForHiDPI is True:
+                    name, extension = os.path.splitext(os.path.basename(background))
+                    orderedImages = [background]
+                    imageDirectory = os.path.dirname(background)
+                    if imageDirectory == '':
+                        imageDirectory = '.'
+                    for candidateName in os.listdir(imageDirectory):
+                        hasScale = re.match(
+                            '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
+                            candidateName)
+                        if hasScale and name == hasScale.group('name') and \
+                            extension == hasScale.group('extension'):
+                                scale = int(hasScale.group('scale'))
+                                if len(orderedImages) < scale:
+                                    orderedImages += [None] * (scale - len(orderedImages))
+                                orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
 
-            if lookForHiDPI is True:
-                name, extension = os.path.splitext(os.path.basename(background))
-                orderedImages = [background]
-                imageDirectory = os.path.dirname(background)
-                if imageDirectory == '':
-                    imageDirectory = '.'
-                for candidateName in os.listdir(imageDirectory):
-                    hasScale = re.match(
-                        '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
-                        candidateName)
-                    if hasScale and name == hasScale.group('name') and \
-                        extension == hasScale.group('extension'):
-                            scale = int(hasScale.group('scale'))
-                            if len(orderedImages) < scale:
-                                orderedImages += [None] * (scale - len(orderedImages))
-                            orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
+                    if len(orderedImages) > 1:
+                        # compile the grouped tiff
+                        backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
+                        background = backgroundFile.name
+                        output = tempfile.TemporaryFile(mode='w+')
+                        try:
+                            subprocess.check_call(
+                                ['/usr/bin/tiffutil', '-cathidpicheck'] +
+                                filter(None, orderedImages) +
+                                ['-out', background], stdout=output, stderr=output)
+                        except Exception as e:
+                            output.seek(0)
+                            raise ValueError(
+                                'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
+                                % (background, str(e), output.read()))
 
-                if len(orderedImages) > 1:
-                    # compile the grouped tiff
-                    backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
-                    background = backgroundFile.name
-                    output = tempfile.TemporaryFile(mode='w+')
-                    try:
-                        subprocess.check_call(
-                            ['/usr/bin/tiffutil', '-cathidpicheck'] +
-                            filter(None, orderedImages) +
-                            ['-out', background], stdout=output, stderr=output)
-                    except Exception as e:
-                        output.seek(0)
-                        raise ValueError(
-                            'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
-                            % (background, str(e), output.read()))
-            
-            _, kind = os.path.splitext(background)
-            path_in_image = os.path.join(mount_point, '.background' + kind)
-            shutil.copyfile(background, path_in_image)
+                _, kind = os.path.splitext(background)
+                path_in_image = os.path.join(mount_point, '.background' + kind)
+                shutil.copyfile(background, path_in_image)
+            elif pkg_resources.resource_exists('dmgbuild', 'resources/' + background + '.tiff'):
+                tiffdata = pkg_resources.resource_string(
+                    'dmgbuild',
+                    'resources/' + background + '.tiff')
+                path_in_image = os.path.join(mount_point, '.background.tiff')
+
+                with open(path_in_image, 'w') as f:
+                    f.write(tiffdata)
+            else:
+                raise ValueError('background file "%s" not found' % background)
 
             alias = Alias.for_file(path_in_image)
             background_bmk = Bookmark.for_file(path_in_image)
 
             icvp['backgroundType'] = 2
             icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
-        else:
-            raise ValueError('background file "%s" not found' % background)
 
         for f in settings['files']:
             if isinstance(f, tuple):
