@@ -15,7 +15,7 @@ if sys.platform.startswith('darwin'):
 
 setup(name='dmgbuild',
       version='1.3.0',
-      description='Mac OS X command line utility to build disk images',
+      description='macOS command line utility to build disk images',
       long_description=long_desc,
       author='Alastair Houghton',
       author_email='alastair@alastairs-place.net',
