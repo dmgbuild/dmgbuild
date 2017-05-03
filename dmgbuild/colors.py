@@ -253,7 +253,7 @@ _x11_colors = {
     
 _ws_re = re.compile('\s+')
 _token_re = re.compile('[A-Za-z_][A-Za-z0-9_]*')
-_hex_re = re.compile('#([0-9a-f]{3}(?:[0-9a-f]{3}))')
+_hex_re = re.compile('#([0-9a-f]{3}(?:[0-9a-f]{3})?)$')
 _number_re = re.compile('[0-9]*(\.[0-9]*)')
 
 class ColorParser (object):
@@ -324,13 +324,13 @@ class ColorParser (object):
             hrgb = m.group(1)
 
             if len(hrgb) == 3:
-                r = int('0x' + 2 * hrgb[0])
-                g = int('0x' + 2 * hrgb[1])
-                b = int('0x' + 2 * hrgb[2])
+                r = int('0x' + 2 * hrgb[0], 16)
+                g = int('0x' + 2 * hrgb[1], 16)
+                b = int('0x' + 2 * hrgb[2], 16)
             else:
-                r = int('0x' + hrgb[0:2])
-                g = int('0x' + hrgb[2:4])
-                b = int('0x' + hrgb[4:6])
+                r = int('0x' + hrgb[0:2], 16)
+                g = int('0x' + hrgb[2:4], 16)
+                b = int('0x' + hrgb[4:6], 16)
 
             self._pos = m.end(0)
             self.skipws()
