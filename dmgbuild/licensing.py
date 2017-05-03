@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import struct
 
 from .resources import *
@@ -425,6 +426,10 @@ def add_license(filename, license_info):
         lang_id = region_codes[language]
 
         is_two_byte = lang_id in (14, 51, 52, 53) # Japanese, Korean, SimpChinese, TradChinese
+
+        if os.path.isfile(license_data):
+            with open(license_data) as f:
+                license_data = f.read()
 
         if license_data.startswith('{\\rtf1'):
             fork.add(Resource(b'RTF ', 5000 + ndx, language + ' SLA',

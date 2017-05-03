@@ -369,7 +369,8 @@ some cases you will need to encode the data and use a byte string.
    +------------------+----------+-------------------------------------------+
    | licenses         | No       | A dictionary mapping language names to    |
    |                  |          | license text (either RTF data or plain    |
-   |                  |          | text).                                    |
+   |                  |          | text) or paths to files containing the    |
+   |                  |          | license text.                             |
    +------------------+----------+-------------------------------------------+
    | buttons          | Yes      | A dictionary mapping language names to    |
    |                  |          | a sequence of user interface strings.     |

@@ -197,7 +197,8 @@ list_column_sort_directions = {
 #     'default-language': 'en_US',
 #     'licenses': {
 #         # For each language, the text of the license.  This can be plain text,
-#         # or RTF (in which case it must start "{\rtf1").  If you're using RTF,
+#         # RTF (in which case it must start "{\rtf1"), or a path to a file
+#         # containing the license text.  If you're using RTF,
 #         # watch out for Python escaping (or read it from a file).
 #         'English': b'''{\\rtf1\\ansi\\ansicpg1252\\cocoartf1504\\cocoasubrtf820
 # {\\fonttbl\\f0\\fnil\\fcharset0 Helvetica-Bold;\\f1\\fnil\\fcharset0 Helvetica;}
