@@ -10,9 +10,6 @@ with open('README.rst', 'rb') as f:
 requires=['ds_store >= 1.1.0',
           'mac_alias >= 2.0.1']
 
-if sys.platform.startswith('darwin'):
-    requires.append('pyobjc-framework-Quartz >= 3.0.4')
-
 setup(name='dmgbuild',
       version='1.3.0',
       description='macOS command line utility to build disk images',
