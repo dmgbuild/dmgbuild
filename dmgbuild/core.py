@@ -92,10 +92,12 @@ def load_json(filename, settings):
     if bk is not None:
         settings['background'] = bk
     settings['icon_size'] = json_data.get('icon-size', 80)
-    wnd = settings.get('window', { 'position': (100, 100),
-                                   'size': (640, 480) })
-    settings['window_rect'] = (wnd.get('position', (100, 100)),
-                               wnd.get('size', (640, 480)))
+    wnd = json_data.get('window', { 'position': (100, 100),
+                                    'size': (640, 480) })
+    pos = wnd.get('position', { 'x': 100, 'y': 100 })
+    siz = wnd.get('size', { 'width': 640, 'height': 480 })
+    settings['window_rect'] = ((pos.get('x', 100), pos.get('y', 100)),
+                               (siz.get('width', 640), siz.get('height', 480)))
     settings['format'] = json_data.get('format', 'UDZO')
     settings['compression_level'] = json_data.get('compression-level', None)
     settings['license'] = json_data.get('license', None)
