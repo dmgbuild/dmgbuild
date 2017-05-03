@@ -398,7 +398,7 @@ def get_encoder_name(locale):
     script_code = script_codes[region_code]
 
     if script_code not in encodings_map:
-        raise Exception("Cannot determine Python encoder name for locale '%s' - " +
+        raise Exception("Cannot determine Python encoder name for locale '%s' - "
                         "encode the string data manually as a byte array instead" % locale)
     return encodings_map[script_code]
 
