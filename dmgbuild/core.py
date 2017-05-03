@@ -97,7 +97,7 @@ def load_json(filename, settings):
     settings['window_rect'] = (wnd.get('position', (100, 100)),
                                wnd.get('size', (640, 480)))
     settings['format'] = json_data.get('format', 'UDZO')
-    settings['compression_level'] = json_data.get('compression_level', None)
+    settings['compression_level'] = json_data.get('compression-level', None)
     settings['license'] = json_data.get('license', None)
     files = []
     symlinks = {}
