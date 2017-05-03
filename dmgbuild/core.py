@@ -85,6 +85,7 @@ def load_json(filename, settings):
 
     settings['volume_name'] = json_data['title']
     settings['icon'] = json_data.get('icon', None)
+    settings['badge_icon'] = json_data.get('badge-icon', None)
     bk = json_data.get('background', None)
     if bk is None:
         bk = json_data.get('background-color', None)
