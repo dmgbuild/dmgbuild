@@ -181,7 +181,7 @@ Window Settings
    +-------------+
    | column-view |
    +-------------+
-   | coverflow   | 
+   | coverflow   |
    +-------------+
 
 .. py:data:: show_icon_preview
@@ -191,7 +191,7 @@ Window Settings
 
 .. py:data:: include_icon_view_settings
              include_list_view_settings
-   
+
    Set these to ``True`` to force inclusion of the icon/list view
    settings respectively.  By default, ``dmgbuild`` will only include
    settings for the default view type.
@@ -238,7 +238,7 @@ Icon View Settings
 
    Specifies the grid spacing for automatic arrangement.
 
-   .. warning:: As of Mac OS X 10.10 Yosemite, Finder checks to make sure
+   .. warning:: As of Mac OS X Yosemite (v10.10), Finder checks to make sure
                 that grid_spacing is less than 100.  If it is over that
                 value, it will reject the saved settings.
 
@@ -369,31 +369,23 @@ some cases you will need to encode the data and use a byte string.
    +------------------+----------+-------------------------------------------+
    | licenses         | No       | A dictionary mapping language names to    |
    |                  |          | license text (either RTF data or plain    |
-   |                  |          | text).                                    |
+   |                  |          | text) or paths to files containing the    |
+   |                  |          | license text.                             |
    +------------------+----------+-------------------------------------------+
    | buttons          | Yes      | A dictionary mapping language names to    |
    |                  |          | a sequence of user interface strings.     |
    +------------------+----------+-------------------------------------------+
 
-   Supported languages are:
+   Recognized languages are:
 
-     English, French, German, Italian, Dutch, Swedish, Spanish, Danish,
-     Portuguese, Norwegian, Hebrew, Japanese, Arabic, Finnish, Greek,
-     Icelandic, Maltese, Turkish, Croatian, TradChinese, Urdu, Hindi, Thai,
-     Korean, Lithuanian, Polish, Hungarian, Estonian, Latvian,
-     Sami, Faroese, Farsi, Persian, Russian, SimpChinese, Flemish, IrishGaelic,
-     Albanian, Romanian, Czech, Slovak, Slovenian, Yiddish, Serbian, Macedonian,
-     Bulgarian, Ukrainian, Byelorussian, Belorussian, Uzbek, Kazakh, Azerbaijani,
-     AzerbaijanAr, Armenian, Georgian, Moldavian, Kirghiz, Tajiki, Turkmen,
-     Mongolian, MongolianCyr, Pashto, Kurdish, Kashmiri, Sindhi, Tibetan, Nepali,
-     Sanskrit, Marathi, Bengali, Assamese, Gujarati, Punjabi, Oriya, Malayalam,
-     Kannada, Tamil, Telugu, Sinhalese, Burmese, Khmer, Lao, Vietnamese,
-     Indonesian, Tagalog, MalayRoman, MalayArabic, Amharic, Tigrinya, Oromo,
-     Somali, Swahili, Kinyarwanda, Ruanda, Rundi, Nyanja, Chewa, Malagasy,
-     Esperanto, Welsh, Basque, Catalan, Latin, Quechua, Guarani, Aymara, Tatar,
-     Uighur, Dzongkha, JavaneseRom, SundaneseRom, Galician, Afrikaans, Breton,
-     Inuktitut, ScottishGaelic, ManxGaelic, IrishGaelicScript, Tongan,
-     GreekAncient, Greenlandic, AzerbaijanRoman, Nynorsk
+     af_ZA, ar, be_BY, bg_BG, bn, bo, br, ca_ES, cs_CZ, cy, da_DK, de_AT, de_CH,
+     de_DE, dz_BT, el_CY, el_GR, en_AU, en_CA, en_GB, en_IE, en_SG, en_US, eo,
+     es_419, es_ES, et_EE, fa_IR, fi_FI, fo_FO, fr_001, fr_BE, fr_CA, fr_CH,
+     fr_FR, ga-Latg_IE, ga_IE, gd, grc, gu_IN, gv, he_IL, hi_IN, hr_HR, hu_HU,
+     hy_AM, is_IS, it_CH, it_IT, iu_CA, ja_JP, ka_GE, kl, ko_KR, lt_LT, lv_LV,
+     mk_MK, mr_IN, mt_MT, nb_NO, ne_NP, nl_BE, nl_NL, nn_NO, pa, pl_PL, pt_BR,
+     pt_PT, ro_RO, ru_RU, se, sk_SK, sl_SI, sr_RS, sv_SE, th_TH, to_TO, tr_TR,
+     uk_UA, ur_IN, ur_PK, uz_UZ, vi_VN, zh_CN, zh_TW
 
    The user interface strings are as follows:
 
@@ -418,9 +410,11 @@ some cases you will need to encode the data and use a byte string.
 
    There are built-in user interface strings for the following languages:
 
-     English, German, Spanish, French, Italian, Japanese, Dutch,
-     Swedish, Portuguese, SimpChinese, TradChinese, Danish, Finnish, Korean,
-     Norwegian
+     English (en_US), German (de_DE), Spanish (es_ES), French (fr_FR),
+     Italian (it_IT), Japanese (ja_JP), Dutch (nl_NL), Swedish (sv_SE),
+     Brazilian Portuguese (pt_BR), Simplified Chinese (zh_CN),
+     Traditional Chinese (zh_TW), Danish (da_DK), Finnish (fi_FI),
+     Korean (ko_KR), Norwegian (nb_NO)
 
    For other languages, if you don't specify a suitable set, ``dmgbuild`` will
    use the English defaults instead.

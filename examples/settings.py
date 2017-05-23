@@ -140,7 +140,7 @@ icon_size = 128
 #   label
 #   version
 #   comments
-# 
+#
 list_icon_size = 16
 list_text_size = 12
 list_scroll_position = (0, 0)
@@ -182,31 +182,23 @@ list_column_sort_directions = {
 # in many cases you will need to encode the text yourself and use byte strings
 # instead here.
 
-# Supported language names are:
+# Recognized language names are:
 #
-#  English, French, German, Italian, Dutch, Swedish, Spanish, Danish,
-#  Portuguese, Norwegian, Hebrew, Japanese, Arabic, Finnish, Greek,
-#  Icelandic, Maltese, Turkish, Croatian, TradChinese, Urdu, Hindi, Thai,
-#  Korean, Lithuanian, Polish, Hungarian, Estonian, Latvian,
-#  Sami, Faroese, Farsi, Persian, Russian, SimpChinese, Flemish, IrishGaelic,
-#  Albanian, Romanian, Czech, Slovak, Slovenian, Yiddish, Serbian, Macedonian,
-#  Bulgarian, Ukrainian, Byelorussian, Belorussian, Uzbek, Kazakh, Azerbaijani,
-#  AzerbaijanAr, Armenian, Georgian, Moldavian, Kirghiz, Tajiki, Turkmen,
-#  Mongolian, MongolianCyr, Pashto, Kurdish, Kashmiri, Sindhi, Tibetan, Nepali,
-#  Sanskrit, Marathi, Bengali, Assamese, Gujarati, Punjabi, Oriya, Malayalam,
-#  Kannada, Tamil, Telugu, Sinhalese, Burmese, Khmer, Lao, Vietnamese,
-#  Indonesian, Tagalog, MalayRoman, MalayArabic, Amharic, Tigrinya, Oromo,
-#  Somali, Swahili, Kinyarwanda, Ruanda, Rundi, Nyanja, Chewa, Malagasy,
-#  Esperanto, Welsh, Basque, Catalan, Latin, Quechua, Guarani, Aymara, Tatar,
-#  Uighur, Dzongkha, JavaneseRom, SundaneseRom, Galician, Afrikaans, Breton,
-#  Inuktitut, ScottishGaelic, ManxGaelic, IrishGaelicScript, Tongan,
-#  GreekAncient, Greenlandic, AzerbaijanRoman, Nynorsk
+#  af_ZA, ar, be_BY, bg_BG, bn, bo, br, ca_ES, cs_CZ, cy, da_DK, de_AT, de_CH,
+#  de_DE, dz_BT, el_CY, el_GR, en_AU, en_CA, en_GB, en_IE, en_SG, en_US, eo,
+#  es_419, es_ES, et_EE, fa_IR, fi_FI, fo_FO, fr_001, fr_BE, fr_CA, fr_CH,
+#  fr_FR, ga-Latg_IE, ga_IE, gd, grc, gu_IN, gv, he_IL, hi_IN, hr_HR, hu_HU,
+#  hy_AM, is_IS, it_CH, it_IT, iu_CA, ja_JP, ka_GE, kl, ko_KR, lt_LT, lv_LV,
+#  mk_MK, mr_IN, mt_MT, nb_NO, ne_NP, nl_BE, nl_NL, nn_NO, pa, pl_PL, pt_BR,
+#  pt_PT, ro_RO, ru_RU, se, sk_SK, sl_SI, sr_RS, sv_SE, th_TH, to_TO, tr_TR,
+#  uk_UA, ur_IN, ur_PK, uz_UZ, vi_VN, zh_CN, zh_TW
 
 # license = {
-#     'default-language': 'English',
+#     'default-language': 'en_US',
 #     'licenses': {
 #         # For each language, the text of the license.  This can be plain text,
-#         # or RTF (in which case it must start "{\rtf1").  If you're using RTF,
+#         # RTF (in which case it must start "{\rtf1"), or a path to a file
+#         # containing the license text.  If you're using RTF,
 #         # watch out for Python escaping (or read it from a file).
 #         'English': b'''{\\rtf1\\ansi\\ansicpg1252\\cocoartf1504\\cocoasubrtf820
 # {\\fonttbl\\f0\\fnil\\fcharset0 Helvetica-Bold;\\f1\\fnil\\fcharset0 Helvetica;}
@@ -232,14 +224,16 @@ list_column_sort_directions = {
 #         #
 #         # Default buttons and text are built-in for the following languages:
 #         #
-#         #   English, German, Spanish, French, Italian, Japanese, Dutch,
-#         #   Swedish, Portuguese, SimpChinese, TradChinese, Danish, Finnish,
-#         #   Korean, Norwegian
+#         #   English (en_US), German (de_DE), Spanish (es_ES), French (fr_FR),
+#         #   Italian (it_IT), Japanese (ja_JP), Dutch (nl_NL), Swedish (sv_SE),
+#         #   Brazilian Portuguese (pt_BR), Simplified Chinese (zh_CN),
+#         #   Traditional Chinese (zh_TW), Danish (da_DK), Finnish (fi_FI),
+#         #   Korean (ko_KR), Norwegian (nb_NO)
 #         #
 #         # You don't need to specify them for those languages; if you fail to
 #         # specify them for some other language, English will be used instead.
 
-#         'English': (
+#         'en_US': (
 #             b'English',
 #             b'Agree',
 #             b'Disagree',

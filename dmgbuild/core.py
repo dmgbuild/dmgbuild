@@ -85,17 +85,21 @@ def load_json(filename, settings):
 
     settings['volume_name'] = json_data['title']
     settings['icon'] = json_data.get('icon', None)
+    settings['badge_icon'] = json_data.get('badge-icon', None)
     bk = json_data.get('background', None)
     if bk is None:
         bk = json_data.get('background-color', None)
     if bk is not None:
         settings['background'] = bk
     settings['icon_size'] = json_data.get('icon-size', 80)
-    wnd = settings.get('window', { 'position': (100, 100),
-                                   'size': (640, 480) })
-    settings['window_rect'] = (wnd.get('position', (100, 100)),
-                               wnd.get('size', (640, 480)))
+    wnd = json_data.get('window', { 'position': (100, 100),
+                                    'size': (640, 480) })
+    pos = wnd.get('position', { 'x': 100, 'y': 100 })
+    siz = wnd.get('size', { 'width': 640, 'height': 480 })
+    settings['window_rect'] = ((pos.get('x', 100), pos.get('y', 100)),
+                               (siz.get('width', 640), siz.get('height', 480)))
     settings['format'] = json_data.get('format', 'UDZO')
+    settings['compression_level'] = json_data.get('compression-level', None)
     settings['license'] = json_data.get('license', None)
     files = []
     symlinks = {}
@@ -129,12 +133,13 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         'filename': filename,
         'volume_name': volume_name,
         'format': 'UDBZ',
+        'compression_level': None,
         'size': None,
         'files': [],
         'symlinks': {},
         'icon': None,
         'badge_icon': None,
-        'background': 'builtin-arrow',
+        'background': None,
         'show_status_bar': False,
         'show_tab_view': False,
         'show_toolbar': False,
@@ -433,20 +438,6 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
 
         if not isinstance(background, (str, unicode)):
             pass
-        elif background == 'builtin-arrow':
-            tiffdata = pkg_resources.resource_string(
-                'dmgbuild',
-                'resources/builtin-arrow.tiff')
-            path_in_image = os.path.join(mount_point, '.background.tiff')
-
-            with open(path_in_image, 'w') as f:
-                f.write(tiffdata)
-
-            alias = Alias.for_file(path_in_image)
-            background_bmk = Bookmark.for_file(path_in_image)
-
-            icvp['backgroundType'] = 2
-            icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
         elif colors.isAColor(background):
             c = colors.parseColor(background).to_rgb()
 
@@ -454,54 +445,62 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             icvp['backgroundColorRed'] = float(c.r)
             icvp['backgroundColorGreen'] = float(c.g)
             icvp['backgroundColorBlue'] = float(c.b)
-        elif os.path.isfile(background):
+        else:
+            if os.path.isfile(background):
+                # look to see if there are HiDPI resources available
 
-            # look to see if there are HiDPI resources available
+                if lookForHiDPI is True:
+                    name, extension = os.path.splitext(os.path.basename(background))
+                    orderedImages = [background]
+                    imageDirectory = os.path.dirname(background)
+                    if imageDirectory == '':
+                        imageDirectory = '.'
+                    for candidateName in os.listdir(imageDirectory):
+                        hasScale = re.match(
+                            '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
+                            candidateName)
+                        if hasScale and name == hasScale.group('name') and \
+                            extension == hasScale.group('extension'):
+                                scale = int(hasScale.group('scale'))
+                                if len(orderedImages) < scale:
+                                    orderedImages += [None] * (scale - len(orderedImages))
+                                orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
 
-            if lookForHiDPI is True:
-                name, extension = os.path.splitext(os.path.basename(background))
-                orderedImages = [background]
-                imageDirectory = os.path.dirname(background)
-                if imageDirectory == '':
-                    imageDirectory = '.'
-                for candidateName in os.listdir(imageDirectory):
-                    hasScale = re.match(
-                        '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
-                        candidateName)
-                    if hasScale and name == hasScale.group('name') and \
-                        extension == hasScale.group('extension'):
-                            scale = int(hasScale.group('scale'))
-                            if len(orderedImages) < scale:
-                                orderedImages += [None] * (scale - len(orderedImages))
-                            orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
+                    if len(orderedImages) > 1:
+                        # compile the grouped tiff
+                        backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
+                        background = backgroundFile.name
+                        output = tempfile.TemporaryFile(mode='w+')
+                        try:
+                            subprocess.check_call(
+                                ['/usr/bin/tiffutil', '-cathidpicheck'] +
+                                filter(None, orderedImages) +
+                                ['-out', background], stdout=output, stderr=output)
+                        except Exception as e:
+                            output.seek(0)
+                            raise ValueError(
+                                'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
+                                % (background, str(e), output.read()))
 
-                if len(orderedImages) > 1:
-                    # compile the grouped tiff
-                    backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
-                    background = backgroundFile.name
-                    output = tempfile.TemporaryFile(mode='w+')
-                    try:
-                        subprocess.check_call(
-                            ['/usr/bin/tiffutil', '-cathidpicheck'] +
-                            filter(None, orderedImages) +
-                            ['-out', background], stdout=output, stderr=output)
-                    except Exception as e:
-                        output.seek(0)
-                        raise ValueError(
-                            'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
-                            % (background, str(e), output.read()))
-            
-            _, kind = os.path.splitext(background)
-            path_in_image = os.path.join(mount_point, '.background' + kind)
-            shutil.copyfile(background, path_in_image)
+                _, kind = os.path.splitext(background)
+                path_in_image = os.path.join(mount_point, '.background' + kind)
+                shutil.copyfile(background, path_in_image)
+            elif pkg_resources.resource_exists('dmgbuild', 'resources/' + background + '.tiff'):
+                tiffdata = pkg_resources.resource_string(
+                    'dmgbuild',
+                    'resources/' + background + '.tiff')
+                path_in_image = os.path.join(mount_point, '.background.tiff')
+
+                with open(path_in_image, 'w') as f:
+                    f.write(tiffdata)
+            else:
+                raise ValueError('background file "%s" not found' % background)
 
             alias = Alias.for_file(path_in_image)
             background_bmk = Bookmark.for_file(path_in_image)
 
             icvp['backgroundType'] = 2
             icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
-        else:
-            raise ValueError('background file "%s" not found' % background)
 
         for f in settings['files']:
             if isinstance(f, tuple):
@@ -561,23 +560,33 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     if ret:
         raise DMGError('Unable to shrink')
 
+    key_prefix = {'UDZO': 'zlib', 'UDBZ': 'bzip2', 'ULFO': 'lzfse'}
+    compression_level = settings['compression_level']
+    if settings['format'] in key_prefix and compression_level:
+        compression_args = [
+            '-imagekey',
+            key_prefix[settings['format']] + '-level=' + str(compression_level)
+        ]
+    else:
+        compression_args = []
+
     ret, output = hdiutil('convert', writableFile.name,
                           '-format', settings['format'],
                           '-ov',
-                          '-o', filename)
+                          '-o', filename, *compression_args)
 
     if ret:
         raise DMGError('Unable to convert')
 
     if settings['license']:
-        ret, output = hdiutil('unflatten', filename, plist=False)
+        ret, output = hdiutil('unflatten', '-quiet', filename, plist=False)
 
         if ret:
             raise DMGError('Unable to unflatten to add license')
 
         licensing.add_license(filename, settings['license'])
 
-        ret, output = hdiutil('flatten', filename, plist=False)
+        ret, output = hdiutil('flatten', '-quiet', filename, plist=False)
 
         if ret:
             raise DMGError('Unable to flatten after adding license')
