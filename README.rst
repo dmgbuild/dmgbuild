@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/al45tair/dmgbuild.svg?branch=master
+    :target: https://travis-ci.org/al45tair/dmgbuild
+
 ``dmgbuild`` is a command line tool to create macOS disk images (aka
 ``.dmg`` files).  While it is possible to create disk images easily enough
 from the command line using the ``hdiutil`` program that ships with macOS,
