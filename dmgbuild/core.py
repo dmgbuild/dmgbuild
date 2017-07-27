@@ -127,8 +127,9 @@ def load_json(filename, settings):
     settings['symlinks'] = symlinks
     settings['icon_locations'] = icon_locations
 
-def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDPI=True):
-    settings = {
+def build_dmg(filename, volume_name, settings_file=None, settings={},
+              defines={}, lookForHiDPI=True):
+    options = {
         # Default settings
         'filename': filename,
         'volume_name': volume_name,
@@ -199,26 +200,29 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     if settings_file:
         # We now support JSON settings files using appdmg's format
         if settings_file.endswith('.json'):
-            load_json(settings_file, settings)
+            load_json(settings_file, options)
         else:
-            load_settings(settings_file, settings)
+            load_settings(settings_file, options)
+
+    # Add any overrides
+    options.update(settings)
 
     # Set up the finder data
-    bounds = settings['window_rect']
+    bounds = options['window_rect']
 
     bwsp = {
-        b'ShowStatusBar': settings['show_status_bar'],
+        b'ShowStatusBar': options['show_status_bar'],
         b'WindowBounds': b'{{%s, %s}, {%s, %s}}' % (bounds[0][0],
                                                     bounds[0][1],
                                                     bounds[1][0],
                                                     bounds[1][1]),
         b'ContainerShowSidebar': False,
         b'PreviewPaneVisibility': False,
-        b'SidebarWidth': settings['sidebar_width'],
-        b'ShowTabView': settings['show_tab_view'],
-        b'ShowToolbar': settings['show_toolbar'],
-        b'ShowPathbar': settings['show_pathbar'],
-        b'ShowSidebar': settings['show_sidebar']
+        b'SidebarWidth': options['sidebar_width'],
+        b'ShowTabView': options['show_tab_view'],
+        b'ShowToolbar': options['show_toolbar'],
+        b'ShowPathbar': options['show_pathbar'],
+        b'ShowSidebar': options['show_sidebar']
         }
 
     arrange_options = {
@@ -238,20 +242,20 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         b'backgroundColorRed': 1.0,
         b'backgroundColorGreen': 1.0,
         b'backgroundColorBlue': 1.0,
-        b'gridOffsetX': float(settings['grid_offset'][0]),
-        b'gridOffsetY': float(settings['grid_offset'][1]),
-        b'gridSpacing': float(settings['grid_spacing']),
-        b'arrangeBy': str(arrange_options.get(settings['arrange_by'], 'none')),
-        b'showIconPreview': settings['show_icon_preview'] == True,
-        b'showItemInfo': settings['show_item_info'] == True,
-        b'labelOnBottom': settings['label_pos'] == 'bottom',
-        b'textSize': float(settings['text_size']),
-        b'iconSize': float(settings['icon_size']),
-        b'scrollPositionX': float(settings['scroll_position'][0]),
-        b'scrollPositionY': float(settings['scroll_position'][1])
+        b'gridOffsetX': float(options['grid_offset'][0]),
+        b'gridOffsetY': float(options['grid_offset'][1]),
+        b'gridSpacing': float(options['grid_spacing']),
+        b'arrangeBy': str(arrange_options.get(options['arrange_by'], 'none')),
+        b'showIconPreview': options['show_icon_preview'] == True,
+        b'showItemInfo': options['show_item_info'] == True,
+        b'labelOnBottom': options['label_pos'] == 'bottom',
+        b'textSize': float(options['text_size']),
+        b'iconSize': float(options['icon_size']),
+        b'scrollPositionX': float(options['scroll_position'][0]),
+        b'scrollPositionY': float(options['scroll_position'][1])
         }
 
-    background = settings['background']
+    background = options['background']
     
     columns = {
         'name': 'name',
@@ -294,24 +298,24 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         
     lsvp = {
         b'viewOptionsVersion': 1,
-        b'sortColumn': columns.get(settings['list_sort_by'], 'name'),
-        b'textSize': float(settings['list_text_size']),
-        b'iconSize': float(settings['list_icon_size']),
-        b'showIconPreview': settings['show_icon_preview'],
-        b'scrollPositionX': settings['list_scroll_position'][0],
-        b'scrollPositionY': settings['list_scroll_position'][1],
-        b'useRelativeDates': settings['list_use_relative_dates'],
-        b'calculateAllSizes': settings['list_calculate_all_sizes'],
+        b'sortColumn': columns.get(options['list_sort_by'], 'name'),
+        b'textSize': float(options['list_text_size']),
+        b'iconSize': float(options['list_icon_size']),
+        b'showIconPreview': options['show_icon_preview'],
+        b'scrollPositionX': options['list_scroll_position'][0],
+        b'scrollPositionY': options['list_scroll_position'][1],
+        b'useRelativeDates': options['list_use_relative_dates'],
+        b'calculateAllSizes': options['list_calculate_all_sizes'],
         }
 
     lsvp['columns'] = {}
     cndx = {}
 
-    for n, column in enumerate(settings['list_columns']):
+    for n, column in enumerate(options['list_columns']):
         cndx[column] = n
-        width = settings['list_column_widths'].get(column,
+        width = options['list_column_widths'].get(column,
                                                    default_widths[column])
-        asc = 'ascending' == settings['list_column_sort_directions'].get(column,
+        asc = 'ascending' == options['list_column_sort_directions'].get(column,
                     default_sort_directions[column])
         
         lsvp['columns'][columns[column]] = {
@@ -322,7 +326,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             'ascending': asc
             }
 
-    n = len(settings['list_columns'])
+    n = len(options['list_columns'])
     for k in iterkeys(columns):
         if cndx.get(k, None) is None:
             cndx[k] = n
@@ -339,7 +343,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
 
         n += 1
     
-    default_view = settings['default_view']
+    default_view = options['default_view']
     views = {
         'icon-view': b'icnv',
         'column-view': b'clmv',
@@ -350,14 +354,14 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     icvl = (b'type', views.get(default_view, 'icnv'))
 
     include_icon_view_settings = default_view == 'icon-view' \
-        or settings['include_icon_view_settings'] not in \
+        or options['include_icon_view_settings'] not in \
         ('auto', 'no', 0, False, None)
     include_list_view_settings = default_view in ('list-view', 'coverflow') \
-        or settings['include_list_view_settings'] not in \
+        or options['include_list_view_settings'] not in \
         ('auto', 'no', 0, False, None)
 
-    filename = settings['filename']
-    volume_name = settings['volume_name']
+    filename = options['filename']
+    volume_name = options['volume_name']
 
     # Construct a writeable image to start with
     dirname, basename = os.path.split(os.path.realpath(filename))
@@ -366,7 +370,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
     writableFile = tempfile.NamedTemporaryFile(dir=dirname, prefix='.temp',
                                                suffix=basename)
 
-    total_size = settings['size']
+    total_size = options['size']
     if total_size == None:
         # Start with a size of 128MB - this way we don't need to calculate the
         # size of the background image, volume icon, and .DS_Store file (and
@@ -377,7 +381,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         def roundup(x, n):
             return x if x % n == 0 else x + n - x % n
 
-        for path in settings['files']:
+        for path in options['files']:
             if isinstance(path, tuple):
                 path = path[0]
 
@@ -389,7 +393,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             else:
                 total_size += roundup(os.lstat(path).st_size, 4096)
 
-        for name,target in iteritems(settings['symlinks']):
+        for name,target in iteritems(options['symlinks']):
             total_size += 4096
 
         total_size = str(max(total_size / 1024, 1024)) + 'K'
@@ -420,9 +424,9 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                 device = info['dev-entry']
                 mount_point = info['mount-point']
 
-        icon = settings['icon']
+        icon = options['icon']
         if badge:
-            badge_icon = settings['badge_icon']
+            badge_icon = options['badge_icon']
         else:
             badge_icon = None
         icon_target_path = os.path.join(mount_point, '.VolumeIcon.icns')
@@ -502,7 +506,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             icvp['backgroundType'] = 2
             icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
 
-        for f in settings['files']:
+        for f in options['files']:
             if isinstance(f, tuple):
                 f_in_image = os.path.join(mount_point, f[1])
                 f = f[0]
@@ -513,13 +517,13 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
             # use system ditto command to preserve code signing, etc.
             subprocess.call(['/usr/bin/ditto', f, f_in_image])
 
-        for name,target in iteritems(settings['symlinks']):
+        for name,target in iteritems(options['symlinks']):
             name_in_image = os.path.join(mount_point, name)
             os.symlink(target, name_in_image)
 
-        userfn = settings.get('create_hook', None)
+        userfn = options.get('create_hook', None)
         if callable(userfn):
-            userfn(mount_point, settings)
+            userfn(mount_point, options)
 
         image_dsstore = os.path.join(mount_point, '.DS_Store')
 
@@ -534,7 +538,7 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
                 d['.']['lsvp'] = lsvp
             d['.']['icvl'] = icvl
 
-            for k,v in iteritems(settings['icon_locations']):
+            for k,v in iteritems(options['icon_locations']):
                 d[k]['Iloc'] = v
 
         # Delete .Trashes, if it gets created
@@ -561,30 +565,30 @@ def build_dmg(filename, volume_name, settings_file=None, defines={}, lookForHiDP
         raise DMGError('Unable to shrink')
 
     key_prefix = {'UDZO': 'zlib', 'UDBZ': 'bzip2', 'ULFO': 'lzfse'}
-    compression_level = settings['compression_level']
-    if settings['format'] in key_prefix and compression_level:
+    compression_level = options['compression_level']
+    if options['format'] in key_prefix and compression_level:
         compression_args = [
             '-imagekey',
-            key_prefix[settings['format']] + '-level=' + str(compression_level)
+            key_prefix[options['format']] + '-level=' + str(compression_level)
         ]
     else:
         compression_args = []
 
     ret, output = hdiutil('convert', writableFile.name,
-                          '-format', settings['format'],
+                          '-format', options['format'],
                           '-ov',
                           '-o', filename, *compression_args)
 
     if ret:
         raise DMGError('Unable to convert')
 
-    if settings['license']:
+    if options['license']:
         ret, output = hdiutil('unflatten', '-quiet', filename, plist=False)
 
         if ret:
             raise DMGError('Unable to unflatten to add license')
 
-        licensing.add_license(filename, settings['license'])
+        licensing.add_license(filename, options['license'])
 
         ret, output = hdiutil('flatten', '-quiet', filename, plist=False)
 
