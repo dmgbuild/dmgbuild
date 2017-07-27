@@ -38,8 +38,11 @@ def icon_from_app(app_path):
 # Uncomment to override the output volume name
 # volume_name = 'Test'
 
-# Volume format (see hdiutil create -help)
+# Volume format (see hdiutil create -help)
 format = defines.get('format', 'UDBZ')
+
+# Compression level (if relevant)
+# compression_level = 9
 
 # Volume size
 size = defines.get('size', None)

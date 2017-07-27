@@ -1,0 +1,5 @@
+*.pyc
+*~
+.cache
+.eggs
+dmgbuild.egg-info
