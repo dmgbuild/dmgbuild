@@ -23,7 +23,7 @@ requires=['ds_store >= 1.1.0',
           'mac_alias >= 2.0.1']
 
 setup(name='dmgbuild',
-      version='1.3.0',
+      version='1.3.1',
       description='macOS command line utility to build disk images',
       long_description=long_desc,
       author='Alastair Houghton',
