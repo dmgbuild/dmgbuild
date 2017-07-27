@@ -2,18 +2,10 @@ language: python
 
 install:
   - |
-    brew update || brew update
-    brew upgrade
-    brew reinstall pyenv
     eval "$(pyenv init -)"
-    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing 2.7.13
-    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing 3.6.2
-    pyenv global 3.6.2
-    pyenv shell 3.6.2
-    pip install -U pip setuptools wheel
-    pip install .
-
-    pyenv shell 2.7.13
+    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing $(PYVER)
+    pyenv global $(PYVER)
+    pyenv shell $(PYVER)
     pip install -U pip setuptools wheel
     pip install .
 
@@ -21,9 +13,9 @@ matrix:
   include:
     - os: osx
       language: generic
-      env: PYTHON=python3.6
+      env: PYTHON=python3.6 PYVER=3.6.2
     - os: osx
       language: generic
-      env: PYTHON=python2.7
+      env: PYTHON=python2.7 PYVER=2.7.13
 
 script: $(PYTHON) setup.py test
