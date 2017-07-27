@@ -5,6 +5,9 @@ dmgbuild
 .. image:: https://travis-ci.org/al45tair/dmgbuild.svg?branch=master
     :target: https://travis-ci.org/al45tair/dmgbuild
 
+.. image:: https://readthedocs.org/projects/dmgbuild/badge/?version=latest
+    :target: http://dmgbuild.readthedocs.io/en/latest/?badge=latest
+
 What is this?
 -------------
 
