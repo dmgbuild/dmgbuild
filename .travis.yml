@@ -3,9 +3,9 @@ language: python
 install:
   - |
     eval "$(pyenv init -)"
-    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing $(PYVER)
-    pyenv global $(PYVER)
-    pyenv shell $(PYVER)
+    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing $PYVER
+    pyenv global $PYVER
+    pyenv shell $PYVER
     pip install -U pip setuptools wheel
     pip install .
 
@@ -18,4 +18,4 @@ matrix:
       language: generic
       env: PYTHON=python2.7 PYVER=2.7.13
 
-script: $(PYTHON) setup.py test
+script: $PYTHON setup.py test
