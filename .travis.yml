@@ -2,11 +2,12 @@ language: python
 
 install:
   - |
+    brew update && brew upgrade pyenv
     eval "$(pyenv init -)"
     env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing $PYTHON_VERSION
     pyenv global $PYTHON_VERSION
     pyenv shell $PYTHON_VERSION
-    pip install -U pip setuptools wheel
+    pip install -U pip setuptools wheel py
     pip install .
 
 matrix:
