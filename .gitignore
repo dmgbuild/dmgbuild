@@ -2,4 +2,7 @@
 *~
 .cache
 .eggs
-dmgbuild.egg-info
+*.egg-info
+*.egg
+*#
+.#*

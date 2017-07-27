@@ -210,19 +210,20 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     # Set up the finder data
     bounds = options['window_rect']
 
+    bounds_string = '{{%s, %s}, {%s, %s}}' % (bounds[0][0],
+                                              bounds[0][1],
+                                              bounds[1][0],
+                                              bounds[1][1])
     bwsp = {
-        b'ShowStatusBar': options['show_status_bar'],
-        b'WindowBounds': b'{{%s, %s}, {%s, %s}}' % (bounds[0][0],
-                                                    bounds[0][1],
-                                                    bounds[1][0],
-                                                    bounds[1][1]),
-        b'ContainerShowSidebar': False,
-        b'PreviewPaneVisibility': False,
-        b'SidebarWidth': options['sidebar_width'],
-        b'ShowTabView': options['show_tab_view'],
-        b'ShowToolbar': options['show_toolbar'],
-        b'ShowPathbar': options['show_pathbar'],
-        b'ShowSidebar': options['show_sidebar']
+        'ShowStatusBar': options['show_status_bar'],
+        'WindowBounds': bounds_string.encode('utf-8'),
+        'ContainerShowSidebar': False,
+        'PreviewPaneVisibility': False,
+        'SidebarWidth': options['sidebar_width'],
+        'ShowTabView': options['show_tab_view'],
+        'ShowToolbar': options['show_toolbar'],
+        'ShowPathbar': options['show_pathbar'],
+        'ShowSidebar': options['show_sidebar']
         }
 
     arrange_options = {
@@ -237,22 +238,22 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         }
 
     icvp = {
-        b'viewOptionsVersion': 1,
-        b'backgroundType': 0,
-        b'backgroundColorRed': 1.0,
-        b'backgroundColorGreen': 1.0,
-        b'backgroundColorBlue': 1.0,
-        b'gridOffsetX': float(options['grid_offset'][0]),
-        b'gridOffsetY': float(options['grid_offset'][1]),
-        b'gridSpacing': float(options['grid_spacing']),
-        b'arrangeBy': str(arrange_options.get(options['arrange_by'], 'none')),
-        b'showIconPreview': options['show_icon_preview'] == True,
-        b'showItemInfo': options['show_item_info'] == True,
-        b'labelOnBottom': options['label_pos'] == 'bottom',
-        b'textSize': float(options['text_size']),
-        b'iconSize': float(options['icon_size']),
-        b'scrollPositionX': float(options['scroll_position'][0]),
-        b'scrollPositionY': float(options['scroll_position'][1])
+        'viewOptionsVersion': 1,
+        'backgroundType': 0,
+        'backgroundColorRed': 1.0,
+        'backgroundColorGreen': 1.0,
+        'backgroundColorBlue': 1.0,
+        'gridOffsetX': float(options['grid_offset'][0]),
+        'gridOffsetY': float(options['grid_offset'][1]),
+        'gridSpacing': float(options['grid_spacing']),
+        'arrangeBy': str(arrange_options.get(options['arrange_by'], 'none')),
+        'showIconPreview': options['show_icon_preview'] == True,
+        'showItemInfo': options['show_item_info'] == True,
+        'labelOnBottom': options['label_pos'] == 'bottom',
+        'textSize': float(options['text_size']),
+        'iconSize': float(options['icon_size']),
+        'scrollPositionX': float(options['scroll_position'][0]),
+        'scrollPositionY': float(options['scroll_position'][1])
         }
 
     background = options['background']
@@ -297,15 +298,15 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         }
         
     lsvp = {
-        b'viewOptionsVersion': 1,
-        b'sortColumn': columns.get(options['list_sort_by'], 'name'),
-        b'textSize': float(options['list_text_size']),
-        b'iconSize': float(options['list_icon_size']),
-        b'showIconPreview': options['show_icon_preview'],
-        b'scrollPositionX': options['list_scroll_position'][0],
-        b'scrollPositionY': options['list_scroll_position'][1],
-        b'useRelativeDates': options['list_use_relative_dates'],
-        b'calculateAllSizes': options['list_calculate_all_sizes'],
+        'viewOptionsVersion': 1,
+        'sortColumn': columns.get(options['list_sort_by'], 'name'),
+        'textSize': float(options['list_text_size']),
+        'iconSize': float(options['list_icon_size']),
+        'showIconPreview': options['show_icon_preview'],
+        'scrollPositionX': options['list_scroll_position'][0],
+        'scrollPositionY': options['list_scroll_position'][1],
+        'useRelativeDates': options['list_use_relative_dates'],
+        'calculateAllSizes': options['list_calculate_all_sizes'],
         }
 
     lsvp['columns'] = {}
@@ -495,7 +496,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                     'resources/' + background + '.tiff')
                 path_in_image = os.path.join(mount_point, '.background.tiff')
 
-                with open(path_in_image, 'w') as f:
+                with open(path_in_image, 'wb') as f:
                     f.write(tiffdata)
             else:
                 raise ValueError('background file "%s" not found' % background)
