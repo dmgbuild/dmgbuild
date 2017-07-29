@@ -479,7 +479,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                         try:
                             subprocess.check_call(
                                 ['/usr/bin/tiffutil', '-cathidpicheck'] +
-                                filter(None, orderedImages) +
+                                list(filter(None, orderedImages)) +
                                 ['-out', background], stdout=output, stderr=output)
                         except Exception as e:
                             output.seek(0)
