@@ -17,6 +17,6 @@ matrix:
       env: PYTHON_VERSION=3.6.2
     - os: osx
       language: generic
-      env: PYTHON_VERSION=2.7.13
+      env: PYTHON_VERSION=2.7.0
 
 script: python setup.py test
