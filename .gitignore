@@ -6,3 +6,5 @@
 *.egg
 *#
 .#*
+dist
+build
