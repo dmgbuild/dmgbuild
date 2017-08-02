@@ -5,7 +5,7 @@ install:
     pip install --egg --no-binary pyenv pyenv
     export PATH=~/.pyenv/bin:$PATH
     eval "$(pyenv init -)"
-    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install --skip-existing $PYTHON_VERSION
+    pyenv install --skip-existing $PYTHON_VERSION
     pyenv global $PYTHON_VERSION
     pyenv shell $PYTHON_VERSION
     pip install -U pip setuptools wheel py
