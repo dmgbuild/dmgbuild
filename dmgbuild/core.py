@@ -11,6 +11,7 @@ import sys
 import tempfile
 import tokenize
 import json
+import time
 
 try:
     {}.iteritems
@@ -549,7 +550,11 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         hdiutil('detach', '-force', device, plist=False)
         raise
 
-    ret, output = hdiutil('detach', device, plist=False)
+    for tries in range(5):
+        ret, output = hdiutil('detach', device, plist=False)
+        if not ret:
+            break
+        time.sleep(1)
 
     if ret:
         hdiutil('detach', '-force', device, plist=False)
