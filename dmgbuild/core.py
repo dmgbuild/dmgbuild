@@ -463,7 +463,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                         imageDirectory = '.'
                     for candidateName in os.listdir(imageDirectory):
                         hasScale = re.match(
-                            '^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
+                            r'^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
                             candidateName)
                         if hasScale and name == hasScale.group('name') and \
                             extension == hasScale.group('extension'):
