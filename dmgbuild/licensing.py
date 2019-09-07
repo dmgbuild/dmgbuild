@@ -431,12 +431,12 @@ def add_license(filename, license_info):
             with open(license_data) as f:
                 license_data = f.read()
 
-        if license_data.startswith(b'{\\rtf1'):
+        if type(license_data) == bytes and license_data.startswith(b'{\\rtf1'):
             fork.add(Resource(b'RTF ', 5000 + ndx, (language + ' SLA').encode(),
                               license_data))
         else:
-            fork.add(TextResource(5000 + ndx, (language + ' SLA')).encode(),
-                                  maybe_encode(license_data, encoding_name))
+            fork.add(TextResource(5000 + ndx, (language + ' SLA').encode(),
+                                  maybe_encode(license_data, encoding_name)))
             fork.add(StyleResource(5000 + ndx, (language + ' SLA').encode(),
                                    [Style(0, 12, 9, Style.Helvetica,
                                           0, 0, (0, 0, 0))]))
