@@ -169,7 +169,7 @@ class ResourceFork (object):
             raise ValueError('Bad resource data - data too short')
 
         # Read the header
-        data_start, map_start, data_len, map_len = struct.unpack('>LLLL',
+        data_start, map_start, data_len, map_len = struct.unpack(b'>LLLL',
                                                                  data[0:16])
 
         if data_start + data_len > len(data):
@@ -181,7 +181,7 @@ class ResourceFork (object):
 
         # Read the map header
         fork_attrs, type_offset, name_offset, max_type_ndx \
-            = struct.unpack('>HHHH', data[map_start + 22:map_start + 30])
+            = struct.unpack(b'>HHHH', data[map_start + 22:map_start + 30])
         num_types = max_type_ndx + 1
 
         if type_offset + 8 * num_types > map_len:
@@ -199,7 +199,7 @@ class ResourceFork (object):
         for ntype in range(0, num_types):
             type_pos = 2 + type_offset + 8 * ntype
             res_type, max_item_ndx, ref_offset \
-                = struct.unpack('>4sHH', data[type_pos:type_pos+8])
+                = struct.unpack(b'>4sHH', data[type_pos:type_pos+8])
             num_items = max_item_ndx + 1
 
             result.types[res_type] = []
@@ -211,7 +211,7 @@ class ResourceFork (object):
             for nitem in range(0, num_items):
                 ref_elt = ref_list_offset + 12 * nitem
                 res_id, res_name_offset, data_offset \
-                    = struct.unpack('>hHL', data[ref_elt:ref_elt+8])
+                    = struct.unpack(b'>hHL', data[ref_elt:ref_elt+8])
 
                 res_attrs = data_offset >> 24
                 data_offset &= 0xffffff
@@ -220,7 +220,7 @@ class ResourceFork (object):
                     raise ValueError('Bad resource data - item data out of range')
 
                 data_offset += data_start
-                res_len = struct.unpack('>L', data[data_offset:data_offset+4])[0]
+                res_len = struct.unpack(b'>L', data[data_offset:data_offset+4])[0]
                 if data_offset + res_len >= data_start + data_len:
                     raise ValueError('Bad resource data - item data too large')
 
@@ -234,7 +234,7 @@ class ResourceFork (object):
                         raise ValueError('Bad resource data - name out of range')
                     try:
                         # python2
-                        res_name_len = struct.unpack('B', data[res_name_offset])[0]
+                        res_name_len = struct.unpack(b'B', data[res_name_offset])[0]
                     except:
                         # python3
                         res_name_len = data[res_name_offset]
