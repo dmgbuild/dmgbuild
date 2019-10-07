@@ -22,6 +22,13 @@ with open('README.rst', 'rb') as f:
 requires=['ds_store >= 1.1.0',
           'mac_alias >= 2.0.1']
 
+if sys.version_info.major == 2:
+    tests_require = ['pytest == 3.6.4',
+                     'py == 1.5.1',
+                     'more_itertools == 4.0.0']
+else:
+    tests_require = ['pytest']
+
 setup(name='dmgbuild',
       version='1.3.2',
       description='macOS command line utility to build disk images',
@@ -42,7 +49,7 @@ setup(name='dmgbuild',
       },
       scripts=['scripts/dmgbuild'],
       install_requires=requires,
-      tests_require=['pytest'],
+      tests_require=tests_require,
       cmdclass={
           'test': PyTest
           },
