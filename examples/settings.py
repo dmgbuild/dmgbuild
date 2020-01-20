@@ -57,7 +57,8 @@ symlinks = { 'Applications': '/Applications' }
 #
 # You can either define icon, in which case that icon file will be copied to the
 # image, *or* you can define badge_icon, in which case the icon file you specify
-# will be used to badge the system's Removable Disk icon
+# will be used to badge the system's Removable Disk icon. Badge icons require
+# pyobjc-framework-Quartz.
 #
 #icon = '/path/to/icon.icns'
 badge_icon = icon_from_app(application)
