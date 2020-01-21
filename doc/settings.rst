@@ -104,6 +104,8 @@ Content Settings
 
      badge_icon = '/Applications/TextEdit.app/Contents/Resources/Edit.icns'
 
+   Badge icons require pyobjc-framework-Quartz.
+
 .. py:data:: icon_locations
 
    A dictionary specifying the co-ordinates of items in the root
