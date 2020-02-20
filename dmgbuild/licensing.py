@@ -428,7 +428,8 @@ def add_license(filename, license_info):
         is_two_byte = lang_id in (14, 51, 52, 53) # Japanese, Korean, SimpChinese, TradChinese
 
         if os.path.isfile(license_data):
-            with open(license_data) as f:
+            mode = 'rb' if license_data.endswith('.rtf') else 'r'
+            with open(license_data, mode=mode) as f:
                 license_data = f.read()
 
         if type(license_data) == bytes and license_data.startswith(b'{\\rtf1'):
