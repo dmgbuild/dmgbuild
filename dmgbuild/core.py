@@ -378,7 +378,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         # size of the background image, volume icon, and .DS_Store file (and
         # 128 MB should be well sufficient for even the most outlandish image
         # sizes, like an uncompressed 5K multi-resolution TIFF)
-        total_size = 128 * 1024 * 1024
+        total_size = 128e6
 
         def roundup(x, n):
             return x if x % n == 0 else x + n - x % n
@@ -391,12 +391,12 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                 for dirpath, dirnames, filenames in os.walk(path):
                     for f in filenames:
                         fp = os.path.join(dirpath, f)
-                        total_size += roundup(os.lstat(fp).st_size, 4096)
+                        total_size += roundup(os.lstat(fp).st_size, 4000)
             else:
-                total_size += roundup(os.lstat(path).st_size, 4096)
+                total_size += roundup(os.lstat(path).st_size, 4000)
 
         for name,target in iteritems(options['symlinks']):
-            total_size += 4096
+            total_size += 4000
 
         total_size = str(max(total_size / 1000, 1000)) + 'K'
 
