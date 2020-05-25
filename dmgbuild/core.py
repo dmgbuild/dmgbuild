@@ -378,7 +378,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         # size of the background image, volume icon, and .DS_Store file (and
         # 128 MB should be well sufficient for even the most outlandish image
         # sizes, like an uncompressed 5K multi-resolution TIFF)
-        total_size = 128e6
+        total_size = 128 * 1024 * 1024
 
         def roundup(x, n):
             return x if x % n == 0 else x + n - x % n
