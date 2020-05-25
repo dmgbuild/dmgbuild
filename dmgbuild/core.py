@@ -398,7 +398,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         for name,target in iteritems(options['symlinks']):
             total_size += 4096
 
-        total_size = str(max(total_size / 1024, 1024)) + 'K'
+        total_size = str(max(total_size / 1000, 1000)) + 'K'
 
     ret, output = hdiutil('create',
                           '-ov',
