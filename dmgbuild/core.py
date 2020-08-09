@@ -129,7 +129,7 @@ def load_json(filename, settings):
     settings['icon_locations'] = icon_locations
 
 def build_dmg(filename, volume_name, settings_file=None, settings={},
-              defines={}, lookForHiDPI=True, detach_timeout=5):
+              defines={}, lookForHiDPI=True, detach_retries=5):
     options = {
         # Default settings
         'filename': filename,
@@ -550,7 +550,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         hdiutil('detach', '-force', device, plist=False)
         raise
 
-    for tries in range(detach_timeout):
+    for tries in range(detach_retries):
         ret, output = hdiutil('detach', device, plist=False)
         if not ret:
             break
