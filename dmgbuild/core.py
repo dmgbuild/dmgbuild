@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 import pkg_resources
+import platform
 import re
 import shutil
 import stat
@@ -38,6 +39,10 @@ except ImportError:
     badge = None
 
 _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
+
+# The first element in the platform.mac_ver() tuple is a string containing the
+# macOS version (e.g., '10.15.6'). Parse into an integer tuple.
+MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.'))
 
 class DMGError(Exception):
     pass
@@ -258,7 +263,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         }
 
     background = options['background']
-    
+
     columns = {
         'name': 'name',
         'date-modified': 'dateModified',
@@ -297,7 +302,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         'version': 'ascending',
         'comments': 'ascending',
         }
-        
+
     lsvp = {
         'viewOptionsVersion': 1,
         'sortColumn': columns.get(options['list_sort_by'], 'name'),
@@ -319,7 +324,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                                                    default_widths[column])
         asc = 'ascending' == options['list_column_sort_directions'].get(column,
                     default_sort_directions[column])
-        
+
         lsvp['columns'][columns[column]] = {
             'index': n,
             'width': width,
@@ -334,7 +339,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             cndx[k] = n
             width = default_widths[k]
             asc = 'ascending' == default_sort_directions[k]
-            
+
         lsvp['columns'][columns[column]] = {
             'index': n,
             'width': width,
@@ -344,7 +349,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             }
 
         n += 1
-    
+
     default_view = options['default_view']
     views = {
         'icon-view': b'icnv',
@@ -411,11 +416,19 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     if ret:
         raise DMGError('Unable to create disk image')
 
-    ret, output = hdiutil('attach',
-                          '-nobrowse',
-                          '-owners', 'off',
-                          '-noidme',
-                          writableFile.name)
+    # IDME was deprecated in macOS 10.15/Catalina; as a result, use of -noidme
+    # started raising a warning.
+    if MACOS_VERSION >= (10, 15):
+        ret, output = hdiutil('attach',
+                              '-nobrowse',
+                              '-owners', 'off',
+                              writableFile.name)
+    else:
+        ret, output = hdiutil('attach',
+                              '-nobrowse',
+                              '-owners', 'off',
+                              '-noidme',
+                              writableFile.name)
 
     if ret:
         raise DMGError('Unable to attach disk image')
