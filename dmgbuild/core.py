@@ -108,6 +108,8 @@ def load_json(filename, settings):
     settings['compression_level'] = json_data.get('compression-level', None)
     settings['license'] = json_data.get('license', None)
     files = []
+    hide = []
+    hide_extensions = []
     symlinks = {}
     icon_locations = {}
     for fileinfo in json_data.get('contents', []):
@@ -128,8 +130,16 @@ def load_json(filename, settings):
         elif kind == 'position':
             pass
         icon_locations[name] = (fileinfo['x'], fileinfo['y'])
+        hide_ext = fileinfo.get('hide_extension', False)
+        if hide_ext:
+            hide_extensions.append(name)
+        hidden = fileinfo.get('hidden', False)
+        if hidden:
+            hide.append(name)
 
     settings['files'] = files
+    settings['hide_extensions'] = hide_extensions
+    settings['hide'] = hide
     settings['symlinks'] = symlinks
     settings['icon_locations'] = icon_locations
 
@@ -144,6 +154,8 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         'size': None,
         'files': [],
         'symlinks': {},
+        'hide': [],
+        'hide_extensions': [],
         'icon': None,
         'badge_icon': None,
         'background': None,
@@ -535,6 +547,20 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         for name,target in iteritems(options['symlinks']):
             name_in_image = os.path.join(mount_point, name)
             os.symlink(target, name_in_image)
+
+        to_hide = []
+        for name in options['hide_extensions']:
+            name_in_image = os.path.join(mount_point, name)
+            to_hide.append(name_in_image)
+
+        subprocess.call(['/usr/bin/SetFile', '-a', 'E'] + to_hide)
+
+        to_hide = []
+        for name in options['hide']:
+            name_in_image = os.path.join(mount_point, name)
+            to_hide.append(name_in_image)
+
+        subprocess.call(['/usr/bin/SetFile', '-a', 'V'] + to_hide)
 
         userfn = options.get('create_hook', None)
         if callable(userfn):

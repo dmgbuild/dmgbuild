@@ -82,12 +82,33 @@ Content Settings
 
      files = [ '/Applications/TextEdit.app' ]
 
+   The items in this list may be a tuple consisting of the path to copy
+   from and the name to copy to. e.g.::
+
+     files = [ ('/Applications/TextEdit.app', 'Editor.app') ]
+
 .. py:data:: symlinks
 
    A dictionary specifying symbolic links to create in the image.  For
    example::
 
      symlinks = { 'Applications': '/Applications' }
+
+.. py:data:: hide
+
+   A list of files or folders that should be hidden from the user.
+   The names in this list are relative to the root of the disk image.
+   e.g.::
+
+     hide = [ 'Secret.data' ]
+
+.. py:data:: hide_extensions
+
+   A list of files or folders whose extensions should be hidden.
+   The names in this list are relative to the root of the disk image.
+   e.g.::
+
+     hide_extensions = [ 'README.rst' ]
 
 .. py:data:: icon
 

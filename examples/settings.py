@@ -17,7 +17,7 @@ import os.path
 
 # .. Useful stuff ..............................................................
 
-application = defines.get('app', '/Applications/TextEdit.app')
+application = defines.get('app', '/System/Applications/TextEdit.app')
 appname = os.path.basename(application)
 
 def icon_from_app(app_path):
@@ -52,6 +52,12 @@ files = [ application ]
 
 # Symlinks to create
 symlinks = { 'Applications': '/Applications' }
+
+# Files to hide
+# hide = [ 'Secret.data' ]
+
+# Files to hide the extension of
+# hide_extension = [ 'README.rst' ]
 
 # Volume icon
 #
