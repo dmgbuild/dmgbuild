@@ -20,6 +20,10 @@ matrix:
     - os: osx
       osx_image: xcode12.2
       language: generic
+      env: PYTHON_VERSION=3.8.6
+    - os: osx
+      osx_image: xcode12.2
+      language: generic
       env: PYTHON_VERSION=2.7.16
 
 script: python setup.py test
