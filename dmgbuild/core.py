@@ -26,7 +26,19 @@ try:
 except NameError:
     unicode = str
 
-import biplist
+if sys.version_info < (3, 4):
+    import biplist
+    def plist_from_bytes(data):
+        return biplist.readPlistFromString(data)
+    def plist_bytes(data):
+        return biplist.Data(data)
+else:
+    import plistlib
+    def plist_from_bytes(data):
+        return plistlib.loads(data)
+    def plist_bytes(data):
+        return data
+
 from mac_alias import *
 from ds_store import *
 
@@ -56,7 +68,7 @@ def hdiutil(cmd, *args, **kwargs):
     p = subprocess.Popen(all_args, stdout=subprocess.PIPE, close_fds=True)
     output, errors = p.communicate()
     if plist:
-        results = biplist.readPlistFromString(output)
+        results = plist_from_bytes(output)
     else:
         results = output
     retcode = p.wait()
@@ -531,7 +543,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             background_bmk = Bookmark.for_file(path_in_image)
 
             icvp['backgroundType'] = 2
-            icvp['backgroundImageAlias'] = biplist.Data(alias.to_bytes())
+            icvp['backgroundImageAlias'] = plist_bytes(alias.to_bytes())
 
         for f in options['files']:
             if isinstance(f, tuple):

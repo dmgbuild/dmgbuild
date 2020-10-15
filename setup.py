@@ -22,6 +22,10 @@ with open('README.rst', 'rb') as f:
 requires=['ds_store >= 1.1.0',
           'mac_alias >= 2.0.1']
 
+# On Python <3.4, we need biplist
+if sys.version_info < (3, 4):
+    requires.append('biplist >= 0.6')
+
 if sys.version_info.major == 2:
     tests_require = ['pytest == 3.6.4',
                      'py == 1.5.1',
