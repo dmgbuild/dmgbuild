@@ -34,7 +34,7 @@ else:
     tests_require = ['pytest']
 
 setup(name='dmgbuild',
-      version='1.4.0',
+      version='1.4.1',
       description='macOS command line utility to build disk images',
       long_description=long_desc,
       author='Alastair Houghton',
