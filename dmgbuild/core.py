@@ -565,14 +565,16 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             name_in_image = os.path.join(mount_point, name)
             to_hide.append(name_in_image)
 
-        subprocess.call(['/usr/bin/SetFile', '-a', 'E'] + to_hide)
+        if to_hide:
+            subprocess.call(['/usr/bin/SetFile', '-a', 'E'] + to_hide)
 
         to_hide = []
         for name in options['hide']:
             name_in_image = os.path.join(mount_point, name)
             to_hide.append(name_in_image)
 
-        subprocess.call(['/usr/bin/SetFile', '-a', 'V'] + to_hide)
+        if to_hide:
+            subprocess.call(['/usr/bin/SetFile', '-a', 'V'] + to_hide)
 
         userfn = options.get('create_hook', None)
         if callable(userfn):
