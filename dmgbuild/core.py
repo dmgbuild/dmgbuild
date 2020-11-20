@@ -587,12 +587,12 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                 basename = os.path.basename(f.rstrip('/'))
                 f_in_image = os.path.join(mount_point, basename)
 
-            callback({'type': 'operation::start', 'operation': 'file::add', 'file:': f_in_image})
+            callback({'type': 'operation::start', 'operation': 'file::add', 'file': f_in_image})
 
             # use system ditto command to preserve code signing, etc.
             subprocess.call(['/usr/bin/ditto', f, f_in_image])
 
-            callback({'type': 'operation::finished', 'operation': 'file::add', 'file:': f_in_image})
+            callback({'type': 'operation::finished', 'operation': 'file::add', 'file': f_in_image})
 
         callback({'type': 'operation::finished', 'operation:':'files::add'})
 
@@ -600,9 +600,9 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
         for name,target in iteritems(options['symlinks']):
             name_in_image = os.path.join(mount_point, name)
-            callback({'type': 'operation::start', 'operation': 'symlink::add', 'file:': name_in_image})
+            callback({'type': 'operation::start', 'operation': 'symlink::add', 'file': name_in_image})
             os.symlink(target, name_in_image)
-            callback({'type': 'operation::finished', 'operation': 'symlink::add', 'file:': name_in_image})
+            callback({'type': 'operation::finished', 'operation': 'symlink::add', 'file': name_in_image})
 
         callback({'type': 'operation::finished', 'operation:': 'symlinks::add'})
 
