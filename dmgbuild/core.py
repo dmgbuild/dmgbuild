@@ -577,7 +577,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
         callback({'type': 'operation::finished', 'operation': 'background::create'})
 
-        callback({'type': 'operation::start', 'operation:': 'files::add', 'total': len(options['files'])})
+        callback({'type': 'operation::start', 'operation': 'files::add', 'total': len(options['files'])})
 
         for f in options['files']:
             if isinstance(f, tuple):
@@ -594,9 +594,9 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
             callback({'type': 'operation::finished', 'operation': 'file::add', 'file': f_in_image})
 
-        callback({'type': 'operation::finished', 'operation:':'files::add'})
+        callback({'type': 'operation::finished', 'operation':'files::add'})
 
-        callback({'type': 'operation::start', 'operation:': 'symlinks::add', 'total': len(options['symlinks'])})
+        callback({'type': 'operation::start', 'operation': 'symlinks::add', 'total': len(options['symlinks'])})
 
         for name,target in iteritems(options['symlinks']):
             name_in_image = os.path.join(mount_point, name)
@@ -604,9 +604,9 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             os.symlink(target, name_in_image)
             callback({'type': 'operation::finished', 'operation': 'symlink::add', 'file': name_in_image})
 
-        callback({'type': 'operation::finished', 'operation:': 'symlinks::add'})
+        callback({'type': 'operation::finished', 'operation': 'symlinks::add'})
 
-        callback({'type': 'operation::start', 'operation:': 'extensions::hide'})
+        callback({'type': 'operation::start', 'operation': 'extensions::hide'})
 
         to_hide = []
         for name in options['hide_extensions']:
@@ -624,7 +624,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         if to_hide:
             subprocess.call(['/usr/bin/SetFile', '-a', 'V'] + to_hide)
 
-        callback({'type': 'operation::finished', 'operation:': 'extensions::hide'})
+        callback({'type': 'operation::finished', 'operation': 'extensions::hide'})
 
         userfn = options.get('create_hook', None)
         if callable(userfn):
