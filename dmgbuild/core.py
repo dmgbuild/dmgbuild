@@ -600,9 +600,9 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
         for name,target in iteritems(options['symlinks']):
             name_in_image = os.path.join(mount_point, name)
-            callback({'type': 'operation::start', 'operation': 'symlink::add', 'file': name_in_image})
+            callback({'type': 'operation::start', 'operation': 'symlink::add', 'file': name_in_image, 'target': target})
             os.symlink(target, name_in_image)
-            callback({'type': 'operation::finished', 'operation': 'symlink::add', 'file': name_in_image})
+            callback({'type': 'operation::finished', 'operation': 'symlink::add', 'file': name_in_image, 'target': target})
 
         callback({'type': 'operation::finished', 'operation': 'symlinks::add'})
 
