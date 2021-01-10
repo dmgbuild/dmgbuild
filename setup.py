@@ -51,6 +51,11 @@ setup(name='dmgbuild',
       package_data = {
         'dmgbuild': ['resources/*']
       },
+      entry_points = {
+        'console_scripts': [
+            'dmgbuild = dmgbuild.__main__:main'
+        ],
+      },
       scripts=['scripts/dmgbuild'],
       install_requires=requires,
       tests_require=tests_require,
