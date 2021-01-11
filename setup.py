@@ -56,7 +56,6 @@ setup(name='dmgbuild',
             'dmgbuild = dmgbuild.__main__:main'
         ],
       },
-      scripts=['scripts/dmgbuild'],
       install_requires=requires,
       tests_require=tests_require,
       cmdclass={
