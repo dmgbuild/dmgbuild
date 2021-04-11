@@ -659,6 +659,9 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
     callback({'type': 'operation::finished', 'operation': 'dmg::create'})
 
+    # Flush writes before attempting to detach.
+    subprocess.check_call(('sync', '--file-system', mount_point))
+
     for tries in range(detach_retries):
         callback({'type': 'command::start', 'command': 'hdiutil::detach'})
 
