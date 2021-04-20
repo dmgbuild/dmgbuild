@@ -28,7 +28,7 @@ if sys.version_info < (3, 4):
 
 if sys.version_info.major == 2:
     tests_require = ['pytest == 3.6.4',
-                     'py == 1.5.1',
+                     'py == 1.10.0',
                      'more_itertools == 4.0.0']
 else:
     tests_require = ['pytest']
