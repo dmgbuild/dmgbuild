@@ -57,6 +57,14 @@ _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
 MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.'))
 
 class DMGError(Exception):
+    def __init__(self, callback, message):
+        self.message = message
+        callback({'type': 'error::fatal', 'message': message})
+
+    def __str__(self):
+        return str(self.message)
+
+def quiet_callback(info):
     pass
 
 def hdiutil(cmd, *args, **kwargs):
@@ -156,7 +164,7 @@ def load_json(filename, settings):
     settings['icon_locations'] = icon_locations
 
 def build_dmg(filename, volume_name, settings_file=None, settings={},
-              defines={}, lookForHiDPI=True, detach_retries=5):
+              defines={}, lookForHiDPI=True, detach_retries=5, callback=quiet_callback):
     options = {
         # Default settings
         'filename': filename,
@@ -226,13 +234,19 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         'defines': defines
         }
 
+    callback({'type': 'build::started'})
+
     # Execute the settings file
     if settings_file:
+        callback({'type': 'operation::start', 'operation': 'settings::load'})
+
         # We now support JSON settings files using appdmg's format
         if settings_file.endswith('.json'):
             load_json(settings_file, options)
         else:
             load_settings(settings_file, options)
+
+        callback({'type': 'operation::finished', 'operation': 'settings::load'})
 
     # Add any overrides
     options.update(settings)
@@ -401,6 +415,8 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     writableFile = tempfile.NamedTemporaryFile(dir=dirname, prefix='.temp',
                                                suffix=basename)
 
+    callback({'type': 'operation::start', 'operation': 'size::calculate'})
+
     total_size = options['size']
     if total_size == None:
         # Start with a size of 128MB - this way we don't need to calculate the
@@ -429,6 +445,10 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
         total_size = str(max(total_size / 1000, 1024)) + 'K'
 
+    callback({'type': 'operation::finished', 'operation': 'size::calculate', 'size': total_size})
+
+    callback({'type': 'command::start', 'command': 'hdiutil::create'})
+
     ret, output = hdiutil('create',
                           '-ov',
                           '-volname', volume_name,
@@ -437,8 +457,12 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                           '-size', total_size,
                           writableFile.name)
 
+    callback({'type':'command::finished', 'command': 'hdiutil::create', 'ret': ret, 'output': output})
+
     if ret:
-        raise DMGError('Unable to create disk image')
+        raise DMGError(callback, 'Unable to create disk image')
+
+    callback({'type': 'command::start', 'command': 'hdiutil::attach'})
 
     # IDME was deprecated in macOS 10.15/Catalina; as a result, use of -noidme
     # started raising a warning.
@@ -454,8 +478,12 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                               '-noidme',
                               writableFile.name)
 
+    callback({'type': 'command::finished', 'command': 'hdiutil::attach', 'ret': ret, 'output': output})
+
     if ret:
-        raise DMGError('Unable to attach disk image')
+        raise DMGError(callback, 'Unable to attach disk image')
+
+    callback({'type': 'operation::start', 'operation': 'dmg::create'})
 
     try:
         for info in output['system-entities']:
@@ -478,6 +506,8 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             subprocess.call(['/usr/bin/SetFile', '-a', 'C', mount_point])
 
         background_bmk = None
+
+        callback({'type': 'operation::start', 'operation': 'background::create'})
 
         if not isinstance(background, (str, unicode)):
             pass
@@ -545,6 +575,10 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             icvp['backgroundType'] = 2
             icvp['backgroundImageAlias'] = plist_bytes(alias.to_bytes())
 
+        callback({'type': 'operation::finished', 'operation': 'background::create'})
+
+        callback({'type': 'operation::start', 'operation': 'files::add', 'total': len(options['files'])})
+
         for f in options['files']:
             if isinstance(f, tuple):
                 f_in_image = os.path.join(mount_point, f[1])
@@ -553,12 +587,26 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                 basename = os.path.basename(f.rstrip('/'))
                 f_in_image = os.path.join(mount_point, basename)
 
+            callback({'type': 'operation::start', 'operation': 'file::add', 'file': f_in_image})
+
             # use system ditto command to preserve code signing, etc.
             subprocess.call(['/usr/bin/ditto', f, f_in_image])
 
+            callback({'type': 'operation::finished', 'operation': 'file::add', 'file': f_in_image})
+
+        callback({'type': 'operation::finished', 'operation':'files::add'})
+
+        callback({'type': 'operation::start', 'operation': 'symlinks::add', 'total': len(options['symlinks'])})
+
         for name,target in iteritems(options['symlinks']):
             name_in_image = os.path.join(mount_point, name)
+            callback({'type': 'operation::start', 'operation': 'symlink::add', 'file': name_in_image, 'target': target})
             os.symlink(target, name_in_image)
+            callback({'type': 'operation::finished', 'operation': 'symlink::add', 'file': name_in_image, 'target': target})
+
+        callback({'type': 'operation::finished', 'operation': 'symlinks::add'})
+
+        callback({'type': 'operation::start', 'operation': 'extensions::hide'})
 
         to_hide = []
         for name in options['hide_extensions']:
@@ -576,9 +624,13 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         if to_hide:
             subprocess.call(['/usr/bin/SetFile', '-a', 'V'] + to_hide)
 
+        callback({'type': 'operation::finished', 'operation': 'extensions::hide'})
+
         userfn = options.get('create_hook', None)
         if callable(userfn):
             userfn(mount_point, options)
+
+        callback({'type': 'operation::start', 'operation': 'dsstore::create'})
 
         image_dsstore = os.path.join(mount_point, '.DS_Store')
 
@@ -596,6 +648,8 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             for k,v in iteritems(options['icon_locations']):
                 d[k]['Iloc'] = v
 
+        callback({'type': 'operation::finished', 'operation': 'dsstore::create'})
+
         # Delete .Trashes, if it gets created
         shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)
     except:
@@ -603,15 +657,24 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         hdiutil('detach', '-force', device, plist=False)
         raise
 
+    callback({'type': 'operation::finished', 'operation': 'dmg::create'})
+
     for tries in range(detach_retries):
+        callback({'type': 'command::start', 'command': 'hdiutil::detach'})
+
         ret, output = hdiutil('detach', device, plist=False)
+
+        callback({'type': 'command::finished', 'command': 'hdiutil::detach', 'ret:': ret, 'output:': output})
+
         if not ret:
             break
         time.sleep(1)
 
     if ret:
         hdiutil('detach', '-force', device, plist=False)
-        raise DMGError('Unable to detach device cleanly')
+        raise DMGError(callback, 'Unable to detach device cleanly')
+
+    callback({'type': 'command::start', 'command': 'hdiutil::resize'})
 
     # Shrink the output to the minimum possible size
     ret, output = hdiutil('resize',
@@ -620,8 +683,12 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                           writableFile.name,
                           plist=False)
 
+    callback({'type': 'command::finished', 'command': 'hdiutil::resize', 'ret': ret, 'output': output})
+
     if ret:
-        raise DMGError('Unable to shrink')
+        raise DMGError(callback, 'Unable to shrink')
+
+    callback({'type': 'operation::start', 'operation': 'dmg::shrink'})
 
     key_prefix = {'UDZO': 'zlib', 'UDBZ': 'bzip2', 'ULFO': 'lzfse'}
     compression_level = options['compression_level']
@@ -633,23 +700,43 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     else:
         compression_args = []
 
+    callback({'type': 'command::start', 'command': 'hdiutil::convert'})
+
     ret, output = hdiutil('convert', writableFile.name,
                           '-format', options['format'],
                           '-ov',
                           '-o', filename, *compression_args)
 
+    callback({'type': 'command::finished', 'command': 'hdiutil::convert', 'ret': ret, 'output': output})
+
     if ret:
-        raise DMGError('Unable to convert')
+        raise DMGError(callback, 'Unable to convert')
+
+    callback({'type': 'operation::finished', 'operation': 'dmg::shrink'})
 
     if options['license']:
+        callback({'type': 'operation::start', 'command': 'dmg::addlicense'})
+
+        callback({'type': 'command::start', 'command': 'hdiutil::unflatten'})
+
         ret, output = hdiutil('unflatten', '-quiet', filename, plist=False)
 
+        callback({'type': 'command::finished', 'command': 'hdiutil::unflatten', 'ret': ret, 'output': output})
+
         if ret:
-            raise DMGError('Unable to unflatten to add license')
+            raise DMGError(callback, 'Unable to unflatten to add license')
+
+        callback({'type': 'command::start', 'command': 'hdiutil::flatten'})
 
         licensing.add_license(filename, options['license'])
 
         ret, output = hdiutil('flatten', '-quiet', filename, plist=False)
 
+        callback({'type': 'command::finished', 'command': 'hdiutil::flatten', 'ret': ret, 'output': output})
+
         if ret:
-            raise DMGError('Unable to flatten after adding license')
+            raise DMGError(callback, 'Unable to flatten after adding license')
+
+        callback({'type': 'operation::finished', 'command': 'dmg::addlicense'})
+
+    callback({'type': 'build::finished'})
