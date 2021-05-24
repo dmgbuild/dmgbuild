@@ -4,9 +4,11 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import dmgbuild
 import sys
 import argparse
+
+from .core import build_dmg
+
 
 parser = argparse.ArgumentParser(description='Construct a disk image file.')
 parser.add_argument('volume_name', metavar='volume-name',
@@ -19,7 +21,6 @@ parser.add_argument('-D', dest='defines', action='append', default=[],
                     help='Define a value for the settings file (e.g. -Dfoo=bar).')
 parser.add_argument('--no-hidpi', dest='lookForHiDPI', action='store_false', default=True,
                     help='Do not search for HiDPI versions of the background image (if specified)')
-
 
 args = parser.parse_args()
 
