@@ -8,6 +8,14 @@ dmgbuild
 .. image:: https://readthedocs.org/projects/dmgbuild/badge/?version=latest
     :target: http://dmgbuild.readthedocs.io/en/latest/?badge=latest
 
+NEW MAINTAINER WANTED
+---------------------
+
+Alastair, the existing maintainer, starts work for Apple on the 1st of June,
+after which he likely won't be able to work on dmgbuild any more.  If anyone
+would like to volunteer to maintain dmgbuild in the future, please get in
+touch.
+
 What is this?
 -------------
 
