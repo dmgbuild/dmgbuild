@@ -34,4 +34,4 @@ for d in args.defines:
         v = v[1:-1]
     defines[k] = v
 
-dmgbuild.build_dmg(args.filename, args.volume_name, args.settings, defines=defines, lookForHiDPI=args.lookForHiDPI)
+build_dmg(args.filename, args.volume_name, args.settings, defines=defines, lookForHiDPI=args.lookForHiDPI)
