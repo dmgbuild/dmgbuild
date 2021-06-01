@@ -1,3 +1,3 @@
 from .core import build_dmg
 
-__all__ = ['dmgbuild']
+__all__ = ['build_dmg']
