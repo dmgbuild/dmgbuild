@@ -722,7 +722,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
         licenseDict = licensing.build_license(options['license'])
 
-        tempLicenseFile = open(os.path.join(dirname, "license.plist", "wb"))
+        tempLicenseFile = open(os.path.join(dirname, "license.plist"), "wb")
         plistlib.dump(licenseDict, tempLicenseFile)
         tempLicenseFile.close()
 
