@@ -179,6 +179,7 @@ ufifrezXMLtemplate = {
             'Name': 'English buttons'
         },
     ],
+    # example
     # 'TEXT': [
     #     {
     #         'Attributes': '0x0000',
@@ -204,7 +205,6 @@ ufifrezXMLtemplate = {
         }
     ]
 }
-
 
 
 def maybe_encode(s, encoding="mac_roman"):
