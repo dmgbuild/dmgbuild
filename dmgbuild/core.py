@@ -720,16 +720,19 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     if options['license']:
         callback({'type': 'operation::start', 'command': 'dmg::addlicense'})
 
-        licenseDict = licensing.add_license(filename, options['license'])
+        licenseDict = licensing.build_license(options['license'])
 
-        with tempfile.NamedTemporaryFile() as tempFile:
-            plistlib.dump(licenseDict, tempFile)
+        tempLicenseFile = open(os.path.join(dirname, "license.plist", "wb"))
+        plistlib.dump(licenseDict, tempLicenseFile)
+        tempLicenseFile.close()
 
-            # see https://developer.apple.com/forums/thread/668084
-            ret, output = hdiutil("udifrez", "-xml", tempFile.name, "", "-quiet", filename, plist=False)
+        # see https://developer.apple.com/forums/thread/668084
+        ret, output = hdiutil("udifrez", "-xml", tempLicenseFile.name, "", "-quiet", filename, plist=False)
 
-            if ret:
-                raise DMGError(callback, 'Unable to add license')
+        os.remove(tempLicenseFile.name)
+
+        if ret:
+            raise DMGError(callback, 'Unable to add license')
 
         callback({'type': 'operation::finished', 'command': 'dmg::addlicense'})
 

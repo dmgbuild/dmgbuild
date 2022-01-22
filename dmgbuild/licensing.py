@@ -174,7 +174,7 @@ ufifrezXMLtemplate = {
     'STR#': [
         {
             'Attributes': '0x0000',
-            'Data': b'\x00\x06\rEnglish test1\x05Agree\x08Disagree\x05Print\x07Save...zIMPORTANT - Read this License Agreement carefully before clicking on the "Agree" button. By clicking on the "Agree" button, you agree to be bound by the terms of the License Agreement."',
+            'Data': b'\x00\x06\rEnglish test1\x05Agree\x08Disagree\x05Print\x07Save...zIMPORTANT - Read this License Agreement carefully before clicking on the "Agree" button. By clicking on the "Agree" button, you agree to be bound by the terms of the License Agreement.',
             'ID': '5000',
             'Name': 'English buttons'
         },
@@ -213,7 +213,7 @@ def maybe_encode(s, encoding="mac_roman"):
     return s.encode(encoding)
 
 
-def add_license(filename, license_info):
+def build_license(license_info):
     """Add a license agreement to the specified disk image file,
     see https://developer.apple.com/forums/thread/668084
     """
@@ -236,7 +236,7 @@ def add_license(filename, license_info):
             licenseDataFormat = "RTF "
 
         else:
-            licenseDataFormat = "RTF "
+            licenseDataFormat = "TEXT"
             license_data = maybe_encode(license_data)
 
         if licenseDataFormat not in xml:
@@ -264,8 +264,8 @@ def add_license(filename, license_info):
             dict(
                 Attributes='0x0000',
                 Data=b'\x00\x06\x07' + buttons[0] + b'\x05' + buttons[1] + b'\x08' + buttons[2] + b'\x05' + buttons[3] + b'\x07' + buttons[4] + b'{' + buttons[5],
-                ID=5002,
-                Name=buttons[0]
+                ID="5002",
+                Name=language_name
             )
         )
 
