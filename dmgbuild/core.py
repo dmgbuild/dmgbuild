@@ -720,25 +720,15 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     if options['license']:
         callback({'type': 'operation::start', 'command': 'dmg::addlicense'})
 
-        callback({'type': 'command::start', 'command': 'hdiutil::unflatten'})
+        licenseDict = licensing.add_license(filename, options['license'])
 
-        ret, output = hdiutil('unflatten', '-quiet', filename, plist=False)
+        with tempfile.NamedTemporaryFile() as tempFile:
+            plistlib.dump(licenseDict, tempFile)
 
-        callback({'type': 'command::finished', 'command': 'hdiutil::unflatten', 'ret': ret, 'output': output})
+            ret, output = hdiutil("udifrez", "-xml", tempFile.name, "", "-quiet", filename, plist=False)
 
-        if ret:
-            raise DMGError(callback, 'Unable to unflatten to add license')
-
-        callback({'type': 'command::start', 'command': 'hdiutil::flatten'})
-
-        licensing.add_license(filename, options['license'])
-
-        ret, output = hdiutil('flatten', '-quiet', filename, plist=False)
-
-        callback({'type': 'command::finished', 'command': 'hdiutil::flatten', 'ret': ret, 'output': output})
-
-        if ret:
-            raise DMGError(callback, 'Unable to flatten after adding license')
+            if ret:
+                raise DMGError(callback, 'Unable to add license')
 
         callback({'type': 'operation::finished', 'command': 'dmg::addlicense'})
 
