@@ -233,29 +233,23 @@ def add_license(filename, license_info):
                 license_data = f.read()
 
         if type(license_data) == bytes and license_data.startswith(b'{\\rtf1'):
-            if "RTF " not in xml:
-                xml["RTF "] = []
+            licenseDataFormat = "RTF "
 
-            xml["RTF "].append(
-                dict(
-                    Attributes='0x0000',
-                    Data=license_data,
-                    ID='5000',
-                    Name=language_name
-                )
-            )
         else:
-            if "TEXT" not in xml:
-                xml["TEXT"] = []
+            licenseDataFormat = "RTF "
+            license_data = maybe_encode(license_data)
 
-            xml["RTF "].append(
-                dict(
-                    Attributes='0x0000',
-                    Data=maybe_encode(license_data),
-                    ID='5000',
-                    Name=language_name
-                )
+        if licenseDataFormat not in xml:
+            xml[licenseDataFormat] = []
+
+        xml[licenseDataFormat].append(
+            dict(
+                Attributes='0x0000',
+                Data=license_data,
+                ID='5000',
+                Name=language_name
             )
+        )
 
         buttons = license_info.get('buttons', {}).get(language, None)
         if buttons is None:
