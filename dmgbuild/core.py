@@ -725,6 +725,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         with tempfile.NamedTemporaryFile() as tempFile:
             plistlib.dump(licenseDict, tempFile)
 
+            # see https://developer.apple.com/forums/thread/668084
             ret, output = hdiutil("udifrez", "-xml", tempFile.name, "", "-quiet", filename, plist=False)
 
             if ret:

@@ -215,7 +215,7 @@ def maybe_encode(s, encoding="mac_roman"):
 
 def add_license(filename, license_info):
     """Add a license agreement to the specified disk image file,
-    https://developer.apple.com/forums/thread/668084
+    see https://developer.apple.com/forums/thread/668084
     """
     # copy of the dict
     xml = dict(ufifrezXMLtemplate)
