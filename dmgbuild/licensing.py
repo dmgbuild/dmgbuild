@@ -265,7 +265,8 @@ def add_license(filename, license_info):
 
         assert len(buttons) == 6, "Needs 6 entries for license buttons."
         buttons = [maybe_encode(b) for b in buttons]
-        xml["STR#"].append(dict(
+        xml["STR#"].append(
+            dict(
                 Attributes='0x0000',
                 Data=b'\x00\x06\x07' + buttons[0] + b'\x05' + buttons[1] + b'\x08' + buttons[2] + b'\x05' + buttons[3] + b'\x07' + buttons[4] + b'{' + buttons[5],
                 ID=5002,
