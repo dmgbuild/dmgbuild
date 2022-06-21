@@ -1,3 +1,5 @@
+include *.txt
+include *.ini
 recursive-include docs *.bat
 recursive-include docs *.py
 recursive-include docs *.rst
