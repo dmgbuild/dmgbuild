@@ -2,19 +2,29 @@
 dmgbuild
 ========
 
-.. image:: https://travis-ci.org/al45tair/dmgbuild.svg?branch=master
-    :target: https://travis-ci.org/al45tair/dmgbuild
+.. image:: https://img.shields.io/pypi/pyversions/dmgbuild.svg
+   :target: https://pypi.python.org/pypi/dmgbuild
+   :alt: Python Versions
+
+.. image:: https://img.shields.io/pypi/v/dmgbuild.svg
+   :target: https://pypi.python.org/pypi/dmgbuild
+   :alt: PyPI Version
+
+.. image:: https://img.shields.io/pypi/status/dmgbuild.svg
+   :target: https://pypi.python.org/pypi/dmgbuild
+   :alt: Maturity
+
+.. image:: https://img.shields.io/pypi/l/dmgbuild.svg
+   :target: https://github.com/dmgbuild/dmgbuild/blob/master/LICENSE
+   :alt: MIT License
+
+.. image:: https://github.com/dmgbuild/dmgbuild/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/dmgbuild/dmgbuild/actions
+   :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/dmgbuild/badge/?version=latest
-    :target: http://dmgbuild.readthedocs.io/en/latest/?badge=latest
-
-NEW MAINTAINER WANTED
----------------------
-
-Alastair, the existing maintainer, starts work for Apple on the 1st of June,
-after which he likely won't be able to work on dmgbuild any more.  If anyone
-would like to volunteer to maintain dmgbuild in the future, please get in
-touch.
+   :target: http://dmgbuild.readthedocs.io/en/latest/?badge=latest
+   :alt: Docs Build Status
 
 What is this?
 -------------

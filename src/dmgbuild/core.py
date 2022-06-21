@@ -1,46 +1,18 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 import pkg_resources
 import platform
 import re
 import shutil
-import stat
 import subprocess
-import sys
 import tempfile
 import tokenize
 import json
 import time
 
-try:
-    {}.iteritems
-    iteritems = lambda x: x.iteritems()
-    iterkeys = lambda x: x.iterkeys()
-except AttributeError:
-    iteritems = lambda x: x.items()
-    iterkeys = lambda x: x.keys()
-try:
-    unicode
-except NameError:
-    unicode = str
+import plistlib
 
-if sys.version_info < (3, 4):
-    import biplist
-    def plist_from_bytes(data):
-        return biplist.readPlistFromString(data)
-    def plist_bytes(data):
-        return biplist.Data(data)
-else:
-    import plistlib
-    def plist_from_bytes(data):
-        return plistlib.loads(data)
-    def plist_bytes(data):
-        return data
-
-from mac_alias import *
-from ds_store import *
+from mac_alias import Alias, Bookmark
+from ds_store import DSStore
 
 from . import colors
 from . import licensing
@@ -50,11 +22,13 @@ try:
 except ImportError:
     badge = None
 
+
 _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
 
 # The first element in the platform.mac_ver() tuple is a string containing the
 # macOS version (e.g., '10.15.6'). Parse into an integer tuple.
 MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.'))
+
 
 class DMGError(Exception):
     def __init__(self, callback, message):
@@ -64,8 +38,10 @@ class DMGError(Exception):
     def __str__(self):
         return str(self.message)
 
+
 def quiet_callback(info):
     pass
+
 
 def hdiutil(cmd, *args, **kwargs):
     plist = kwargs.get('plist', True)
@@ -76,26 +52,24 @@ def hdiutil(cmd, *args, **kwargs):
     p = subprocess.Popen(all_args, stdout=subprocess.PIPE, close_fds=True)
     output, errors = p.communicate()
     if plist:
-        results = plist_from_bytes(output)
+        results = plistlib.loads(output)
     else:
         results = output
     retcode = p.wait()
     return retcode, results
 
-# On Python 2 we can just execfile() it, but Python 3 deprecated that
-def load_settings(filename, settings):
-    if sys.version_info[0] == 2:
-        execfile(filename, settings, settings)
-    else:
-        encoding = 'utf-8'
-        with open(filename, 'rb') as fp:
-            try:
-                encoding = tokenize.detect_encoding(fp.readline)[0]
-            except SyntaxError:
-                pass
 
-        with open(filename, 'r', encoding=encoding) as fp:
-            exec(compile(fp.read(), filename, 'exec'), settings, settings)
+def load_settings(filename, settings):
+    encoding = 'utf-8'
+    with open(filename, 'rb') as fp:
+        try:
+            encoding = tokenize.detect_encoding(fp.readline)[0]
+        except SyntaxError:
+            pass
+
+    with open(filename, 'r', encoding=encoding) as fp:
+        exec(compile(fp.read(), filename, 'exec'), settings, settings)
+
 
 def load_json(filename, settings):
     """Read an appdmg .json spec.  Uses the defaults for appdmg, rather than
@@ -118,12 +92,13 @@ def load_json(filename, settings):
     if bk is not None:
         settings['background'] = bk
     settings['icon_size'] = json_data.get('icon-size', 80)
-    wnd = json_data.get('window', { 'position': (100, 100),
-                                    'size': (640, 480) })
-    pos = wnd.get('position', { 'x': 100, 'y': 100 })
-    siz = wnd.get('size', { 'width': 640, 'height': 480 })
-    settings['window_rect'] = ((pos.get('x', 100), pos.get('y', 100)),
-                               (siz.get('width', 640), siz.get('height', 480)))
+    wnd = json_data.get('window', {'position': (100, 100), 'size': (640, 480)})
+    pos = wnd.get('position', {'x': 100, 'y': 100})
+    siz = wnd.get('size', {'width': 640, 'height': 480})
+    settings['window_rect'] = (
+        (pos.get('x', 100), pos.get('y', 100)),
+        (siz.get('width', 640), siz.get('height', 480))
+    )
     settings['format'] = json_data.get('format', 'UDZO')
     settings['compression_level'] = json_data.get('compression-level', None)
     settings['license'] = json_data.get('license', None)
@@ -163,8 +138,17 @@ def load_json(filename, settings):
     settings['symlinks'] = symlinks
     settings['icon_locations'] = icon_locations
 
-def build_dmg(filename, volume_name, settings_file=None, settings={},
-              defines={}, lookForHiDPI=True, detach_retries=5, callback=quiet_callback):
+
+def build_dmg(  # noqa; C901
+    filename,
+    volume_name,
+    settings_file=None,
+    settings={},
+    defines={},
+    lookForHiDPI=True,
+    detach_retries=5,
+    callback=quiet_callback
+):
     options = {
         # Default settings
         'filename': filename,
@@ -238,7 +222,10 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
     # Execute the settings file
     if settings_file:
-        callback({'type': 'operation::start', 'operation': 'settings::load'})
+        callback({
+            'type': 'operation::start',
+            'operation': 'settings::load',
+        })
 
         # We now support JSON settings files using appdmg's format
         if settings_file.endswith('.json'):
@@ -246,7 +233,10 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         else:
             load_settings(settings_file, options)
 
-        callback({'type': 'operation::finished', 'operation': 'settings::load'})
+        callback({
+            'type': 'operation::finished',
+            'operation': 'settings::load',
+        })
 
     # Add any overrides
     options.update(settings)
@@ -291,8 +281,8 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         'gridOffsetY': float(options['grid_offset'][1]),
         'gridSpacing': float(options['grid_spacing']),
         'arrangeBy': str(arrange_options.get(options['arrange_by'], 'none')),
-        'showIconPreview': options['show_icon_preview'] == True,
-        'showItemInfo': options['show_item_info'] == True,
+        'showIconPreview': bool(options['show_icon_preview']),
+        'showItemInfo': bool(options['show_item_info']),
         'labelOnBottom': options['label_pos'] == 'bottom',
         'textSize': float(options['text_size']),
         'iconSize': float(options['icon_size']),
@@ -358,10 +348,12 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
     for n, column in enumerate(options['list_columns']):
         cndx[column] = n
-        width = options['list_column_widths'].get(column,
-                                                   default_widths[column])
-        asc = 'ascending' == options['list_column_sort_directions'].get(column,
-                    default_sort_directions[column])
+        width = options['list_column_widths'].get(
+            column, default_widths[column]
+        )
+        asc = 'ascending' == options['list_column_sort_directions'].get(
+            column, default_sort_directions[column]
+        )
 
         lsvp['columns'][columns[column]] = {
             'index': n,
@@ -372,7 +364,7 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             }
 
     n = len(options['list_columns'])
-    for k in iterkeys(columns):
+    for k in columns:
         if cndx.get(k, None) is None:
             cndx[k] = n
             width = default_widths[k]
@@ -415,10 +407,13 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     writableFile = tempfile.NamedTemporaryFile(dir=dirname, prefix='.temp',
                                                suffix=basename)
 
-    callback({'type': 'operation::start', 'operation': 'size::calculate'})
+    callback({
+        'type': 'operation::start',
+        'operation': 'size::calculate',
+    })
 
     total_size = options['size']
-    if total_size == None:
+    if total_size is None:
         # Start with a size of 128MB - this way we don't need to calculate the
         # size of the background image, volume icon, and .DS_Store file (and
         # 128 MB should be well sufficient for even the most outlandish image
@@ -440,29 +435,46 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             else:
                 total_size += roundup(os.lstat(path).st_size, 4096)
 
-        for name,target in iteritems(options['symlinks']):
+        for name, target in options['symlinks'].items():
             total_size += 4096
 
         total_size = str(max(total_size / 1000, 1024)) + 'K'
 
-    callback({'type': 'operation::finished', 'operation': 'size::calculate', 'size': total_size})
+    callback({
+        'type': 'operation::finished',
+        'operation': 'size::calculate',
+        'size': total_size,
+    })
 
-    callback({'type': 'command::start', 'command': 'hdiutil::create'})
+    callback({
+        'type': 'command::start',
+        'command': 'hdiutil::create',
+    })
 
-    ret, output = hdiutil('create',
-                          '-ov',
-                          '-volname', volume_name,
-                          '-fs', 'HFS+',
-                          '-fsargs', '-c c=64,a=16,e=16',
-                          '-size', total_size,
-                          writableFile.name)
+    ret, output = hdiutil(
+        'create',
+        '-ov',
+        '-volname', volume_name,
+        '-fs', 'HFS+',
+        '-fsargs', '-c c=64,a=16,e=16',
+        '-size', total_size,
+        writableFile.name
+    )
 
-    callback({'type':'command::finished', 'command': 'hdiutil::create', 'ret': ret, 'output': output})
+    callback({
+        'type': 'command::finished',
+        'command': 'hdiutil::create',
+        'ret': ret,
+        'output': output
+    })
 
     if ret:
         raise DMGError(callback, 'Unable to create disk image')
 
-    callback({'type': 'command::start', 'command': 'hdiutil::attach'})
+    callback({
+        'type': 'command::start',
+        'command': 'hdiutil::attach',
+    })
 
     # IDME was deprecated in macOS 10.15/Catalina; as a result, use of -noidme
     # started raising a warning.
@@ -478,12 +490,20 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                               '-noidme',
                               writableFile.name)
 
-    callback({'type': 'command::finished', 'command': 'hdiutil::attach', 'ret': ret, 'output': output})
+    callback({
+        'type': 'command::finished',
+        'command': 'hdiutil::attach',
+        'ret': ret,
+        'output': output,
+    })
 
     if ret:
         raise DMGError(callback, 'Unable to attach disk image')
 
-    callback({'type': 'operation::start', 'operation': 'dmg::create'})
+    callback({
+        'type': 'operation::start',
+        'operation': 'dmg::create',
+    })
 
     try:
         for info in output['system-entities']:
@@ -507,9 +527,12 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
 
         background_bmk = None
 
-        callback({'type': 'operation::start', 'operation': 'background::create'})
+        callback({
+            'type': 'operation::start',
+            'operation': 'background::create',
+        })
 
-        if not isinstance(background, (str, unicode)):
+        if not isinstance(background, str):
             pass
         elif colors.isAColor(background):
             c = colors.parseColor(background).to_rgb()
@@ -532,12 +555,15 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                         hasScale = re.match(
                             r'^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
                             candidateName)
-                        if hasScale and name == hasScale.group('name') and \
-                            extension == hasScale.group('extension'):
-                                scale = int(hasScale.group('scale'))
-                                if len(orderedImages) < scale:
-                                    orderedImages += [None] * (scale - len(orderedImages))
-                                orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
+                        if (
+                            hasScale
+                            and name == hasScale.group('name')
+                            and extension == hasScale.group('extension')
+                        ):
+                            scale = int(hasScale.group('scale'))
+                            if len(orderedImages) < scale:
+                                orderedImages += [None] * (scale - len(orderedImages))
+                            orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
 
                     if len(orderedImages) > 1:
                         # compile the grouped tiff
@@ -573,11 +599,18 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
             background_bmk = Bookmark.for_file(path_in_image)
 
             icvp['backgroundType'] = 2
-            icvp['backgroundImageAlias'] = plist_bytes(alias.to_bytes())
+            icvp['backgroundImageAlias'] = alias.to_bytes()
 
-        callback({'type': 'operation::finished', 'operation': 'background::create'})
+        callback({
+            'type': 'operation::finished',
+            'operation': 'background::create',
+        })
 
-        callback({'type': 'operation::start', 'operation': 'files::add', 'total': len(options['files'])})
+        callback({
+            'type': 'operation::start',
+            'operation': 'files::add',
+            'total': len(options['files']),
+        })
 
         for f in options['files']:
             if isinstance(f, tuple):
@@ -587,26 +620,58 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                 basename = os.path.basename(f.rstrip('/'))
                 f_in_image = os.path.join(mount_point, basename)
 
-            callback({'type': 'operation::start', 'operation': 'file::add', 'file': f_in_image})
+            callback({
+                'type': 'operation::start',
+                'operation': 'file::add',
+                'file': f_in_image,
+            })
 
             # use system ditto command to preserve code signing, etc.
             subprocess.call(['/usr/bin/ditto', f, f_in_image])
 
-            callback({'type': 'operation::finished', 'operation': 'file::add', 'file': f_in_image})
+            callback({
+                'type': 'operation::finished',
+                'operation': 'file::add',
+                'file': f_in_image,
+            })
 
-        callback({'type': 'operation::finished', 'operation':'files::add'})
+        callback({
+            'type': 'operation::finished',
+            'operation': 'files::add',
+        })
 
-        callback({'type': 'operation::start', 'operation': 'symlinks::add', 'total': len(options['symlinks'])})
+        callback({
+            'type': 'operation::start',
+            'operation': 'symlinks::add',
+            'total': len(options['symlinks']),
+        })
 
-        for name,target in iteritems(options['symlinks']):
+        for name, target in options['symlinks'].items():
             name_in_image = os.path.join(mount_point, name)
-            callback({'type': 'operation::start', 'operation': 'symlink::add', 'file': name_in_image, 'target': target})
+            callback({
+                'type': 'operation::start',
+                'operation': 'symlink::add',
+                'file': name_in_image,
+                'target': target,
+            })
             os.symlink(target, name_in_image)
-            callback({'type': 'operation::finished', 'operation': 'symlink::add', 'file': name_in_image, 'target': target})
+            callback({
+                'type': 'operation::finished',
+                'operation':
+                'symlink::add',
+                'file': name_in_image,
+                'target': target,
+            })
 
-        callback({'type': 'operation::finished', 'operation': 'symlinks::add'})
+        callback({
+            'type': 'operation::finished',
+            'operation': 'symlinks::add',
+        })
 
-        callback({'type': 'operation::start', 'operation': 'extensions::hide'})
+        callback({
+            'type': 'operation::start',
+            'operation': 'extensions::hide',
+        })
 
         to_hide = []
         for name in options['hide_extensions']:
@@ -624,13 +689,19 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         if to_hide:
             subprocess.call(['/usr/bin/SetFile', '-a', 'V'] + to_hide)
 
-        callback({'type': 'operation::finished', 'operation': 'extensions::hide'})
+        callback({
+            'type': 'operation::finished',
+            'operation': 'extensions::hide',
+        })
 
         userfn = options.get('create_hook', None)
         if callable(userfn):
             userfn(mount_point, options)
 
-        callback({'type': 'operation::start', 'operation': 'dsstore::create'})
+        callback({
+            'type': 'operation::start',
+            'operation': 'dsstore::create',
+        })
 
         image_dsstore = os.path.join(mount_point, '.DS_Store')
 
@@ -645,29 +716,43 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                 d['.']['lsvp'] = lsvp
             d['.']['icvl'] = icvl
 
-            for k,v in iteritems(options['icon_locations']):
+            for k, v in options['icon_locations'].items():
                 d[k]['Iloc'] = v
 
-        callback({'type': 'operation::finished', 'operation': 'dsstore::create'})
+        callback({
+            'type': 'operation::finished',
+            'operation': 'dsstore::create',
+        })
 
         # Delete .Trashes, if it gets created
         shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)
-    except:
+    except Exception:
         # Always try to detach
         hdiutil('detach', '-force', device, plist=False)
         raise
 
-    callback({'type': 'operation::finished', 'operation': 'dmg::create'})
+    callback({
+        'type': 'operation::finished',
+        'operation': 'dmg::create',
+    })
 
     # Flush writes before attempting to detach.
     subprocess.check_call(('sync', '--file-system', mount_point))
 
     for tries in range(detach_retries):
-        callback({'type': 'command::start', 'command': 'hdiutil::detach'})
+        callback({
+            'type': 'command::start',
+            'command': 'hdiutil::detach',
+        })
 
         ret, output = hdiutil('detach', device, plist=False)
 
-        callback({'type': 'command::finished', 'command': 'hdiutil::detach', 'ret:': ret, 'output:': output})
+        callback({
+            'type': 'command::finished',
+            'command': 'hdiutil::detach',
+            'ret:': ret,
+            'output:': output,
+        })
 
         if not ret:
             break
@@ -677,7 +762,10 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         hdiutil('detach', '-force', device, plist=False)
         raise DMGError(callback, 'Unable to detach device cleanly')
 
-    callback({'type': 'command::start', 'command': 'hdiutil::resize'})
+    callback({
+        'type': 'command::start',
+        'command': 'hdiutil::resize',
+    })
 
     # Shrink the output to the minimum possible size
     ret, output = hdiutil('resize',
@@ -686,12 +774,20 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
                           writableFile.name,
                           plist=False)
 
-    callback({'type': 'command::finished', 'command': 'hdiutil::resize', 'ret': ret, 'output': output})
+    callback({
+        'type': 'command::finished',
+        'command': 'hdiutil::resize',
+        'ret': ret,
+        'output': output,
+    })
 
     if ret:
         raise DMGError(callback, 'Unable to shrink')
 
-    callback({'type': 'operation::start', 'operation': 'dmg::shrink'})
+    callback({
+        'type': 'operation::start',
+        'operation': 'dmg::shrink',
+    })
 
     key_prefix = {'UDZO': 'zlib', 'UDBZ': 'bzip2', 'ULFO': 'lzfse'}
     compression_level = options['compression_level']
@@ -703,22 +799,36 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
     else:
         compression_args = []
 
-    callback({'type': 'command::start', 'command': 'hdiutil::convert'})
+    callback({
+        'type': 'command::start',
+        'command': 'hdiutil::convert',
+    })
 
     ret, output = hdiutil('convert', writableFile.name,
                           '-format', options['format'],
                           '-ov',
                           '-o', filename, *compression_args)
 
-    callback({'type': 'command::finished', 'command': 'hdiutil::convert', 'ret': ret, 'output': output})
+    callback({
+        'type': 'command::finished',
+        'command': 'hdiutil::convert',
+        'ret': ret,
+        'output': output,
+    })
 
     if ret:
         raise DMGError(callback, 'Unable to convert')
 
-    callback({'type': 'operation::finished', 'operation': 'dmg::shrink'})
+    callback({
+        'type': 'operation::finished',
+        'operation': 'dmg::shrink',
+    })
 
     if options['license']:
-        callback({'type': 'operation::start', 'command': 'dmg::addlicense'})
+        callback({
+            'type': 'operation::start',
+            'command': 'dmg::addlicense',
+        })
 
         licenseDict = licensing.build_license(options['license'])
 
@@ -734,6 +844,9 @@ def build_dmg(filename, volume_name, settings_file=None, settings={},
         if ret:
             raise DMGError(callback, 'Unable to add license')
 
-        callback({'type': 'operation::finished', 'command': 'dmg::addlicense'})
+        callback({
+            'type': 'operation::finished',
+            'command': 'dmg::addlicense',
+        })
 
     callback({'type': 'build::finished'})

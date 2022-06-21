@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import re
 import math
 
-class Color (object):
+
+class Color:
     def to_rgb(self):
         raise Exception('Must implement to_rgb() in subclasses')
 
-class RGB (Color):
+
+class RGB:
     def __init__(self, r, g, b):
         self.r = r
         self.g = g
@@ -16,12 +15,13 @@ class RGB (Color):
 
     def to_rgb(self):
         return self
-    
-class HSL (Color):
-    def __init__(self, h, s, l):
+
+
+class HSL(Color):
+    def __init__(self, h, s, l):  # noqa; E741
         self.h = h
         self.s = s
-        self.l = l
+        self.l = l  # noqa; E741
 
     @staticmethod
     def _hue_to_rgb(t1, t2, hue):
@@ -38,10 +38,10 @@ class HSL (Color):
             return (t2 - t1) * (4 - hue) + t1
         else:
             return t1
-        
+
     def to_rgb(self):
         hue = self.h / 60.0
-        if self.l <= 0.5:
+        if self.l <= 0.5:  # noqa; E741
             t2 = self.l * (self.s + 1)
         else:
             t2 = self.l + self.s - (self.l * self.s)
@@ -50,8 +50,9 @@ class HSL (Color):
         g = self._hue_to_rgb(t1, t2, hue)
         b = self._hue_to_rgb(t1, t2, hue - 2)
         return RGB(r, g, b)
-    
-class HWB (Color):
+
+
+class HWB(Color):
     def __init__(self, h, w, b):
         self.h = h
         self.w = w
@@ -72,7 +73,7 @@ class HWB (Color):
             return (4 - hue)
         else:
             return 0
- 
+
     def to_rgb(self):
         hue = self.h / 60.0
         t1 = 1 - self.w - self.b
@@ -80,8 +81,9 @@ class HWB (Color):
         g = self._hue_to_rgb(hue) * t1 + self.w
         b = self._hue_to_rgb(hue - 2) * t1 + self.w
         return RGB(r, g, b)
-    
-class CMYK (Color):
+
+
+class CMYK(Color):
     def __init__(self, c, m, y, k):
         self.c = c
         self.m = m
@@ -93,63 +95,65 @@ class CMYK (Color):
         g = 1.0 - min(1.0, self.m + self.k)
         b = 1.0 - min(1.0, self.y + self.k)
         return RGB(r, g, b)
-    
-class Gray (Color):
+
+
+class Gray(Color):
     def __init__(self, g):
         self.g = g
 
     def to_rgb(self):
-        return RGB(g, g, g)
-    
+        return RGB(self.g, self.g, self.g)
+
+
 _x11_colors = {
-	'aliceblue': (240, 248, 255),
+    'aliceblue': (240, 248, 255),
     'antiquewhite': (250, 235, 215),
-    'aqua':	( 0, 255, 255),
+    'aqua': (0, 255, 255),
     'aquamarine': (127, 255, 212),
     'azure': (240, 255, 255),
     'beige': (245, 245, 220),
     'bisque': (255, 228, 196),
-    'black': ( 0, 0, 0),
+    'black': (0, 0, 0),
     'blanchedalmond': (255, 235, 205),
-    'blue': ( 0, 0, 255),
+    'blue': (0, 0, 255),
     'blueviolet': (138, 43, 226),
     'brown': (165, 42, 42),
     'burlywood': (222, 184, 135),
-    'cadetblue': ( 95, 158, 160),
+    'cadetblue': (95, 158, 160),
     'chartreuse': (127, 255, 0),
     'chocolate': (210, 105, 30),
     'coral': (255, 127, 80),
     'cornflowerblue': (100, 149, 237),
     'cornsilk': (255, 248, 220),
     'crimson': (220, 20, 60),
-    'cyan': ( 0, 255, 255),
-    'darkblue': ( 0, 0, 139),
-    'darkcyan': ( 0, 139, 139),
+    'cyan': (0, 255, 255),
+    'darkblue': (0, 0, 139),
+    'darkcyan': (0, 139, 139),
     'darkgoldenrod': (184, 134, 11),
     'darkgray': (169, 169, 169),
-    'darkgreen': ( 0, 100, 0),
+    'darkgreen': (0, 100, 0),
     'darkgrey': (169, 169, 169),
     'darkkhaki': (189, 183, 107),
     'darkmagenta': (139, 0, 139),
-    'darkolivegreen': ( 85, 107, 47),
+    'darkolivegreen': (85, 107, 47),
     'darkorange': (255, 140, 0),
     'darkorchid': (153, 50, 204),
     'darkred': (139, 0, 0),
     'darksalmon': (233, 150, 122),
     'darkseagreen': (143, 188, 143),
-    'darkslateblue': ( 72, 61, 139),
-    'darkslategray': ( 47, 79, 79),
-    'darkslategrey': ( 47, 79, 79),
-    'darkturquoise': ( 0, 206, 209),
+    'darkslateblue': (72, 61, 139),
+    'darkslategray': (47, 79, 79),
+    'darkslategrey': (47, 79, 79),
+    'darkturquoise': (0, 206, 209),
     'darkviolet': (148, 0, 211),
     'deeppink': (255, 20, 147),
-    'deepskyblue': ( 0, 191, 255),
+    'deepskyblue': (0, 191, 255),
     'dimgray': (105, 105, 105),
     'dimgrey': (105, 105, 105),
-    'dodgerblue': ( 30, 144, 255),
+    'dodgerblue': (30, 144, 255),
     'firebrick': (178, 34, 34),
     'floralwhite': (255, 250, 240),
-    'forestgreen': ( 34, 139, 34),
+    'forestgreen': (34, 139, 34),
     'fuchsia': (255, 0, 255),
     'gainsboro': (220, 220, 220),
     'ghostwhite': (248, 248, 255),
@@ -157,12 +161,12 @@ _x11_colors = {
     'goldenrod': (218, 165, 32),
     'gray': (128, 128, 128),
     'grey': (128, 128, 128),
-    'green': ( 0, 128, 0),
+    'green': (0, 128, 0),
     'greenyellow': (173, 255, 47),
     'honeydew': (240, 255, 240),
     'hotpink': (255, 105, 180),
     'indianred': (205, 92, 92),
-    'indigo': ( 75, 0, 130),
+    'indigo': (75, 0, 130),
     'ivory': (255, 255, 240),
     'khaki': (240, 230, 140),
     'lavender': (230, 230, 250),
@@ -178,32 +182,32 @@ _x11_colors = {
     'lightgrey': (211, 211, 211),
     'lightpink': (255, 182, 193),
     'lightsalmon': (255, 160, 122),
-    'lightseagreen': ( 32, 178, 170),
+    'lightseagreen': (32, 178, 170),
     'lightskyblue': (135, 206, 250),
     'lightslategray': (119, 136, 153),
     'lightslategrey': (119, 136, 153),
     'lightsteelblue': (176, 196, 222),
     'lightyellow': (255, 255, 224),
-    'lime': ( 0, 255, 0),
-    'limegreen': ( 50, 205, 50),
+    'lime': (0, 255, 0),
+    'limegreen': (50, 205, 50),
     'linen': (250, 240, 230),
     'magenta': (255, 0, 255),
     'maroon': (128, 0, 0),
     'mediumaquamarine': (102, 205, 170),
-    'mediumblue': ( 0, 0, 205),
+    'mediumblue': (0, 0, 205),
     'mediumorchid': (186, 85, 211),
     'mediumpurple': (147, 112, 219),
-    'mediumseagreen': ( 60, 179, 113),
+    'mediumseagreen': (60, 179, 113),
     'mediumslateblue': (123, 104, 238),
-    'mediumspringgreen': ( 0, 250, 154),
-    'mediumturquoise': ( 72, 209, 204),
+    'mediumspringgreen': (0, 250, 154),
+    'mediumturquoise': (72, 209, 204),
     'mediumvioletred': (199, 21, 133),
-    'midnightblue': ( 25, 25, 112),
+    'midnightblue': (25, 25, 112),
     'mintcream': (245, 255, 250),
     'mistyrose': (255, 228, 225),
     'moccasin': (255, 228, 181),
     'navajowhite': (255, 222, 173),
-    'navy': ( 0, 0, 128),
+    'navy': (0, 0, 128),
     'oldlace': (253, 245, 230),
     'olive': (128, 128, 0),
     'olivedrab': (107, 142, 35),
@@ -223,11 +227,11 @@ _x11_colors = {
     'purple': (128, 0, 128),
     'red': (255, 0, 0),
     'rosybrown': (188, 143, 143),
-    'royalblue': ( 65, 105, 225),
+    'royalblue': (65, 105, 225),
     'saddlebrown': (139, 69, 19),
     'salmon': (250, 128, 114),
     'sandybrown': (244, 164, 96),
-    'seagreen': ( 46, 139, 87),
+    'seagreen': (46, 139, 87),
     'seashell': (255, 245, 238),
     'sienna': (160, 82, 45),
     'silver': (192, 192, 192),
@@ -236,13 +240,13 @@ _x11_colors = {
     'slategray': (112, 128, 144),
     'slategrey': (112, 128, 144),
     'snow': (255, 250, 250),
-    'springgreen': ( 0, 255, 127),
-    'steelblue': ( 70, 130, 180),
+    'springgreen': (0, 255, 127),
+    'steelblue': (70, 130, 180),
     'tan': (210, 180, 140),
-    'teal': ( 0, 128, 128),
+    'teal': (0, 128, 128),
     'thistle': (216, 191, 216),
     'tomato': (255, 99, 71),
-    'turquoise': ( 64, 224, 208),
+    'turquoise': (64, 224, 208),
     'violet': (238, 130, 238),
     'wheat': (245, 222, 179),
     'white': (255, 255, 255),
@@ -250,7 +254,7 @@ _x11_colors = {
     'yellow': (255, 255, 0),
     'yellowgreen': (154, 205, 50)
     }
-    
+
 _ws_re = re.compile(r'\s+')
 _token_re = re.compile(r'[A-Za-z_][A-Za-z0-9_]*')
 _hex_re = re.compile(r'#([0-9a-f]{3}(?:[0-9a-f]{3})?)$')
@@ -266,12 +270,15 @@ class ColorParser (object):
         m = _ws_re.match(self._string, self._pos)
         if m:
             self._pos = m.end(0)
-        
+
     def expect(self, s, context=''):
         if len(self._string) - self._pos < len(s) \
           or self._string[self._pos:self._pos + len(s)] != s:
-            raise ValueError('bad color "%s" - expected "%s"%s'
-                            % (self._string, s, context))
+            raise ValueError(
+                'bad color "%s" - expected "%s"%s' % (
+                    self._string, s, context
+                )
+            )
         self._pos += len(s)
 
     def expectEnd(self):
@@ -286,7 +293,7 @@ class ColorParser (object):
             self._pos = m.end(0)
             return token
         return None
-        
+
     def parseNumber(self, context=''):
         m = _number_re.match(self._string, self._pos)
         if m:
@@ -294,7 +301,7 @@ class ColorParser (object):
             return float(m.group(0))
         raise ValueError('bad color "%s" - expected a number%s'
                          % (self._string, context))
-    
+
     def parseColor(self):
         self.skipws()
 
@@ -319,7 +326,7 @@ class ColorParser (object):
             self.expectEnd()
 
             return RGB(r / 255.0, g / 255.0, b / 255.0)
-        
+
         m = _hex_re.match(self._string, self._pos)
         if m:
             hrgb = m.group(1)
@@ -367,7 +374,7 @@ class ColorParser (object):
         self.expectEnd()
 
         return RGB(r, g, b)
-        
+
     def parseHSL(self):
         self.expect('(', 'after "hsl"')
         self.skipws()
@@ -384,7 +391,7 @@ class ColorParser (object):
         self.expect(',', 'in "hsl"')
         self.skipws()
 
-        l = self.parseValue()
+        l = self.parseValue()  # noqa; E741
 
         self.skipws()
         self.expect(')', 'at end of "hsl"')
@@ -473,7 +480,7 @@ class ColorParser (object):
             n = n / 100.0
             self.pos += 1
         return n
-    
+
     def parseAngle(self):
         n = self.parseNumber()
         self.skipws()
@@ -485,6 +492,7 @@ class ColorParser (object):
         elif tok != 'deg':
             raise ValueError('bad angle unit "%s"' % tok)
         return n
+
 
 _color_re = re.compile(r'\s*(#|rgb|hsl|hwb|cmyk|gray|grey|%s)'
                        % '|'.join(_x11_colors.keys()))

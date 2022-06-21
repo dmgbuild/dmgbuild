@@ -1,20 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import sys
-
-# Before Python 3.4, use biplist; afterwards, use plistlib
-if sys.version_info < (3, 4):
-    import biplist
-    def read_plist(path):
-        return biplist.readPlist(path)
-else:
-    import plistlib
-    def read_plist(path):
-        with open(path, 'rb') as f:
-            return plistlib.load(f)
-
 import os.path
+
+import plistlib
 
 #
 # Example settings file for dmgbuild
@@ -29,18 +15,21 @@ import os.path
 
 # .. Useful stuff ..............................................................
 
-application = defines.get('app', '/System/Applications/TextEdit.app')
+application = defines.get('app', '/System/Applications/TextEdit.app')  # noqa: F821
 appname = os.path.basename(application)
+
 
 def icon_from_app(app_path):
     plist_path = os.path.join(app_path, 'Contents', 'Info.plist')
-    plist = read_plist(plist_path)
+    with open(plist_path, 'rb') as f:
+        plist = plistlib.load(f)
     icon_name = plist['CFBundleIconFile']
-    icon_root,icon_ext = os.path.splitext(icon_name)
+    icon_root, icon_ext = os.path.splitext(icon_name)
     if not icon_ext:
         icon_ext = '.icns'
     icon_name = icon_root + icon_ext
     return os.path.join(app_path, 'Contents', 'Resources', icon_name)
+
 
 # .. Basics ....................................................................
 
@@ -51,19 +40,19 @@ def icon_from_app(app_path):
 # volume_name = 'Test'
 
 # Volume format (see hdiutil create -help)
-format = defines.get('format', 'UDBZ')
+format = defines.get('format', 'UDBZ')  # noqa: F821
 
 # Compression level (if relevant)
 # compression_level = 9
 
 # Volume size
-size = defines.get('size', None)
+size = defines.get('size', None)  # noqa: F821
 
 # Files to include
-files = [ application ]
+files = [application]
 
 # Symlinks to create
-symlinks = { 'Applications': '/Applications' }
+symlinks = {'Applications': '/Applications'}
 
 # Files to hide
 # hide = [ 'Secret.data' ]
@@ -78,14 +67,14 @@ symlinks = { 'Applications': '/Applications' }
 # will be used to badge the system's Removable Disk icon. Badge icons require
 # pyobjc-framework-Quartz.
 #
-#icon = '/path/to/icon.icns'
+# icon = '/path/to/icon.icns'
 badge_icon = icon_from_app(application)
 
 # Where to put the icons
 icon_locations = {
     appname:        (140, 120),
     'Applications': (500, 120)
-    }
+}
 
 # .. Window configuration ......................................................
 
@@ -144,7 +133,7 @@ arrange_by = None
 grid_offset = (0, 0)
 grid_spacing = 100
 scroll_position = (0, 0)
-label_pos = 'bottom' # or 'right'
+label_pos = 'bottom'  # or 'right'
 text_size = 16
 icon_size = 128
 
@@ -216,13 +205,13 @@ list_column_sort_directions = {
 #  uk_UA, ur_IN, ur_PK, uz_UZ, vi_VN, zh_CN, zh_TW
 
 license = {
-     'default-language': 'en_US',
-     'licenses': {
-         # For each language, the text of the license.  This can be plain text,
-         # RTF (in which case it must start "{\rtf1"), or a path to a file
-         # containing the license text.  If you're using RTF,
-         # watch out for Python escaping (or read it from a file).
-         'en_GB': b'''{\\rtf1\\ansi\\ansicpg1252\\cocoartf1504\\cocoasubrtf820
+    'default-language': 'en_US',
+    'licenses': {
+        # For each language, the text of the license.  This can be plain text,
+        # RTF (in which case it must start "{\rtf1"), or a path to a file
+        # containing the license text.  If you're using RTF,
+        # watch out for Python escaping (or read it from a file).
+        'en_GB': b'''{\\rtf1\\ansi\\ansicpg1252\\cocoartf1504\\cocoasubrtf820
  {\\fonttbl\\f0\\fnil\\fcharset0 Helvetica-Bold;\\f1\\fnil\\fcharset0 Helvetica;}
  {\\colortbl;\\red255\\green255\\blue255;\\red0\\green0\\blue0;}
  {\\*\\expandedcolortbl;;\\cssrgb\\c0\\c0\\c0;}
@@ -240,29 +229,29 @@ license = {
  \\f1\\b0\\fs22 \\cf2 \\strokec2 This is the English license. It says what you are allowed to do with this software.\\
  \\
  }''',
-     },
-     'buttons': {
-#         # For each language, text for the buttons on the licensing window.
-#         #
-#         # Default buttons and text are built-in for the following languages:
-#         #
-#         #   English (en_US), German (de_DE), Spanish (es_ES), French (fr_FR),
-#         #   Italian (it_IT), Japanese (ja_JP), Dutch (nl_NL), Swedish (sv_SE),
-#         #   Brazilian Portuguese (pt_BR), Simplified Chinese (zh_CN),
-#         #   Traditional Chinese (zh_TW), Danish (da_DK), Finnish (fi_FI),
-#         #   Korean (ko_KR), Norwegian (nb_NO)
-#         #
-#         # You don't need to specify them for those languages; if you fail to
-#         # specify them for some other language, English will be used instead.
+    },
+    'buttons': {
+        # For each language, text for the buttons on the licensing window.
+        #
+        # Default buttons and text are built-in for the following languages:
+        #
+        #   English (en_US), German (de_DE), Spanish (es_ES), French (fr_FR),
+        #   Italian (it_IT), Japanese (ja_JP), Dutch (nl_NL), Swedish (sv_SE),
+        #   Brazilian Portuguese (pt_BR), Simplified Chinese (zh_CN),
+        #   Traditional Chinese (zh_TW), Danish (da_DK), Finnish (fi_FI),
+        #   Korean (ko_KR), Norwegian (nb_NO)
+        #
+        # You don't need to specify them for those languages; if you fail to
+        # specify them for some other language, English will be used instead.
 
-         'en_US': (
-             b'English',
-             b'Agree',
-             b'Disagree',
-             b'Print',
-             b'Save',
-             b'If you agree with the terms of this license, press "Agree" to '
-             b'install the software.  If you do not agree, press "Disagree".'
-         ),
-     },
- }
+        'en_US': (
+            b'English',
+            b'Agree',
+            b'Disagree',
+            b'Print',
+            b'Save',
+            b'If you agree with the terms of this license, press "Agree" to '
+            b'install the software.  If you do not agree, press "Disagree".'
+        ),
+    },
+}
