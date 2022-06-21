@@ -2,7 +2,6 @@
 dmgbuild
 ========
 
-
 .. image:: https://img.shields.io/pypi/pyversions/dmgbuild.svg
    :target: https://pypi.python.org/pypi/dmgbuild
    :alt: Python Versions
