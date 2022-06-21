@@ -1,10 +1,33 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from Quartz import *
+from Quartz import (
+    CFURLCreateWithFileSystemPath,
+    CGBitmapContextCreate,
+    CGBitmapContextCreateImage,
+    CGColorSpaceCreateWithName,
+    CGImageDestinationAddImage,
+    CGImageDestinationCreateWithURL,
+    CGImageDestinationFinalize,
+    CGImageSourceCopyPropertiesAtIndex,
+    CGImageSourceCreateImageAtIndex,
+    CGImageSourceCreateWithURL,
+    CGImageSourceGetCount,
+    CIContext,
+    CIFilter,
+    CIImage,
+    CIVector,
+    kCFURLPOSIXPathStyle,
+    kCGColorSpaceGenericRGB,
+    kCGImageAlphaPremultipliedLast,
+    kCIInputAspectRatioKey,
+    kCIInputBackgroundImageKey,
+    kCIInputImageKey,
+    kCIInputScaleKey,
+    kCIOutputImageKey,
+    NSAffineTransform,
+)
 import math
 
 _REMOVABLE_DISK_PATH = '/System/Library/Extensions/IOStorageFamily.kext/Contents/Resources/Removable.icns'
+
 
 def badge_disk_icon(badge_file, output_file):
     # Load the Removable disk icon
@@ -12,14 +35,14 @@ def badge_disk_icon(badge_file, output_file):
                                         kCFURLPOSIXPathStyle, False)
     backdrop = CGImageSourceCreateWithURL(url, None)
     backdropCount = CGImageSourceGetCount(backdrop)
-    
+
     # Load the badge
     url = CFURLCreateWithFileSystemPath(None, badge_file,
                                         kCFURLPOSIXPathStyle, False)
     badge = CGImageSourceCreateWithURL(url, None)
     assert badge is not None, 'Unable to process image file: %s' % badge_file
     badgeCount = CGImageSourceGetCount(badge)
-    
+
     # Set up a destination for our target
     url = CFURLCreateWithFileSystemPath(None, output_file,
                                         kCFURLPOSIXPathStyle, False)
@@ -31,7 +54,7 @@ def badge_disk_icon(badge_file, output_file):
 
     # Scale
     scale = 1.0
-    
+
     # Perspective transform
     corners = ((0.2, 0.95), (0.8, 0.95), (0.85, 0.35), (0.15, 0.35))
 
@@ -44,45 +67,56 @@ def badge_disk_icon(badge_file, output_file):
         height = props['PixelHeight']
         dpi = props['DPIWidth']
         depth = props['Depth']
-        
+
         # Choose the best sized badge image
         bestWidth = None
-        bestHeight = None
+        # bestHeight = None
         bestBadge = None
         bestDepth = None
-        bestDPI = None
+        # bestDPI = None
         for m in range(badgeCount):
             badgeProps = CGImageSourceCopyPropertiesAtIndex(badge, m, None)
             badgeWidth = badgeProps['PixelWidth']
-            badgeHeight = badgeProps['PixelHeight']
+            # badgeHeight = badgeProps['PixelHeight']
             badgeDPI = badgeProps['DPIWidth']
             badgeDepth = badgeProps['Depth']
-            
-            if bestBadge is None or (badgeWidth <= width
-                                    and (bestWidth > width
-                                        or badgeWidth > bestWidth
-                                        or (badgeWidth == bestWidth
-                                            and badgeDPI == dpi
-                                            and badgeDepth <= depth
-                                            and (bestDepth is None
-                                                 or badgeDepth > bestDepth)))):
+
+            if (
+                bestBadge is None
+                or (
+                    badgeWidth <= width
+                    and (
+                        bestWidth > width
+                        or badgeWidth > bestWidth
+                        or (
+                            badgeWidth == bestWidth
+                            and badgeDPI == dpi
+                            and badgeDepth <= depth
+                            and (
+                                bestDepth is None
+                                or badgeDepth > bestDepth
+                            )
+                        )
+                    )
+                )
+            ):
                 bestBadge = m
                 bestWidth = badgeWidth
-                bestHeight = badgeHeight
-                bestDPI = badgeDPI
+                # bestHeight = badgeHeight
+                # bestDPI = badgeDPI
                 bestDepth = badgeDepth
 
         badgeImage = CGImageSourceCreateImageAtIndex(badge, bestBadge, None)
         badgeCI = CIImage.imageWithCGImage_(badgeImage)
-    
+
         backgroundImage = CGImageSourceCreateImageAtIndex(backdrop, n, None)
         backgroundCI = CIImage.imageWithCGImage_(backgroundImage)
-    
+
         compositor = CIFilter.filterWithName_('CISourceOverCompositing')
         lanczos = CIFilter.filterWithName_('CILanczosScaleTransform')
         perspective = CIFilter.filterWithName_('CIPerspectiveTransform')
         transform = CIFilter.filterWithName_('CIAffineTransform')
-    
+
         lanczos.setValue_forKey_(badgeCI, kCIInputImageKey)
         lanczos.setValue_forKey_(scale * float(width)/bestWidth, kCIInputScaleKey)
         lanczos.setValue_forKey_(1.0, kCIInputAspectRatioKey)
@@ -116,28 +150,31 @@ def badge_disk_icon(badge_file, output_file):
         transform.setValue_forKey_(out, kCIInputImageKey)
         transform.setValue_forKey_(tfm, 'inputTransform')
         out = transform.valueForKey_(kCIOutputImageKey)
-    
+
         compositor.setValue_forKey_(out, kCIInputImageKey)
         compositor.setValue_forKey_(backgroundCI, kCIInputBackgroundImageKey)
 
         result = compositor.valueForKey_(kCIOutputImageKey)
 
-        cgContext = CGBitmapContextCreate(None,
-                                        width,
-                                        height,
-                                        8,
-                                        0,
-                                        rgbColorSpace,
-                                        kCGImageAlphaPremultipliedLast)
+        cgContext = CGBitmapContextCreate(
+            None,
+            width,
+            height,
+            8,
+            0,
+            rgbColorSpace,
+            kCGImageAlphaPremultipliedLast
+        )
         context = CIContext.contextWithCGContext_options_(cgContext, None)
 
-        context.drawImage_inRect_fromRect_(result,
-                                           ((0, 0), (width, height)),
-                                           ((0, 0), (width, height)))
+        context.drawImage_inRect_fromRect_(
+            result,
+            ((0, 0), (width, height)),
+            ((0, 0), (width, height))
+        )
 
         image = CGBitmapContextCreateImage(cgContext)
 
         CGImageDestinationAddImage(target, image, props)
 
     CGImageDestinationFinalize(target)
-    
