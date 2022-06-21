@@ -16,11 +16,11 @@ dmgbuild
    :alt: Maturity
 
 .. image:: https://img.shields.io/pypi/l/dmgbuild.svg
-   :target: https://github.com/beeware/dmgbuild/blob/master/LICENSE
-   :alt: BSD License
+   :target: https://github.com/al45tair/dmgbuild/blob/master/LICENSE
+   :alt: MIT License
 
-.. image:: https://github.com/beeware/dmgbuild/workflows/CI/badge.svg?branch=master
-   :target: https://github.com/beeware/dmgbuild/actions
+.. image:: https://github.com/al45tair/dmgbuild/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/al45tair/dmgbuild/actions
    :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/dmgbuild/badge/?version=latest
