@@ -15,11 +15,11 @@ dmgbuild
    :alt: Maturity
 
 .. image:: https://img.shields.io/pypi/l/dmgbuild.svg
-   :target: https://github.com/al45tair/dmgbuild/blob/master/LICENSE
+   :target: https://github.com/dmgbuild/dmgbuild/blob/master/LICENSE
    :alt: MIT License
 
-.. image:: https://github.com/al45tair/dmgbuild/workflows/CI/badge.svg?branch=master
-   :target: https://github.com/al45tair/dmgbuild/actions
+.. image:: https://github.com/dmgbuild/dmgbuild/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/dmgbuild/dmgbuild/actions
    :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/dmgbuild/badge/?version=latest
