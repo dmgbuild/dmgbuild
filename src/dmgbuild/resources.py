@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import struct
 
-class Resource (object):
+
+class Resource:
     def __init__(self, res_type, res_id, res_name, data=None, res_attrs=0):
         self.res_type = res_type
         self.res_id = res_id
@@ -22,17 +21,18 @@ class Resource (object):
                                                                 self.data,
                                                                 self.res_attrs)
 
-class TMPLResource (Resource):
+
+class TMPLResource(Resource):
     def __init__(self, res_id, res_name, tmpl, res_attrs=0):
         data = []
-        for name,typecode in tmpl:
+        for name, typecode in tmpl:
             data.append(struct.pack(b'B', len(name)))
             data.append(name)
             data.append(typecode)
-        super(TMPLResource, self).__init__(b'TMPL', res_id, res_name,
-                                           b''.join(data), res_attrs)
+        super().__init__(b'TMPL', res_id, res_name, b''.join(data), res_attrs)
 
-class StringListResource (Resource):
+
+class StringListResource(Resource):
     def __init__(self, res_id, res_name, strings, res_attrs=0):
         data = []
         data.append(struct.pack(b'>H', len(strings)))
@@ -40,40 +40,40 @@ class StringListResource (Resource):
             data.append(struct.pack(b'B', len(s)))
             data.append(s)
 
-        super(StringListResource, self).__init__(b'STR#', res_id, res_name,
-                                                 b''.join(data), res_attrs)
+        super().__init__(b'STR#', res_id, res_name, b''.join(data), res_attrs)
 
-class TextResource (Resource):
+
+class TextResource(Resource):
     def __init__(self, res_id, res_name, string, res_attrs=0):
-        super(TextResource, self).__init__(b'TEXT', res_id, res_name,
-                                           string, res_attrs)
+        super().__init__(b'TEXT', res_id, res_name, string, res_attrs)
 
-class Style (object):
+
+class Style:
     # Fonts
-    NewYork      = 2
-    Geneva       = 3
-    Monaco       = 4
-    Venice       = 5
-    London       = 6
-    Athens       = 7
+    NewYork = 2
+    Geneva = 3
+    Monaco = 4
+    Venice = 5
+    London = 6
+    Athens = 7
     SanFrancisco = 8
-    Toronto      = 9
-    Cairo        = 11
-    LosAngeles   = 12
-    Times        = 20
-    Helvetica    = 21
-    Courier      = 22
-    Symbol       = 23
-    Mobile       = 24
+    Toronto = 9
+    Cairo = 11
+    LosAngeles = 12
+    Times = 20
+    Helvetica = 21
+    Courier = 22
+    Symbol = 23
+    Mobile = 24
 
     # Styles
-    Bold       = 0x0100
-    Italic     = 0x0200
-    Underline  = 0x0400
-    Outline    = 0x0800
-    Shadow     = 0x1000
-    Condense   = 0x2000
-    Expand     = 0x4000
+    Bold = 0x0100
+    Italic = 0x0200
+    Underline = 0x0400
+    Outline = 0x0800
+    Shadow = 0x1000
+    Condense = 0x2000
+    Expand = 0x4000
 
     def __init__(self, start_character, height, ascent, font_id, face,
                  size, color):
@@ -109,21 +109,21 @@ class Style (object):
             styles = '0'
 
         font_revmap = {
-             2: 'Style.NewYork',
-             3: 'Style.Geneva',
-             4: 'Style.Monaco',
-             5: 'Style.Venice',
-             6: 'Style.London',
-             7: 'Style.Athens',
-             8: 'Style.SanFrancisco',
-             9: 'Style.Toronto',
+            2: 'Style.NewYork',
+            3: 'Style.Geneva',
+            4: 'Style.Monaco',
+            5: 'Style.Venice',
+            6: 'Style.London',
+            7: 'Style.Athens',
+            8: 'Style.SanFrancisco',
+            9: 'Style.Toronto',
             11: 'Style.Cairo',
             12: 'Style.LosAngeles',
             20: 'Style.Times',
             21: 'Style.Helvetica',
             22: 'Style.Courier',
             23: 'Style.Symbol',
-            24: 'Style.Mobile'
+            24: 'Style.Mobile',
         }
 
         font = font_revmap.get(self.font_id, '%s' % self.font_id)
@@ -137,7 +137,8 @@ class Style (object):
             self.size,
             self.color)
 
-class StyleResource (Resource):
+
+class StyleResource(Resource):
     def __init__(self, res_id, res_name, styles, res_attrs=0):
         data = []
         data.append(struct.pack(b'>H', len(styles)))
@@ -152,10 +153,10 @@ class StyleResource (Resource):
                                     style.color[0],
                                     style.color[1],
                                     style.color[2]))
-        super(StyleResource, self).__init__(b'styl', res_id, res_name,
-                                            b''.join(data), res_attrs)
+        super().__init__(b'styl', res_id, res_name, b''.join(data), res_attrs)
 
-class ResourceFork (object):
+
+class ResourceFork:
     def __init__(self, resources=None):
         self.types = {}
         self.attrs = 0
@@ -232,13 +233,7 @@ class ResourceFork (object):
                     res_name_offset += name_offset
                     if res_name_offset >= map_start + map_len:
                         raise ValueError('Bad resource data - name out of range')
-                    try:
-                        # python2
-                        res_name_len = struct.unpack(b'B', data[res_name_offset])[0]
-                    except:
-                        # python3
-                        res_name_len = data[res_name_offset]
-
+                    res_name_len = data[res_name_offset]
                     res_name = data[res_name_offset + 1:res_name_offset + res_name_len + 1]
 
                 result.types[res_type].append(Resource(res_type, res_id,
@@ -285,12 +280,15 @@ class ResourceFork (object):
                     data_len += 4 + (len(item.data) + 3) & ~3
 
                 reflist_len += 12
-                reflist_data.append(struct.pack(b'>hHLL',
-                                                item.res_id,
-                                                name_offset,
-                                                (item.res_attrs << 24) \
-                                                | data_offset,
-                                                0))
+                reflist_data.append(
+                    struct.pack(
+                        b'>hHLL',
+                        item.res_id,
+                        name_offset,
+                        (item.res_attrs << 24) | data_offset,
+                        0
+                    )
+                )
 
         # Header
         data.append(struct.pack(b'>LLLL240s', 256, 256 + data_len, data_len,
