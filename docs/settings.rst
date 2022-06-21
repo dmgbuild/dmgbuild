@@ -284,6 +284,7 @@ Icon View Settings
    Specifies the size of icon to use.  Default is 128pt.
 
 .. py:data:: icon_locations
+   :noindex:
 
    If :data:`arrange_by` is not set, a dictionary mapping the names of
    items in the root of the volume to an (x, y) tuple specifying their
