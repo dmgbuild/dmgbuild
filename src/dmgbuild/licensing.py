@@ -170,7 +170,7 @@ udifrezXMLtemplate = {
     'STR#': [
         {
             'Attributes': '0x0000',
-            'Data': b'\x00\x06\x07English\x05Agree\x08Disagree\x05Print\x07Save...{IMPORTANT - Read this License Agreement carefully before clicking on the "Agree" button. By clicking on the "Agree" button, you agree to be bound by the terms of the License Agreement.',
+            'Data': b'\x00\x06\x07English\x05Agree\x08Disagree\x05Print\x07Save...{If you agree with the terms of this license, press "Agree" to install the software.  If you do not agree, press "Disagree".',
             'ID': '5000',
             'Name': 'English'
         },
