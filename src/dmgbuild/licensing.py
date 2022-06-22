@@ -158,7 +158,7 @@ default_buttons = {
     ),
 }
 
-ufifrezXMLtemplate = {
+udifrezXMLtemplate = {
     'LPic': [
         {
             'Attributes': '0x0000',
@@ -170,9 +170,9 @@ ufifrezXMLtemplate = {
     'STR#': [
         {
             'Attributes': '0x0000',
-            'Data': b'\x00\x06\rEnglish test1\x05Agree\x08Disagree\x05Print\x07Save...zIMPORTANT - Read this License Agreement carefully before clicking on the "Agree" button. By clicking on the "Agree" button, you agree to be bound by the terms of the License Agreement.',  # noqa: E501
+            'Data': b'\x00\x06\x07English\x05Agree\x08Disagree\x05Print\x07Save...{IMPORTANT - Read this License Agreement carefully before clicking on the "Agree" button. By clicking on the "Agree" button, you agree to be bound by the terms of the License Agreement.',
             'ID': '5000',
-            'Name': 'English buttons'
+            'Name': 'English'
         },
     ],
     # example
@@ -214,7 +214,7 @@ def build_license(license_info):
     see https://developer.apple.com/forums/thread/668084
     """
     # copy of the dict
-    xml = dict(ufifrezXMLtemplate)
+    xml = dict(udifrezXMLtemplate)
 
     for language, license_data in license_info['licenses'].items():
         if language not in language_names_map:
@@ -246,12 +246,9 @@ def build_license(license_info):
                 Name=language_name
             )
         )
-
         buttons = license_info.get('buttons', {}).get(language, None)
         if buttons is None:
-            buttons = default_buttons.get(language_name, None)
-            if buttons is None:
-                buttons = default_buttons[0]
+            buttons = default_buttons.get(language_name, default_buttons["English"])
 
         assert len(buttons) == 6, "License buttons must have 6 entries."
 
