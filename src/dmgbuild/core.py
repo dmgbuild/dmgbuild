@@ -1,3 +1,4 @@
+import math
 import os
 import pkg_resources
 import platform
@@ -24,6 +25,23 @@ except ImportError:
 
 
 _hexcolor_re = re.compile(r'#[0-9a-f]{3}(?:[0-9a-f]{3})?')
+
+MAX_RESIZING_RETRIES = 3
+
+# Maximum acceptable slack in DMG (in bytes)
+ACCEPTABLE_SLACK = 8 * 1024 * 1024
+
+# Slack added to DMG after compensating for difference between predicted and observed
+SAFETY_SLACK = 1 * 1024 * 1024
+
+assert ACCEPTABLE_SLACK >= 2*SAFETY_SLACK
+
+
+def get_directory_free_space(dirname):
+    """Return free space in directory/drive (in bytes)."""
+    st = os.statvfs(dirname)
+    return st.f_bavail * st.f_frsize
+
 
 # The first element in the platform.mac_ver() tuple is a string containing the
 # macOS version (e.g., '10.15.6'). Parse into an integer tuple.
@@ -413,12 +431,14 @@ def build_dmg(  # noqa; C901
     })
 
     total_size = options['size']
+    total_files = 0
+    directories = set()
     if total_size is None:
         # Start with a size of 128MB - this way we don't need to calculate the
         # size of the background image, volume icon, and .DS_Store file (and
         # 128 MB should be well sufficient for even the most outlandish image
         # sizes, like an uncompressed 5K multi-resolution TIFF)
-        total_size = 128 * 1024 * 1024
+        total_size = 0
 
         def roundup(x, n):
             return x if x % n == 0 else x + n - x % n
@@ -429,188 +449,217 @@ def build_dmg(  # noqa; C901
 
             if not os.path.islink(path) and os.path.isdir(path):
                 for dirpath, dirnames, filenames in os.walk(path):
+                    directories.add(dirpath)
                     for f in filenames:
                         fp = os.path.join(dirpath, f)
                         total_size += roundup(os.lstat(fp).st_size, 4096)
+                        total_files += 1
             else:
                 total_size += roundup(os.lstat(path).st_size, 4096)
+                total_files += 1
 
         for name, target in options['symlinks'].items():
             total_size += 4096
+            total_files += 1
 
-        total_size = str(max(total_size / 1000, 1024)) + 'K'
+    total_size += 256 * total_files  # File name overhead
+    total_size += 4096 * len(directories)  # Directory overhead
+    overhead = 128 * 1024 * 1024  # Initial space allocated for icon, background, and file system overhead
 
-    callback({
-        'type': 'operation::finished',
-        'operation': 'size::calculate',
-        'size': total_size,
-    })
-
-    callback({
-        'type': 'command::start',
-        'command': 'hdiutil::create',
-    })
-
-    ret, output = hdiutil(
-        'create',
-        '-ov',
-        '-volname', volume_name,
-        '-fs', 'HFS+',
-        '-fsargs', '-c c=64,a=16,e=16',
-        '-size', total_size,
-        writableFile.name
-    )
-
-    callback({
-        'type': 'command::finished',
-        'command': 'hdiutil::create',
-        'ret': ret,
-        'output': output
-    })
-
-    if ret:
-        raise DMGError(callback, 'Unable to create disk image')
-
-    callback({
-        'type': 'command::start',
-        'command': 'hdiutil::attach',
-    })
-
-    # IDME was deprecated in macOS 10.15/Catalina; as a result, use of -noidme
-    # started raising a warning.
-    if MACOS_VERSION >= (10, 15):
-        ret, output = hdiutil('attach',
-                              '-nobrowse',
-                              '-owners', 'off',
-                              writableFile.name)
-    else:
-        ret, output = hdiutil('attach',
-                              '-nobrowse',
-                              '-owners', 'off',
-                              '-noidme',
-                              writableFile.name)
-
-    callback({
-        'type': 'command::finished',
-        'command': 'hdiutil::attach',
-        'ret': ret,
-        'output': output,
-    })
-
-    if ret:
-        raise DMGError(callback, 'Unable to attach disk image')
-
-    callback({
-        'type': 'operation::start',
-        'operation': 'dmg::create',
-    })
-
-    try:
-        for info in output['system-entities']:
-            if info.get('mount-point', None):
-                device = info['dev-entry']
-                mount_point = info['mount-point']
-
-        icon = options['icon']
-        if badge:
-            badge_icon = options['badge_icon']
-        else:
-            badge_icon = None
-        icon_target_path = os.path.join(mount_point, '.VolumeIcon.icns')
-        if icon:
-            shutil.copyfile(icon, icon_target_path)
-        elif badge_icon:
-            badge.badge_disk_icon(badge_icon, icon_target_path)
-
-        if icon or badge_icon:
-            subprocess.call(['/usr/bin/SetFile', '-a', 'C', mount_point])
-
-        background_bmk = None
-
-        callback({
-            'type': 'operation::start',
-            'operation': 'background::create',
-        })
-
-        if not isinstance(background, str):
-            pass
-        elif colors.isAColor(background):
-            c = colors.parseColor(background).to_rgb()
-
-            icvp['backgroundType'] = 1
-            icvp['backgroundColorRed'] = float(c.r)
-            icvp['backgroundColorGreen'] = float(c.g)
-            icvp['backgroundColorBlue'] = float(c.b)
-        else:
-            if os.path.isfile(background):
-                # look to see if there are HiDPI resources available
-
-                if lookForHiDPI is True:
-                    name, extension = os.path.splitext(os.path.basename(background))
-                    orderedImages = [background]
-                    imageDirectory = os.path.dirname(background)
-                    if imageDirectory == '':
-                        imageDirectory = '.'
-                    for candidateName in os.listdir(imageDirectory):
-                        hasScale = re.match(
-                            r'^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
-                            candidateName)
-                        if (
-                            hasScale
-                            and name == hasScale.group('name')
-                            and extension == hasScale.group('extension')
-                        ):
-                            scale = int(hasScale.group('scale'))
-                            if len(orderedImages) < scale:
-                                orderedImages += [None] * (scale - len(orderedImages))
-                            orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
-
-                    if len(orderedImages) > 1:
-                        # compile the grouped tiff
-                        backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
-                        background = backgroundFile.name
-                        output = tempfile.TemporaryFile(mode='w+')
-                        try:
-                            subprocess.check_call(
-                                ['/usr/bin/tiffutil', '-cathidpicheck'] +
-                                list(filter(None, orderedImages)) +
-                                ['-out', background], stdout=output, stderr=output)
-                        except Exception as e:
-                            output.seek(0)
-                            raise ValueError(
-                                'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
-                                % (background, str(e), output.read()))
-
-                _, kind = os.path.splitext(background)
-                path_in_image = os.path.join(mount_point, '.background' + kind)
-                shutil.copyfile(background, path_in_image)
-            elif pkg_resources.resource_exists('dmgbuild', 'resources/' + background + '.tiff'):
-                tiffdata = pkg_resources.resource_string(
-                    'dmgbuild',
-                    'resources/' + background + '.tiff')
-                path_in_image = os.path.join(mount_point, '.background.tiff')
-
-                with open(path_in_image, 'wb') as f:
-                    f.write(tiffdata)
-            else:
-                raise ValueError('background file "%s" not found' % background)
-
-            alias = Alias.for_file(path_in_image)
-            background_bmk = Bookmark.for_file(path_in_image)
-
-            icvp['backgroundType'] = 2
-            icvp['backgroundImageAlias'] = alias.to_bytes()
+    found_size = False
+    for retry in range(MAX_RESIZING_RETRIES):
+        formatted_size = str(int(math.ceil(max((total_size + overhead) / 1024, 1024)))) + 'K'
 
         callback({
             'type': 'operation::finished',
-            'operation': 'background::create',
+            'operation': 'size::calculate',
+            'size': formatted_size
         })
 
         callback({
-            'type': 'operation::start',
-            'operation': 'files::add',
-            'total': len(options['files']),
+            'type': 'command::start',
+            'command': 'hdiutil::create'
         })
+        ret, output = hdiutil(
+            'create',
+            '-ov',
+            '-volname', volume_name,
+            '-fs', 'HFS+',
+            '-fsargs',
+            '-c c=64,a=16,e=16',  # clump sizes for c=catalog file, a=attribute file, e=extent file
+            '-size', formatted_size,
+            writableFile.name
+        )
+
+        callback({
+            'type': 'command::finished',
+            'command': 'hdiutil::create',
+            'ret': ret, 'output': output
+        })
+
+        if ret:
+            raise DMGError(callback, 'Unable to create disk image')
+
+        callback({
+            'type': 'command::start',
+            'command': 'hdiutil::attach'
+        })
+
+        # IDME was deprecated in macOS 10.15/Catalina; as a result, use of -noidme
+        # started raising a warning.
+        if MACOS_VERSION >= (10, 15):
+            ret, output = hdiutil(
+                'attach',
+                '-nobrowse',
+                '-owners', 'off',
+                writableFile.name
+            )
+        else:
+            ret, output = hdiutil(
+                'attach',
+                '-nobrowse',
+                '-owners', 'off',
+                '-noidme',
+                writableFile.name,
+            )
+
+        callback({
+            'type': 'command::finished',
+            'command': 'hdiutil::attach',
+            'ret': ret,
+            'output': output
+        })
+
+        if ret:
+            raise DMGError(callback, 'Unable to attach disk image')
+
+        callback({
+            'type': 'operation::start',
+            'operation': 'dmg::create'
+        })
+
+        try:
+            for info in output['system-entities']:
+                if info.get('mount-point', None):
+                    device = info['dev-entry']
+                    mount_point = info['mount-point']
+
+            icon = options['icon']
+            if badge:
+                badge_icon = options['badge_icon']
+            else:
+                badge_icon = None
+            icon_target_path = os.path.join(mount_point, '.VolumeIcon.icns')
+            if icon:
+                shutil.copyfile(icon, icon_target_path)
+            elif badge_icon:
+                badge.badge_disk_icon(badge_icon, icon_target_path)
+
+            if icon or badge_icon:
+                subprocess.call(['/usr/bin/SetFile', '-a', 'C', mount_point])
+
+            background_bmk = None
+
+            callback({
+                'type': 'operation::start',
+                'operation': 'background::create'
+            })
+
+            if not isinstance(background, str):
+                pass
+            elif colors.isAColor(background):
+                c = colors.parseColor(background).to_rgb()
+
+                icvp['backgroundType'] = 1
+                icvp['backgroundColorRed'] = float(c.r)
+                icvp['backgroundColorGreen'] = float(c.g)
+                icvp['backgroundColorBlue'] = float(c.b)
+            else:
+                if os.path.isfile(background):
+                    # look to see if there are HiDPI resources available
+
+                    if lookForHiDPI is True:
+                        name, extension = os.path.splitext(os.path.basename(background))
+                        orderedImages = [background]
+                        imageDirectory = os.path.dirname(background)
+                        if imageDirectory == '':
+                            imageDirectory = '.'
+                        for candidateName in os.listdir(imageDirectory):
+                            hasScale = re.match(
+                                r'^(?P<name>.+)@(?P<scale>\d+)x(?P<extension>\.\w+)$',
+                                candidateName)
+                            if (
+                                hasScale
+                                and name == hasScale.group('name')
+                                and extension == hasScale.group('extension')
+                            ):
+                                scale = int(hasScale.group('scale'))
+                                if len(orderedImages) < scale:
+                                    orderedImages += [None] * (scale - len(orderedImages))
+                                orderedImages[scale - 1] = os.path.join(imageDirectory, candidateName)
+
+                        if len(orderedImages) > 1:
+                            # compile the grouped tiff
+                            backgroundFile = tempfile.NamedTemporaryFile(suffix='.tiff')
+                            background = backgroundFile.name
+                            output = tempfile.TemporaryFile(mode='w+')
+                            try:
+                                subprocess.check_call(
+                                    ['/usr/bin/tiffutil', '-cathidpicheck'] +
+                                    list(filter(None, orderedImages)) +
+                                    ['-out', background], stdout=output, stderr=output)
+                            except Exception as e:
+                                output.seek(0)
+                                raise ValueError(
+                                    'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
+                                    % (background, str(e), output.read()))
+
+                    _, kind = os.path.splitext(background)
+                    path_in_image = os.path.join(mount_point, '.background' + kind)
+                    shutil.copyfile(background, path_in_image)
+                elif pkg_resources.resource_exists('dmgbuild', 'resources/' + background + '.tiff'):
+                    tiffdata = pkg_resources.resource_string(
+                        'dmgbuild',
+                        'resources/' + background + '.tiff')
+                    path_in_image = os.path.join(mount_point, '.background.tiff')
+
+                    with open(path_in_image, 'wb') as f:
+                        f.write(tiffdata)
+                else:
+                    raise ValueError('background file "%s" not found' % background)
+
+                alias = Alias.for_file(path_in_image)
+                background_bmk = Bookmark.for_file(path_in_image)
+
+                icvp['backgroundType'] = 2
+                icvp['backgroundImageAlias'] = alias.to_bytes()
+
+            callback({'type': 'operation::finished', 'operation': 'background::create'})
+
+            callback({'type': 'operation::start', 'operation': 'files::add', 'total': len(options['files'])})
+
+            remaining_space = get_directory_free_space(mount_point)
+
+            # old_overhead = overhead
+            if remaining_space < (total_size + SAFETY_SLACK):
+                overhead += (total_size + 2*SAFETY_SLACK) - remaining_space
+            elif remaining_space > (total_size + ACCEPTABLE_SLACK):
+                overhead -= remaining_space - (total_size + 2*SAFETY_SLACK)
+            else:
+                # We've got a good size
+                found_size = True
+                break
+            hdiutil('detach', '-force', device, plist=False)
+
+        except Exception:
+            # Always try to detach
+            hdiutil('detach', '-force', device, plist=False)
+            raise
+
+    if not found_size:
+        raise RuntimeError('unable to find adequate size for DMG volume')
+
+    try:
 
         for f in options['files']:
             if isinstance(f, tuple):
