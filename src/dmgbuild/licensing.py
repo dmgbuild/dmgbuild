@@ -2,21 +2,25 @@ import os
 
 
 language_names_map = {
-    "en_US": "English",
-    "fr_FR": "Français",
-    "en_GB": "English",
-    "de_DE": "Deutsch",
-    "it_IT": "Italiano",
-    "nl_NL": "Nederlands",
-    "nl_BE": "Nederlands",
-    "sv_SE": "Svensk",
-    "es_ES": "Español",
     "da_DK": "Dansk",
-    "pt_PT": "Português",
-    "fr_CA": "Français",
-    "nb_NO": "Norsk",
-    "ja_JP": "Japanese",
+    "de_DE": "Deutsch",
     "en_AU": "English",
+    "en_GB": "English",
+    "en_NZ": "English",
+    "en_US": "English",
+    "es_ES": "Español",
+    "fr_CA": "Français",
+    "fr_FR": "Français",
+    "it_IT": "Italiano",
+    "ja_JP": "Japanese",
+    "nb_NO": "Norsk",
+    "nl_BE": "Nederlands",
+    "nl_NL": "Nederlands",
+    "pt_BR": "Português",
+    "pt_PT": "Português",
+    "sv_SE": "Svensk",
+    "zh_CN": "Simplified Chinese",
+    "zh_TW": "Traditional Chinese",
 }
 
 # Buttons (these come from the SLAResources file which you can find in the SLA
@@ -164,18 +168,18 @@ udifrezXMLtemplate = {
             'Attributes': '0x0000',
             'Data': b'\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00',
             'ID': '5000',
-            'Name': ''
+            'Name': '',
         }
     ],
     'STR#': [
         {
             'Attributes': '0x0000',
-            'Data': b'\x00\x06\x07English\x05Agree\x08Disagree\x05Print\x07Save...{If you agree with the terms of this license, press "Agree" to install the software.  If you do not agree, press "Disagree".',
+            'Data': b'\x00\x06\x07English\x05Agree\x08Disagree\x05Print\x07Save...{If you agree with the terms of this license, press "Agree" to install the software.  If you do not agree, press "Disagree".',  # noqa; E501
             'ID': '5000',
-            'Name': 'English'
+            'Name': 'English',
         },
     ],
-    # example
+    # License text would be included in a block like this:
     # 'TEXT': [
     #     {
     #         'Attributes': '0x0000',
@@ -189,7 +193,7 @@ udifrezXMLtemplate = {
             'Attributes': '0x0000',
             'Data': b'\x13Default Language IDDWRD\x05CountOCNT\x04****LSTC\x0bsys lang IDDWRD\x1elocal res ID (offset from 5000DWRD\x102-byte language?DWRD\x04****LSTE',  # noqa: E501
             'ID': '128',
-            'Name': 'LPic'
+            'Name': 'LPic',
         }
     ],
     'styl': [
@@ -197,7 +201,7 @@ udifrezXMLtemplate = {
             'Attributes': '0x0000',
             'Data': b"\x00\x03\x00\x00\x00\x00\x00\x0c\x00\t\x00\x14\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'\x00\x0c\x00\t\x00\x14\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00*\x00\x0c\x00\t\x00\x14\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",  # noqa: E501
             'ID': '5000',
-            'Name': 'English'
+            'Name': 'English',
         }
     ]
 }
@@ -213,7 +217,7 @@ def build_license(license_info):
     """Add a license agreement to the specified disk image file,
     see https://developer.apple.com/forums/thread/668084
     """
-    # copy of the dict
+    # Copy the original template
     xml = dict(udifrezXMLtemplate)
 
     for language, license_data in license_info['licenses'].items():
@@ -239,24 +243,24 @@ def build_license(license_info):
             xml[licenseDataFormat] = []
 
         xml[licenseDataFormat].append(
-            dict(
-                Attributes='0x0000',
-                Data=license_data,
-                ID='5000',
-                Name=language_name
-            )
+            {
+                "Attributes": '0x0000',
+                "Data": license_data,
+                "ID": '5000',
+                "Name": language_name
+            }
         )
-        buttons = license_info.get('buttons', {}).get(language, None)
-        if buttons is None:
-            buttons = default_buttons.get(language_name, default_buttons["English"])
+
+        language_default_buttons = default_buttons.get(language_name, default_buttons["English"])
+        buttons = license_info.get('buttons', {}).get(language, language_default_buttons)
 
         assert len(buttons) == 6, "License buttons must have 6 entries."
 
         buttons = [maybe_encode(b) for b in buttons]
         xml["STR#"].append(
-            dict(
-                Attributes='0x0000',
-                Data=(
+            {
+                "Attributes": '0x0000',
+                "Data": (
                     b'\x00\x06\x07'
                     + buttons[0] + b'\x05'
                     + buttons[1] + b'\x08'
@@ -265,9 +269,9 @@ def build_license(license_info):
                     + buttons[4] + b'{'
                     + buttons[5]
                 ),
-                ID="5002",
-                Name=language_name
-            )
+                "ID": "5002",
+                "Name": language_name,
+            }
         )
 
     return xml
