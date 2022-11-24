@@ -830,41 +830,19 @@ def build_dmg(  # noqa; C901
             'command': 'dmg::addlicense',
         })
 
-        callback({
-            'type': 'command::start',
-            'command': 'hdiutil::unflatten',
-        })
+        licenseDict = licensing.build_license(options['license'])
 
-        ret, output = hdiutil('unflatten', '-quiet', filename, plist=False)
+        tempLicenseFile = open(os.path.join(dirname, "license.plist"), "wb")
+        plistlib.dump(licenseDict, tempLicenseFile)
+        tempLicenseFile.close()
 
-        callback({
-            'type': 'command::finished',
-            'command': 'hdiutil::unflatten',
-            'ret': ret,
-            'output': output,
-        })
+        # see https://developer.apple.com/forums/thread/668084
+        ret, output = hdiutil("udifrez", "-xml", tempLicenseFile.name, "", "-quiet", filename, plist=False)
+
+        os.remove(tempLicenseFile.name)
 
         if ret:
-            raise DMGError(callback, 'Unable to unflatten to add license')
-
-        callback({
-            'type': 'command::start',
-            'command': 'hdiutil::flatten',
-        })
-
-        licensing.add_license(filename, options['license'])
-
-        ret, output = hdiutil('flatten', '-quiet', filename, plist=False)
-
-        callback({
-            'type': 'command::finished',
-            'command': 'hdiutil::flatten',
-            'ret': ret,
-            'output': output,
-        })
-
-        if ret:
-            raise DMGError(callback, 'Unable to flatten after adding license')
+            raise DMGError(callback, 'Unable to add license')
 
         callback({
             'type': 'operation::finished',

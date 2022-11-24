@@ -7,7 +7,6 @@ recursive-include docs *.rst
 recursive-include docs *.txt
 recursive-include docs Makefile
 recursive-exclude docs/_build *
-recursive-include examples *.json
-recursive-include examples *.py
 recursive-include src *.tiff
 recursive-include tests *.py
+recursive-include tests *.json
