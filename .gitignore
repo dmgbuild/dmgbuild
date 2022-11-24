@@ -14,3 +14,4 @@ build
 coverage.xml
 dist
 venv*
+docs/_build

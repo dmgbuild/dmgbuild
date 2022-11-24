@@ -229,29 +229,43 @@ license = {
  \\f1\\b0\\fs22 \\cf2 \\strokec2 This is the English license. It says what you are allowed to do with this software.\\
  \\
  }''',
+        "de_DE": "Ich bin ein Berliner. Bielefeld gibt's doch gar nicht.",
     },
     'buttons': {
         # For each language, text for the buttons on the licensing window.
         #
         # Default buttons and text are built-in for the following languages:
         #
-        #   English (en_US), German (de_DE), Spanish (es_ES), French (fr_FR),
-        #   Italian (it_IT), Japanese (ja_JP), Dutch (nl_NL), Swedish (sv_SE),
-        #   Brazilian Portuguese (pt_BR), Simplified Chinese (zh_CN),
-        #   Traditional Chinese (zh_TW), Danish (da_DK), Finnish (fi_FI),
-        #   Korean (ko_KR), Norwegian (nb_NO)
+        #   da_DK: Danish
+        #   de_DE: German
+        #   en_AU: English (Australian)
+        #   en_GB: English (UK)
+        #   en_NZ: English (New Zealand)
+        #   en_US: English (US)
+        #   es_ES: Spanish
+        #   fr_CA: French (Canadian)
+        #   fr_FR: French
+        #   it_IT: Italian
+        #   ja_JP: Japanese
+        #   nb_NO: Norsk
+        #   nl_BE: Flemish
+        #   nl_NL: Dutch
+        #   pt_BR: Brazilian Portuguese
+        #   pt_PT: Portugese
+        #   sv_SE: Swedish
+        #   zh_CN: Simplified Chinese
+        #   zh_TW: Traditional Chinese
         #
         # You don't need to specify them for those languages; if you fail to
         # specify them for some other language, English will be used instead.
 
         'en_US': (
             b'English',
-            b'Agree',
-            b'Disagree',
-            b'Print',
-            b'Save',
-            b'If you agree with the terms of this license, press "Agree" to '
-            b'install the software.  If you do not agree, press "Disagree".'
+            b'Agree!',
+            b'Disagree!',
+            b'Print!',
+            b'Save!',
+            b'Do you agree or not? Press "Agree" or "Disagree".'
         ),
     },
 }
