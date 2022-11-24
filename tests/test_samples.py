@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 import dmgbuild
-import os
+from pathlib import Path
 
 
-def test_sample_settings():
+def test_sample_settings(tmp_path):
     """Test with the sample settings.py file."""
-    dmgbuild.build_dmg('/tmp/out.dmg', 'Test', 'examples/settings.py')
+    target = tmp_path / 'out.dmg'
+    dmgbuild.build_dmg(str(target), 'Test', str(Path(__file__).parent / 'examples' / 'settings.py'))
 
-    assert os.path.exists('/tmp/out.dmg')
+    assert target.exists()
 
 
-def test_sample_json():
+def test_sample_json(tmp_path):
     """Test with the sample settings.json file."""
-    dmgbuild.build_dmg('/tmp/out2.dmg', 'Test', 'examples/settings.json')
+    target = tmp_path / 'out.dmg'
+    dmgbuild.build_dmg(str(target), 'Test', str(Path(__file__).parent / 'examples' / 'settings.py'))
 
-    assert os.path.exists('/tmp/out2.dmg')
+    assert target.exists()
