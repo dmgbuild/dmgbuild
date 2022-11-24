@@ -125,7 +125,10 @@ Content Settings
 
      badge_icon = '/Applications/TextEdit.app/Contents/Resources/Edit.icns'
 
-   Badge icons require pyobjc-framework-Quartz.
+   The use of badge icons requires that ``dmg_build`` be installed with the
+   ``badge_icons`` extra; i.e., you need to install dmg_build using::
+
+      pip install "dmg_build[badge_icons]"
 
 .. py:data:: icon_locations
 
