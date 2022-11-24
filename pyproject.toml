@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=60"]
+build-backend = "setuptools.build_meta"
+
+[tool.isort]
+profile = "black"
+skip_glob = [
+    "docs/conf.py",
+    "venv*",
+    "local",
+]
+multi_line_output = 3

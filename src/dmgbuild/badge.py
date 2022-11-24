@@ -1,3 +1,5 @@
+import math
+
 from Quartz import (
     CFURLCreateWithFileSystemPath,
     CGBitmapContextCreate,
@@ -14,6 +16,7 @@ from Quartz import (
     CIFilter,
     CIImage,
     CIVector,
+    NSAffineTransform,
     kCFURLPOSIXPathStyle,
     kCGColorSpaceGenericRGB,
     kCGImageAlphaPremultipliedLast,
@@ -22,32 +25,30 @@ from Quartz import (
     kCIInputImageKey,
     kCIInputScaleKey,
     kCIOutputImageKey,
-    NSAffineTransform,
 )
-import math
 
-_REMOVABLE_DISK_PATH = '/System/Library/Extensions/IOStorageFamily.kext/Contents/Resources/Removable.icns'
+_REMOVABLE_DISK_PATH = (
+    "/System/Library/Extensions/IOStorageFamily.kext/Contents/Resources/Removable.icns"
+)
 
 
 def badge_disk_icon(badge_file, output_file):
     # Load the Removable disk icon
-    url = CFURLCreateWithFileSystemPath(None, _REMOVABLE_DISK_PATH,
-                                        kCFURLPOSIXPathStyle, False)
+    url = CFURLCreateWithFileSystemPath(
+        None, _REMOVABLE_DISK_PATH, kCFURLPOSIXPathStyle, False
+    )
     backdrop = CGImageSourceCreateWithURL(url, None)
     backdropCount = CGImageSourceGetCount(backdrop)
 
     # Load the badge
-    url = CFURLCreateWithFileSystemPath(None, badge_file,
-                                        kCFURLPOSIXPathStyle, False)
+    url = CFURLCreateWithFileSystemPath(None, badge_file, kCFURLPOSIXPathStyle, False)
     badge = CGImageSourceCreateWithURL(url, None)
-    assert badge is not None, 'Unable to process image file: %s' % badge_file
+    assert badge is not None, "Unable to process image file: %s" % badge_file
     badgeCount = CGImageSourceGetCount(badge)
 
     # Set up a destination for our target
-    url = CFURLCreateWithFileSystemPath(None, output_file,
-                                        kCFURLPOSIXPathStyle, False)
-    target = CGImageDestinationCreateWithURL(url, 'com.apple.icns',
-                                             backdropCount, None)
+    url = CFURLCreateWithFileSystemPath(None, output_file, kCFURLPOSIXPathStyle, False)
+    target = CGImageDestinationCreateWithURL(url, "com.apple.icns", backdropCount, None)
 
     # Get the RGB colorspace
     rgbColorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB)
@@ -63,47 +64,41 @@ def badge_disk_icon(badge_file, output_file):
 
     for n in range(backdropCount):
         props = CGImageSourceCopyPropertiesAtIndex(backdrop, n, None)
-        width = props['PixelWidth']
-        height = props['PixelHeight']
-        dpi = props['DPIWidth']
-        depth = props['Depth']
+        width = props["PixelWidth"]
+        height = props["PixelHeight"]
+        dpi = props["DPIWidth"]
+        depth = props["Depth"]
 
         # Choose the best sized badge image
         bestWidth = None
-        # bestHeight = None
+        # ?? bestHeight = None
         bestBadge = None
         bestDepth = None
-        # bestDPI = None
+        # ?? bestDPI = None
         for m in range(badgeCount):
             badgeProps = CGImageSourceCopyPropertiesAtIndex(badge, m, None)
-            badgeWidth = badgeProps['PixelWidth']
-            # badgeHeight = badgeProps['PixelHeight']
-            badgeDPI = badgeProps['DPIWidth']
-            badgeDepth = badgeProps['Depth']
+            badgeWidth = badgeProps["PixelWidth"]
+            # ?? badgeHeight = badgeProps['PixelHeight']
+            badgeDPI = badgeProps["DPIWidth"]
+            badgeDepth = badgeProps["Depth"]
 
-            if (
-                bestBadge is None
-                or (
-                    badgeWidth <= width
-                    and (
-                        bestWidth > width
-                        or badgeWidth > bestWidth
-                        or (
-                            badgeWidth == bestWidth
-                            and badgeDPI == dpi
-                            and badgeDepth <= depth
-                            and (
-                                bestDepth is None
-                                or badgeDepth > bestDepth
-                            )
-                        )
+            if bestBadge is None or (
+                badgeWidth <= width
+                and (
+                    bestWidth > width
+                    or badgeWidth > bestWidth
+                    or (
+                        badgeWidth == bestWidth
+                        and badgeDPI == dpi
+                        and badgeDepth <= depth
+                        and (bestDepth is None or badgeDepth > bestDepth)
                     )
                 )
             ):
                 bestBadge = m
                 bestWidth = badgeWidth
-                # bestHeight = badgeHeight
-                # bestDPI = badgeDPI
+                # ?? bestHeight = badgeHeight
+                # ?? bestDPI = badgeDPI
                 bestDepth = badgeDepth
 
         badgeImage = CGImageSourceCreateImageAtIndex(badge, bestBadge, None)
@@ -112,43 +107,45 @@ def badge_disk_icon(badge_file, output_file):
         backgroundImage = CGImageSourceCreateImageAtIndex(backdrop, n, None)
         backgroundCI = CIImage.imageWithCGImage_(backgroundImage)
 
-        compositor = CIFilter.filterWithName_('CISourceOverCompositing')
-        lanczos = CIFilter.filterWithName_('CILanczosScaleTransform')
-        perspective = CIFilter.filterWithName_('CIPerspectiveTransform')
-        transform = CIFilter.filterWithName_('CIAffineTransform')
+        compositor = CIFilter.filterWithName_("CISourceOverCompositing")
+        lanczos = CIFilter.filterWithName_("CILanczosScaleTransform")
+        perspective = CIFilter.filterWithName_("CIPerspectiveTransform")
+        transform = CIFilter.filterWithName_("CIAffineTransform")
 
         lanczos.setValue_forKey_(badgeCI, kCIInputImageKey)
-        lanczos.setValue_forKey_(scale * float(width)/bestWidth, kCIInputScaleKey)
+        lanczos.setValue_forKey_(scale * float(width) / bestWidth, kCIInputScaleKey)
         lanczos.setValue_forKey_(1.0, kCIInputAspectRatioKey)
 
-        topLeft = (width * scale * corners[0][0],
-                   width * scale * corners[0][1])
-        topRight = (width * scale * corners[1][0],
-                    width * scale * corners[1][1])
-        bottomRight = (width * scale * corners[2][0],
-                       width * scale * corners[2][1])
-        bottomLeft = (width * scale * corners[3][0],
-                      width * scale * corners[3][1])
+        topLeft = (width * scale * corners[0][0], width * scale * corners[0][1])
+        topRight = (width * scale * corners[1][0], width * scale * corners[1][1])
+        bottomRight = (width * scale * corners[2][0], width * scale * corners[2][1])
+        bottomLeft = (width * scale * corners[3][0], width * scale * corners[3][1])
 
         out = lanczos.valueForKey_(kCIOutputImageKey)
         if width >= 16:
             perspective.setValue_forKey_(out, kCIInputImageKey)
-            perspective.setValue_forKey_(CIVector.vectorWithX_Y_(*topLeft),
-                                         'inputTopLeft')
-            perspective.setValue_forKey_(CIVector.vectorWithX_Y_(*topRight),
-                                         'inputTopRight')
-            perspective.setValue_forKey_(CIVector.vectorWithX_Y_(*bottomRight),
-                                         'inputBottomRight')
-            perspective.setValue_forKey_(CIVector.vectorWithX_Y_(*bottomLeft),
-                                         'inputBottomLeft')
+            perspective.setValue_forKey_(
+                CIVector.vectorWithX_Y_(*topLeft), "inputTopLeft"
+            )
+            perspective.setValue_forKey_(
+                CIVector.vectorWithX_Y_(*topRight), "inputTopRight"
+            )
+            perspective.setValue_forKey_(
+                CIVector.vectorWithX_Y_(*bottomRight), "inputBottomRight"
+            )
+            perspective.setValue_forKey_(
+                CIVector.vectorWithX_Y_(*bottomLeft), "inputBottomLeft"
+            )
             out = perspective.valueForKey_(kCIOutputImageKey)
 
         tfm = NSAffineTransform.transform()
-        tfm.translateXBy_yBy_(math.floor((position[0] - 0.5 * scale) * width),
-                              math.floor((position[1] - 0.5 * scale) * height))
+        tfm.translateXBy_yBy_(
+            math.floor((position[0] - 0.5 * scale) * width),
+            math.floor((position[1] - 0.5 * scale) * height),
+        )
 
         transform.setValue_forKey_(out, kCIInputImageKey)
-        transform.setValue_forKey_(tfm, 'inputTransform')
+        transform.setValue_forKey_(tfm, "inputTransform")
         out = transform.valueForKey_(kCIOutputImageKey)
 
         compositor.setValue_forKey_(out, kCIInputImageKey)
@@ -157,20 +154,12 @@ def badge_disk_icon(badge_file, output_file):
         result = compositor.valueForKey_(kCIOutputImageKey)
 
         cgContext = CGBitmapContextCreate(
-            None,
-            width,
-            height,
-            8,
-            0,
-            rgbColorSpace,
-            kCGImageAlphaPremultipliedLast
+            None, width, height, 8, 0, rgbColorSpace, kCGImageAlphaPremultipliedLast
         )
         context = CIContext.contextWithCGContext_options_(cgContext, None)
 
         context.drawImage_inRect_fromRect_(
-            result,
-            ((0, 0), (width, height)),
-            ((0, 0), (width, height))
+            result, ((0, 0), (width, height)), ((0, 0), (width, height))
         )
 
         image = CGBitmapContextCreateImage(cgContext)
