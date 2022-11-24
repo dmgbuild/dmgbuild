@@ -8,27 +8,32 @@ on:
 jobs:
   pretest:
     name: Pre-test checks
-    runs-on: "macos-latest"
-    strategy:
-      matrix:
-        task:
-        - flake8
-        - docs
-        - package
+    runs-on: "macOS-latest"
     steps:
-    - uses: actions/checkout@v3.0.2
+      - uses: actions/checkout@v3.1.0
+      - name: Set up Python
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: "3.X"
+      - name: Lint with Pre-commit
+        uses: pre-commit/action@v3.0.0
+
+  package:
+    name: Package
+    runs-on: "macOS-latest"
+    steps:
+    - uses: actions/checkout@v3.1.0
     - name: Set up Python
-      uses: actions/setup-python@v3.1.2
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: "3.X"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools
         python -m pip install tox
     - name: Run pre-test checks
       run: |
-        tox -e ${{ matrix.task }}
+        tox -e package
 
   unit-tests:
     name: Unit tests
@@ -39,9 +44,9 @@ jobs:
         macOS-version: ["macos-11", "macos-12"]
     runs-on: ${{ matrix.macOS-version }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.1.0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3.1.2
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies

@@ -1,5 +1,6 @@
 include *.ini
 include pyproject.toml
+include .pre-commit-config.yaml
 include .readthedocs.yaml
 recursive-include docs *.bat
 recursive-include docs *.py
