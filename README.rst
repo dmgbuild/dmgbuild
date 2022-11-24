@@ -41,4 +41,4 @@ Alias Manager functions).
 
 See the documentation_ for more information.
 
-.. _documentation: http://dmgbuild.rtfd.org
+.. _documentation: http://dmgbuild.readthedocs.io
