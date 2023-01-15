@@ -463,7 +463,7 @@ def build_dmg(  # noqa; C901
     )
 
     filesystem = options["filesystem"].upper()
-    fs_args = "-c c=64,a=16,e=16" if filesystem != "APFS" else "" 
+    fs_args = "-c c=64,a=16,e=16" if filesystem != "APFS" else ""
 
     ret, output = hdiutil(
         "create",
