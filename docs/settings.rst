@@ -42,6 +42,8 @@ Disk Image Settings
    UDCO  Compressed (ADC)
    UDZO  Compressed (gzip)
    UDBZ  Compressed (bzip2)
+   ULFO  Compressed (lzfse - macOS 10.11+ only)
+   ULMO  Compressed (lzma - macOS 10.15+ only)
    UFBI  Entire device
    IPOD  iPod image
    UDxx  UDIF stub
@@ -58,6 +60,11 @@ Disk Image Settings
 
    For disk images you intend to distribute over the Internet, you
    should probably stick to 'UDZO' and 'UDBZ'.
+
+.. py:data:: filesystem
+
+   Specifies the filesystem for the output disk image.  Must be
+   either 'HFS+' (the default) or 'APFS' (macOS 10.13+ only).
 
 .. py:data:: size
 

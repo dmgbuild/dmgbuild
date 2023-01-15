@@ -101,6 +101,7 @@ def load_json(filename, settings):
         (siz.get("width", 640), siz.get("height", 480)),
     )
     settings["format"] = json_data.get("format", "UDZO")
+    settings["filesystem"] = json_data.get("filesystem", "HFS+")
     settings["compression_level"] = json_data.get("compression-level", None)
     settings["license"] = json_data.get("license", None)
     files = []
@@ -155,6 +156,7 @@ def build_dmg(  # noqa; C901
         "filename": filename,
         "volume_name": volume_name,
         "format": "UDBZ",
+        "filesystem": "HFS+",
         "compression_level": None,
         "size": None,
         "files": [],
@@ -460,15 +462,18 @@ def build_dmg(  # noqa; C901
         }
     )
 
+    filesystem = options["filesystem"].upper()
+    fs_args = "-c c=64,a=16,e=16" if filesystem != "APFS" else "" 
+
     ret, output = hdiutil(
         "create",
         "-ov",
         "-volname",
         volume_name,
         "-fs",
-        "HFS+",
+        filesystem,
         "-fsargs",
-        "-c c=64,a=16,e=16",
+        fs_args,
         "-size",
         total_size,
         writableFile.name,
@@ -853,7 +858,7 @@ def build_dmg(  # noqa; C901
         }
     )
 
-    key_prefix = {"UDZO": "zlib", "UDBZ": "bzip2", "ULFO": "lzfse"}
+    key_prefix = {"UDZO": "zlib", "UDBZ": "bzip2", "ULFO": "lzfse", "ULMO": "lzma"}
     compression_level = options["compression_level"]
     if options["format"] in key_prefix and compression_level:
         compression_args = [
