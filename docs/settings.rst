@@ -132,10 +132,10 @@ Content Settings
 
      badge_icon = '/Applications/TextEdit.app/Contents/Resources/Edit.icns'
 
-   The use of badge icons requires that ``dmg_build`` be installed with the
-   ``badge_icons`` extra; i.e., you need to install dmg_build using::
+   The use of badge icons requires that ``dmgbuild`` be installed with the
+   ``badge_icons`` extra; i.e., you need to install dmgbuild using::
 
-      pip install "dmg_build[badge_icons]"
+      pip install "dmgbuild[badge_icons]"
 
 .. py:data:: icon_locations
 
