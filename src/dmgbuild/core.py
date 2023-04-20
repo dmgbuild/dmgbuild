@@ -9,7 +9,11 @@ import tempfile
 import time
 import tokenize
 
-import pkg_resources
+try:
+    import importlib_resources as resources
+except ImportError:
+    from importlib import resources
+
 from ds_store import DSStore
 from mac_alias import Alias, Bookmark
 
@@ -616,18 +620,18 @@ def build_dmg(  # noqa; C901
                 _, kind = os.path.splitext(background)
                 path_in_image = os.path.join(mount_point, ".background" + kind)
                 shutil.copyfile(background, path_in_image)
-            elif pkg_resources.resource_exists(
-                "dmgbuild", "resources/" + background + ".tiff"
-            ):
-                tiffdata = pkg_resources.resource_string(
-                    "dmgbuild", "resources/" + background + ".tiff"
-                )
-                path_in_image = os.path.join(mount_point, ".background.tiff")
-
-                with open(path_in_image, "wb") as f:
-                    f.write(tiffdata)
             else:
-                raise ValueError('background file "%s" not found' % background)
+                dmg_resources = resources.files("dmgbuild")
+                bg_resource = dmg_resources.joinpath(
+                    "resources/" + background + ".tiff"
+                )
+                if bg_resource.is_file():
+                    path_in_image = os.path.join(mount_point, ".background.tiff")
+                    with bg_resource.open("rb") as in_file:
+                        with open(path_in_image, "wb") as out_file:
+                            out_file.write(in_file.read())
+                else:
+                    raise ValueError('background file "%s" not found' % background)
 
             alias = Alias.for_file(path_in_image)
             background_bmk = Bookmark.for_file(path_in_image)
@@ -883,7 +887,7 @@ def build_dmg(  # noqa; C901
         "-ov",
         "-o",
         filename,
-        *compression_args
+        *compression_args,
     )
 
     callback(
