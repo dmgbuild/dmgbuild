@@ -8,7 +8,11 @@ import subprocess
 import tempfile
 import time
 import tokenize
-from importlib import resources
+
+try:
+    import importlib_resources as resources
+except ImportError:
+    from importlib import resources
 
 from ds_store import DSStore
 from mac_alias import Alias, Bookmark
@@ -623,11 +627,9 @@ def build_dmg(  # noqa; C901
                 )
                 if bg_resource.is_file():
                     path_in_image = os.path.join(mount_point, ".background.tiff")
-                    with (
-                        bg_resource.open("rb") as in_file,
-                        open(path_in_image, "wb") as out_file,
-                    ):
-                        out_file.write(in_file.read())
+                    with bg_resource.open("rb") as in_file:
+                        with open(path_in_image, "wb") as out_file:
+                            out_file.write(in_file.read())
                 else:
                     raise ValueError('background file "%s" not found' % background)
 
