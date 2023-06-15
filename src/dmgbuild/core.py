@@ -550,7 +550,7 @@ def build_dmg(  # noqa; C901
             badge.badge_disk_icon(badge_icon, icon_target_path)
 
         if icon or badge_icon:
-            subprocess.call(["/usr/bin/SetFile", "-a", "C", mount_point])
+            subprocess.check_call(["/usr/bin/SetFile", "-a", "C", mount_point])
 
         background_bmk = None
 
@@ -671,7 +671,7 @@ def build_dmg(  # noqa; C901
             )
 
             # use system ditto command to preserve code signing, etc.
-            subprocess.call(["/usr/bin/ditto", f, f_in_image])
+            subprocess.check_call(["/usr/bin/ditto", f, f_in_image])
 
             callback(
                 {
@@ -736,7 +736,7 @@ def build_dmg(  # noqa; C901
             to_hide.append(name_in_image)
 
         if to_hide:
-            subprocess.call(["/usr/bin/SetFile", "-a", "E"] + to_hide)
+            subprocess.check_call(["/usr/bin/SetFile", "-a", "E"] + to_hide)
 
         to_hide = []
         for name in options["hide"]:
@@ -744,7 +744,7 @@ def build_dmg(  # noqa; C901
             to_hide.append(name_in_image)
 
         if to_hide:
-            subprocess.call(["/usr/bin/SetFile", "-a", "V"] + to_hide)
+            subprocess.check_call(["/usr/bin/SetFile", "-a", "V"] + to_hide)
 
         callback(
             {
