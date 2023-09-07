@@ -249,23 +249,12 @@ def build_license(license_info):
         assert len(buttons) == 6, "License buttons must have 6 entries."
 
         buttons = [maybe_encode(b) for b in buttons]
+        buttons = [len(b).to_bytes(1, "big") + b for b in buttons]
         xml["STR#"].append(
             {
                 "Attributes": "0x0000",
-                "Data": (
-                    b"\x00\x06\x07"
-                    + buttons[0]
-                    + b"\x05"
-                    + buttons[1]
-                    + b"\x08"
-                    + buttons[2]
-                    + b"\x05"
-                    + buttons[3]
-                    + b"\x07"
-                    + buttons[4]
-                    + b"{"
-                    + buttons[5]
-                ),
+                # \x06 is apparently the number of buttons which is always 6
+                "Data": b"\x00\x06" + b"".join(buttons),
                 "ID": "5002",
                 "Name": language_name,
             }
