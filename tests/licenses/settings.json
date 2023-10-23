@@ -1,0 +1,19 @@
+{
+    "contents": [],
+    "format": "UDBZ",
+    "icon-size": 128,
+    "license": {
+        "buttons": {}
+    },
+    "title": "licenses",
+    "window": {
+        "position": {
+            "x": 100,
+            "y": 100
+        },
+        "size": {
+            "height": 480,
+            "width": 640
+        }
+    }
+}

@@ -17,9 +17,52 @@ language_names_map = {
     "nl_NL": "Nederlands",
     "pt_BR": "Português",
     "pt_PT": "Português",
+    "ru_RU": "Russian",
     "sv_SE": "Svensk",
     "zh_CN": "Simplified Chinese",
     "zh_TW": "Traditional Chinese",
+}
+
+# based on https://github.com/argv-minus-one/dmg-license/blob/master/language-info-generator/Languages.tsv
+# note that this table specifies STR# Resource ID but it seems to have no effect
+language_info_map = {
+    "da_DK": {"name": "Danish", "language_id": 9},
+    "de_DE": {"name": "Deutsch", "language_id": 3},
+    "en_AU": {"name": "English", "language_id": 15},
+    "en_GB": {"name": "English", "language_id": 2},
+    "en_US": {"name": "English", "language_id": 0},
+    "es_ES": {"name": "Spanish", "language_id": 8},
+    "fr_FR": {"name": "French", "language_id": 1},
+    "fr_CA": {"name": "French", "language_id": 11},
+    "it_IT": {
+        "name": "Italian",
+        "language_id": 14,
+    },
+    "ja_JP": {
+        "name": "Japanese",
+        "language_id": 14,
+        "encoding": "shift_jis",  # not sure if this is correct encoding, but seems to be working
+        "multibyte": True,
+    },
+    "nb_NO": {"name": "Norwegian", "language_id": 12},
+    "nl_BE": {"name": "Dutch", "language_id": 6},
+    "nl_NL": {"name": "Dutch", "language_id": 5},
+    "pt_BR": {"name": "Portuguese", "language_id": 71},
+    "pt_PT": {"name": "Portuguese", "language_id": 10},
+    "ru_RU": {"name": "Russian", "language_id": 49, "encoding": "mac_cyrillic"},
+    "sv_SE": {"name": "Swedish", "language_id": 7},
+    "zh_CN": {
+        "name": "Simplified Chinese",
+        "language_id": 52,
+        "encoding": "gb2312",
+        "multibyte": True,
+    },
+    "zh_TW": {
+        "name": "Traditional Chinese",
+        "language_id": 53,
+        "encoding": "big5",
+        "multibyte": True,
+    },
 }
 
 # Buttons (these come from the SLAResources file which you can find in the SLA
@@ -41,7 +84,7 @@ default_buttons = {
         b"Sichern...",
         b"Klicken Sie in \xd2Akzeptieren\xd3, wenn Sie mit den Bestimmungen des Software-Lizenzvertrags einverstanden sind. Falls nicht, bitte \xd2Ablehnen\xd3 anklicken. Sie k\x9annen die Software nur installieren, wenn Sie \xd2Akzeptieren\xd3 angeklickt haben.",  # noqa; E501
     ),
-    "Español": (
+    "Spanish": (
         b"Espa\x96ol",
         b"Aceptar",
         b"No aceptar",
@@ -49,7 +92,7 @@ default_buttons = {
         b"Guardar...",
         b'Si est\x87 de acuerdo con los t\x8erminos de esta licencia, pulse "Aceptar" para instalar el software. En el supuesto de que no est\x8e de acuerdo con los t\x8erminos de esta licencia, pulse "No aceptar."',  # noqa; E501
     ),
-    "Français": (
+    "French": (
         b"Fran\x8dais",
         b"Accepter",
         b"Refuser",
@@ -57,7 +100,7 @@ default_buttons = {
         b"Enregistrer...",
         b'Si vous acceptez les termes de la pr\x8esente licence, cliquez sur "Accepter" afin d\'installer le logiciel. Si vous n\'\x90tes pas d\'accord avec les termes de la licence, cliquez sur "Refuser".',  # noqa; E501
     ),
-    "Italiano": (
+    "Italian": (
         b"Italiano",
         b"Accetto",
         b"Rifiuto",
@@ -73,7 +116,7 @@ default_buttons = {
         b"\x95\xdb\x91\xb6...",
         b"\x96{\x83\\\x83t\x83g\x83E\x83G\x83A\x8eg\x97p\x8b\x96\x91\xf8\x8c_\x96\xf1\x82\xcc\x8f\xf0\x8c\x8f\x82\xc9\x93\xaf\x88\xd3\x82\xb3\x82\xea\x82\xe9\x8f\xea\x8d\x87\x82\xc9\x82\xcd\x81A\x83\\\x83t\x83g\x83E\x83G\x83A\x82\xf0\x83C\x83\x93\x83X\x83g\x81[\x83\x8b\x82\xb7\x82\xe9\x82\xbd\x82\xdf\x82\xc9\x81u\x93\xaf\x88\xd3\x82\xb5\x82\xdc\x82\xb7\x81v\x82\xf0\x89\x9f\x82\xb5\x82\xc4\x82\xad\x82\xbe\x82\xb3\x82\xa2\x81B\x81@\x93\xaf\x88\xd3\x82\xb3\x82\xea\x82\xc8\x82\xa2\x8f\xea\x8d\x87\x82\xc9\x82\xcd\x81A\x81u\x93\xaf\x88\xd3\x82\xb5\x82\xdc\x82\xb9\x82\xf1\x81v\x82\xf0\x89\x9f\x82\xb5\x82\xc4\x82\xad\x82\xbe\x82\xb3\x82\xa2\x81B",  # noqa; E501
     ),
-    "Nederlands": (
+    "Dutch": (
         b"Nederlands",
         b"Ja",
         b"Nee",
@@ -89,7 +132,7 @@ default_buttons = {
         b"Spara...",
         b'Om Du godk\x8anner licensvillkoren klicka p\x8c "Godk\x8anns" f\x9ar att installera programprodukten. Om Du inte godk\x8anner licensvillkoren, klicka p\x8c "Avb\x9ajs".',  # noqa; E501
     ),
-    "Português": (
+    "Portuguese": (
         b"Portugu\x90s",
         b"Concordar",
         b"Discordar",
@@ -113,7 +156,7 @@ default_buttons = {
         b"\xc0x\xa6s\xa1K",
         b"\xa6p\xaaG\xb1z\xa6P\xb7N\xa5\xbb\xb3\\\xa5i\xc3\xd2\xb8\xcc\xaa\xba\xb1\xf8\xb4\xda\xa1A\xbd\xd0\xab\xf6\xa1\xa7\xa6P\xb7N\xa1\xa8\xa5H\xa6w\xb8\xcb\xb3n\xc5\xe9\xa1C\xa6p\xaaG\xa4\xa3\xa6P\xb7N\xa1A\xbd\xd0\xab\xf6\xa1\xa7\xa4\xa3\xa6P\xb7N\xa1\xa8\xa1C",  # noqa; E501
     ),
-    "Dansk": (
+    "Danish": (
         b"Dansk",
         b"Enig",
         b"Uenig",
@@ -137,7 +180,7 @@ default_buttons = {
         b"\xc0\xfa\xc0\xe5...",
         b'\xbb\xe7\xbf\xeb \xb0\xe8\xbe\xe0\xbc\xad\xc0\xc7 \xb3\xbb\xbf\xeb\xbf\xa1 \xb5\xbf\xc0\xc7\xc7\xcf\xb8\xe9, "\xb5\xbf\xc0\xc7" \xb4\xdc\xc3\xdf\xb8\xa6 \xb4\xad\xb7\xaf \xbc\xd2\xc7\xc1\xc6\xae\xbf\xfe\xbe\xee\xb8\xa6 \xbc\xb3\xc4\xa1\xc7\xcf\xbd\xca\xbd\xc3\xbf\xc0. \xb5\xbf\xc0\xc7\xc7\xcf\xc1\xf6 \xbe\xca\xb4\xc2\xb4\xd9\xb8\xe9, "\xb5\xbf\xc0\xc7 \xbe\xc8\xc7\xd4" \xb4\xdc\xc3\xdf\xb8\xa6 \xb4\xa9\xb8\xa3\xbd\xca\xbd\xc3\xbf\xc0.',  # noqa; E501
     ),
-    "Norsk": (
+    "Norwegian": (
         b"Norsk",
         b"Enig",
         b"Ikke enig",
@@ -148,22 +191,7 @@ default_buttons = {
 }
 
 udifrezXMLtemplate = {
-    "LPic": [
-        {
-            "Attributes": "0x0000",
-            "Data": b"\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00",
-            "ID": "5000",
-            "Name": "",
-        }
-    ],
-    "STR#": [
-        {
-            "Attributes": "0x0000",
-            "Data": b'\x00\x06\x07English\x05Agree\x08Disagree\x05Print\x07Save...{If you agree with the terms of this license, press "Agree" to install the software.  If you do not agree, press "Disagree".',  # noqa; E501
-            "ID": "5000",
-            "Name": "English",
-        },
-    ],
+    "STR#": [],
     # ?? License text would be included in a block like this:
     # ?? 'TEXT': [
     # ??     {
@@ -198,22 +226,45 @@ def maybe_encode(s, encoding="mac_roman"):
     return s.encode(encoding)
 
 
+# Another implementation in TS:
+# https://github.com/argv-minus-one/dmg-license/blob/4268f2e822944fd670c1e197596396f233d6484e/src/makeLicensePlist.ts
+
+
 def build_license(license_info):
     """Add a license agreement to the specified disk image file, see
     https://developer.apple.com/forums/thread/668084."""
     # Copy the original template
     xml = dict(udifrezXMLtemplate)
 
-    for language, license_data in license_info["licenses"].items():
-        if language not in language_names_map:
+    licenses = license_info.get("licenses", {})
+    if len(licenses) == 0:
+        licenses = {
+            "en_US": 'If you agree with the terms of this license, press "Agree" to install the '
+            'software.  If you do not agree, press "Disagree".'
+        }
+
+    lpic = b""
+    # The first field is the default language ID.
+    lpic += int(5000).to_bytes(2, "big")
+    # The second field is the count of language ID to license resource mappings.
+    lpic += len(licenses.items()).to_bytes(2, "big")
+
+    for language, license_data in licenses.items():
+        if language not in language_info_map:
             raise Exception(
                 "Unknown language '"
                 + language
                 + "'. Valid languages are: "
-                + ", ".join(sorted(language_names_map.keys()))
+                + ", ".join(sorted(language_info_map.keys()))
             )
 
-        language_name = language_names_map[language]
+        language_info = language_info_map[language]
+        language_name = language_info["name"]
+        language_id = language_info["language_id"]
+        # for simplicity we use the same id for the resource as system language id + 5000
+        resource_id = language_id + 5000
+        language_encoding = language_info.get("encoding", "mac_roman")
+        multibyte_encoding = language_info.get("multibyte_encoding", False)
 
         if os.path.isfile(license_data):
             mode = "rb" if license_data.endswith(".rtf") else "r"
@@ -225,7 +276,7 @@ def build_license(license_info):
 
         else:
             licenseDataFormat = "TEXT"
-            license_data = maybe_encode(license_data)
+            license_data = maybe_encode(license_data, language_encoding)
 
         if licenseDataFormat not in xml:
             xml[licenseDataFormat] = []
@@ -234,7 +285,7 @@ def build_license(license_info):
             {
                 "Attributes": "0x0000",
                 "Data": license_data,
-                "ID": "5000",
+                "ID": str(resource_id),
                 "Name": language_name,
             }
         )
@@ -248,16 +299,32 @@ def build_license(license_info):
 
         assert len(buttons) == 6, "License buttons must have 6 entries."
 
-        buttons = [maybe_encode(b) for b in buttons]
+        buttons = [maybe_encode(b, language_encoding) for b in buttons]
         buttons = [len(b).to_bytes(1, "big") + b for b in buttons]
         xml["STR#"].append(
             {
                 "Attributes": "0x0000",
                 # \x06 is apparently the number of buttons which is always 6
                 "Data": b"\x00\x06" + b"".join(buttons),
-                "ID": "5002",
+                "ID": str(resource_id),
                 "Name": language_name,
             }
         )
 
+        # Finally, the list of resource ID mappings:
+        # Mapping field 1: system language ID
+        lpic += language_id.to_bytes(2, "big")
+        # Mapping field 2: local resource ID minus 5000
+        lpic += int(resource_id - 5000).to_bytes(2, "big")
+        # Mapping field 3: 2-byte language?
+        lpic += int(1 if multibyte_encoding else 0).to_bytes(2, "big")
+
+    xml["LPic"] = [
+        {
+            "Attributes": "0x0000",
+            "Data": lpic,
+            "ID": "5000",
+            "Name": "",
+        }
+    ]
     return xml
