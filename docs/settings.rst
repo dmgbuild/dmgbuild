@@ -412,14 +412,9 @@ some cases you will need to encode the data and use a byte string.
 
    Recognized languages are:
 
-     af_ZA, ar, be_BY, bg_BG, bn, bo, br, ca_ES, cs_CZ, cy, da_DK, de_AT, de_CH,
-     de_DE, dz_BT, el_CY, el_GR, en_AU, en_CA, en_GB, en_IE, en_SG, en_US, eo,
-     es_419, es_ES, et_EE, fa_IR, fi_FI, fo_FO, fr_001, fr_BE, fr_CA, fr_CH,
-     fr_FR, ga-Latg_IE, ga_IE, gd, grc, gu_IN, gv, he_IL, hi_IN, hr_HR, hu_HU,
-     hy_AM, is_IS, it_CH, it_IT, iu_CA, ja_JP, ka_GE, kl, ko_KR, lt_LT, lv_LV,
-     mk_MK, mr_IN, mt_MT, nb_NO, ne_NP, nl_BE, nl_NL, nn_NO, pa, pl_PL, pt_BR,
-     pt_PT, ro_RO, ru_RU, se, sk_SK, sl_SI, sr_RS, sv_SE, th_TH, to_TO, tr_TR,
-     uk_UA, ur_IN, ur_PK, uz_UZ, vi_VN, zh_CN, zh_TW
+      da_DK, de_AT, de_CH, de_DE, en_AU, en_GB, en_IE, en_SG, en_US, es_ES,
+      fi_FI, fr_BE, fr_FR, fr_CA, fr_CH, it_IT, ja_JP, ko_KR, nb_NO, nl_BE,
+      nl_NL, pt_BR, pt_PT, ru_RU, sv_SE, zh_CN, zh_TW,
 
    The user interface strings are as follows:
 
@@ -444,11 +439,11 @@ some cases you will need to encode the data and use a byte string.
 
    There are built-in user interface strings for the following languages:
 
-     English (en_US), German (de_DE), Spanish (es_ES), French (fr_FR),
-     Italian (it_IT), Japanese (ja_JP), Dutch (nl_NL), Swedish (sv_SE),
-     Brazilian Portuguese (pt_BR), Simplified Chinese (zh_CN),
-     Traditional Chinese (zh_TW), Danish (da_DK), Finnish (fi_FI),
-     Korean (ko_KR), Norwegian (nb_NO)
+     English (en_US, en_AU, en_GB, en_SG), German (de_DE, de_AT, de_CH), Spanish
+     (es_ES), French (fr_FR, fr_BE, fr_CH), Italian (it_IT), Japanese (ja_JP),
+     Dutch (nl_NL), Swedish (sv_SE), Brazilian Portuguese (pt_BR), Simplified
+     Chinese (zh_CN), Traditional Chinese (zh_TW), Danish (da_DK), Finnish
+     (fi_FI), Korean (ko_KR), Norwegian (nb_NO), Russian (ru_RU)
 
    For other languages, if you don't specify a suitable set, ``dmgbuild`` will
    use the English defaults instead.

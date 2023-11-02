@@ -4,14 +4,20 @@ import os
 # note that this table specifies STR# Resource ID but it seems to have no effect
 language_info_map = {
     "da_DK": {"name": "Danish", "language_id": 9},
+    "de_AT": {"name": "German", "language_id": 92},
+    "de_CH": {"name": "German", "language_id": 19},
     "de_DE": {"name": "German", "language_id": 3},
     "en_AU": {"name": "English", "language_id": 15},
     "en_GB": {"name": "English", "language_id": 2},
+    "en_IE": {"name": "English", "language_id": 108},
+    "en_SG": {"name": "English", "language_id": 100},
     "en_US": {"name": "English", "language_id": 0},
     "es_ES": {"name": "Spanish", "language_id": 8},
     "fi_FI": {"name": "Finnish", "language_id": 17},
+    "fr_BE": {"name": "French", "language_id": 98},
     "fr_FR": {"name": "French", "language_id": 1},
     "fr_CA": {"name": "French", "language_id": 11},
+    "fr_CH": {"name": "French", "language_id": 18},
     "it_IT": {"name": "Italian", "language_id": 14},
     "ja_JP": {
         "name": "Japanese",
