@@ -218,12 +218,6 @@ udifrezXMLtemplate = {
 }
 
 
-def maybe_encode(s, encoding="mac_roman"):
-    if isinstance(s, bytes):
-        return s
-    return s.encode(encoding)
-
-
 # Another implementation in TS:
 # https://github.com/argv-minus-one/dmg-license/blob/4268f2e822944fd670c1e197596396f233d6484e/src/makeLicensePlist.ts
 
