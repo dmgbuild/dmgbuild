@@ -3,7 +3,21 @@
     "format": "UDBZ",
     "icon-size": 128,
     "license": {
-        "buttons": {}
+        "buttons": {},
+        "licenses": {
+            "da_DK": "FIKTIONELT SELSKAB\nSOFTWARE EKSEMPEL AFTALE\n\nDu accepterer denne aftale.",
+            "de_DE": "FIKTIONELLES UNTERNEHMEN\nSOFTWARE-BEISPIELVEREINBARUNG\n\nSie stimmen dieser Vereinbarung zu.",
+            "en_US": "FICTIONAL CORPORATION\nSOFTWARE EXAMPLE AGREEMENT\n\nYou agree this agreement.",
+            "es_ES": "CORPORACIÓN FICCIONAL\nCONTRATO DE EJEMPLO DE SOFTWARE\n\nUsted acepta este acuerdo.",
+            "fr_FR": "SOCIÉTÉ FICTIONNELLE\nEXEMPLE DE CONTRAT DE LOGICIEL\n\nVous acceptez cet accord.",
+            "ja_JP": "架空の企業\nソフトウェア例契約書\n\nあなたはこの契約に同意します。",
+            "nl_NL": "FICTIONEEL BEDRIJF\nSOFTWARE VOORBEELDOVEREENKOMST\n\nU gaat akkoord met deze overeenkomst.",
+            "pt_PT": "CORPORAÇÃO FICCIONAL\nEXEMPLO DE CONTRATO DE SOFTWARE\n\nVocê concorda com este acordo.",
+            "ru_RU": "ВЫДУМАННАЯ КОРПОРАЦИЯ\nПРИМЕР СОГЛАШЕНИЯ НА ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ\n\nВы соглашаетесь с этим соглашением.",
+            "sv_SE": "FIKTIONELLT FÖRETAG\nPROGRAMVARA EXEMPELAVTAL\n\nDu godkänner detta avtal.",
+            "zh_CN": "虚构公司\n软件示例协议\n\n您同意本协议。",
+            "it_IT": "FICTIONAL CORPORATION\nESEMPIO DI CONTRATTO SOFTWARE\n\nL'utente accetta il presente contratto."
+        }
     },
     "title": "licenses",
     "window": {
