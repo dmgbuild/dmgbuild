@@ -3,52 +3,65 @@ import os
 # based on https://github.com/argv-minus-one/dmg-license/blob/master/language-info-generator/Languages.tsv
 # note that this table specifies STR# Resource ID but it seems to have no effect
 language_info_map = {
-    "da_DK": {"name": "Danish", "language_id": 9},
-    "de_AT": {"name": "German", "language_id": 92},
-    "de_CH": {"name": "German", "language_id": 19},
-    "de_DE": {"name": "German", "language_id": 3},
-    "en_AU": {"name": "English", "language_id": 15},
-    "en_GB": {"name": "English", "language_id": 2},
-    "en_IE": {"name": "English", "language_id": 108},
-    "en_SG": {"name": "English", "language_id": 100},
-    "en_US": {"name": "English", "language_id": 0},
-    "es_ES": {"name": "Spanish", "language_id": 8},
-    "fi_FI": {"name": "Finnish", "language_id": 17},
-    "fr_BE": {"name": "French", "language_id": 98},
-    "fr_FR": {"name": "French", "language_id": 1},
-    "fr_CA": {"name": "French", "language_id": 11},
-    "fr_CH": {"name": "French", "language_id": 18},
-    "it_IT": {"name": "Italian", "language_id": 14},
+    "da_DK": {"buttons": "Danish", "name": "Danish", "language_id": 9},
+    "de_AT": {"buttons": "German", "name": "German (Austrian)", "language_id": 92},
+    "de_CH": {"buttons": "German", "name": "German (Swiss)", "language_id": 19},
+    "de_DE": {"buttons": "German", "name": "German", "language_id": 3},
+    "en_AU": {"buttons": "English", "name": "English (Australian)", "language_id": 15},
+    "en_GB": {"buttons": "English", "name": "English (UK)", "language_id": 2},
+    "en_IE": {"buttons": "English", "name": "English (Ireland)", "language_id": 108},
+    "en_SG": {
+        "buttons": "English",
+        "name": "English (Singaporean)",
+        "language_id": 100,
+    },
+    "en_US": {"buttons": "English", "name": "English", "language_id": 0},
+    "es_ES": {"buttons": "Spanish", "name": "Spanish", "language_id": 8},
+    "fi_FI": {"buttons": "Finnish", "name": "Finnish", "language_id": 17},
+    "fr_BE": {"buttons": "French", "name": "French (Belgian)", "language_id": 98},
+    "fr_CA": {"buttons": "French", "name": "French (Canadian)", "language_id": 11},
+    "fr_CH": {"buttons": "French", "name": "French (Swiss)", "language_id": 18},
+    "fr_FR": {"buttons": "French", "name": "French", "language_id": 1},
+    "it_IT": {"buttons": "Italian", "name": "Italian", "language_id": 4},
     "ja_JP": {
+        "buttons": "Japanese",
         "name": "Japanese",
         "language_id": 14,
         "encoding": "shift_jis",  # not sure if this is correct encoding, but seems to be working
         "multibyte": True,
     },
     "ko_KR": {
+        "buttons": "Korean",
         "name": "Korean",
         "language_id": 51,
         "encoding": "ksx1001",
         "multibyte": True,
     },
-    "nb_NO": {"name": "Norwegian", "language_id": 12},
-    "nl_BE": {"name": "Dutch", "language_id": 6},
-    "nl_NL": {"name": "Dutch", "language_id": 5},
-    "pt_BR": {"name": "Portuguese", "language_id": 71},
-    "pt_PT": {"name": "Portuguese", "language_id": 10},
+    "nb_NO": {"buttons": "Norwegian", "name": "Norwegian", "language_id": 12},
+    "nl_BE": {"buttons": "Dutch", "name": "Dutch", "language_id": 6},
+    "nl_NL": {"buttons": "Dutch", "name": "Dutch", "language_id": 5},
+    "pt_BR": {
+        "buttons": "Portuguese",
+        "name": "Portuguese (Brazilian)",
+        "language_id": 71,
+    },
+    "pt_PT": {"buttons": "Portuguese", "name": "Portuguese", "language_id": 10},
     "ru_RU": {
+        "buttons": "Russian",
         "name": "Russian",
         "language_id": 49,
         "encoding": "mac_cyrillic",
     },
-    "sv_SE": {"name": "Swedish", "language_id": 7},
+    "sv_SE": {"buttons": "Swedish", "name": "Swedish", "language_id": 7},
     "zh_CN": {
+        "buttons": "Simplified",
         "name": "Simplified Chinese",
         "language_id": 52,
         "encoding": "gb2312",
         "multibyte": True,
     },
     "zh_TW": {
+        "buttons": "Traditional",
         "name": "Traditional Chinese",
         "language_id": 53,
         "encoding": "big5",
@@ -150,7 +163,8 @@ default_buttons = {
     "Traditional Chinese": (
         "漢語",
         "同意",
-        "不同意" "列印",
+        "不同意",
+        "列印",
         "儲存…",
         "如果您同意本許可證裡的條款，請按“同意”以安裝軟體。如果不同意，請按“不同意”。",  # noqa; E501
     ),
@@ -228,9 +242,10 @@ def build_license(license_info):
     # Copy the original template
     xml = dict(udifrezXMLtemplate)
 
-    licenses = license_info.get("licenses", {})
-    if len(licenses) == 0:
-        licenses = {"en_US": default_buttons["English"][5].encode("utf-8")}
+    licenses = license_info.get(
+        "licenses",
+        {"en_US": default_buttons["English"][5].encode("utf-8")},
+    )
 
     lpic = b""
     # The first field is the default language ID.
@@ -248,6 +263,7 @@ def build_license(license_info):
             )
 
         language_info = language_info_map[language]
+        language_buttons = language_info["buttons"]
         language_name = language_info["name"]
         language_id = language_info["language_id"]
         # for simplicity we use the same id for the resource as system language id + 5000
@@ -282,7 +298,7 @@ def build_license(license_info):
         )
 
         language_default_buttons = default_buttons.get(
-            language_name, default_buttons["English"]
+            language_buttons, default_buttons["English"]
         )
         buttons = license_info.get("buttons", {}).get(
             language, language_default_buttons
