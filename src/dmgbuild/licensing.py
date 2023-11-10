@@ -221,14 +221,6 @@ udifrezXMLtemplate = {
             "Name": "LPic",
         }
     ],
-    "styl": [
-        {
-            "Attributes": "0x0000",
-            "Data": b"\x00\x03\x00\x00\x00\x00\x00\x0c\x00\t\x00\x14\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'\x00\x0c\x00\t\x00\x14\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00*\x00\x0c\x00\t\x00\x14\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",  # noqa: E501
-            "ID": "5000",
-            "Name": "English",
-        }
-    ],
 }
 
 
@@ -293,7 +285,7 @@ def build_license(license_info):
                 "Attributes": "0x0000",
                 "Data": license_data,
                 "ID": str(resource_id),
-                "Name": language_name,
+                "Name": f"{language_name} SLA",
             }
         )
 
