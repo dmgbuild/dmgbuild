@@ -27,6 +27,9 @@ APIs (like the Alias Manager functions).  Instead, it uses the
 ``ds_store`` and ``mac_alias`` Python modules, which know how to
 construct the relevant data in Python code.
 
+As ``dmgbuild`` is a wrapper around macOS specific tools, it can't be used on
+Windows or Linux.
+
 Contents:
 
 .. toctree::
