@@ -39,6 +39,9 @@ when the user opens it.
 without relying on Finder, and without using deprecated APIs (like the
 Alias Manager functions).
 
+``dmgbuild`` is a wrapper around macOS specific tools, so it can't be used on
+Windows or Linux.
+
 See the documentation_ for more information.
 
 .. _documentation: http://dmgbuild.readthedocs.io
