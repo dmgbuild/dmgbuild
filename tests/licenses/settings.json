@@ -1,0 +1,47 @@
+{
+    "contents": [],
+    "format": "UDBZ",
+    "icon-size": 128,
+    "license": {
+        "buttons": {},
+        "licenses": {
+            "da_DK": "FIKTIONELT SELSKAB\nSOFTWARE EKSEMPEL AFTALE\n\nDu accepterer denne aftale.",
+            "de_AT": "FIKTIONELLES UNTERNEHMEN\nSOFTWARE-BEISPIELVEREINBARUNG\n\nSie stimmen dieser Österreichischen Vereinbarung zu.",
+            "de_CH": "FIKTIONELLES UNTERNEHMEN\nSOFTWARE-BEISPIELVEREINBARUNG\n\nSie stimmen dieser Schweizer Vereinbarung zu.",
+            "de_DE": "FIKTIONELLES UNTERNEHMEN\nSOFTWARE-BEISPIELVEREINBARUNG\n\nSie stimmen dieser Deutschen Vereinbarung zu.",
+            "en_AU": "FICTIONAL CORPORATION\nSOFTWARE EXAMPLE AGREEMENT\n\nMaaaaate....",
+            "en_GB": "FICTIONAL CORPORATION\nSOFTWARE EXAMPLE AGREEMENT\n\nYou agree to this UK agreement.",
+            "en_IE": "FICTIONAL CORPORATION\nSOFTWARE EXAMPLE AGREEMENT\n\nYou agree to this Irish agreement.",
+            "en_SG": "FICTIONAL CORPORATION\nSOFTWARE EXAMPLE AGREEMENT\n\nYou agree to this Singaporean agreement.",
+            "en_US": "FICTIONAL CORPORATION\nSOFTWARE EXAMPLE AGREEMENT\n\nYou agree to this US agreement.",
+            "es_ES": "CORPORACIÓN FICCIONAL\nCONTRATO DE EJEMPLO DE SOFTWARE\n\nUsted acepta este acuerdo.",
+            "fi_FI": "FIKTIONAALINEN OYJ\nOHJELMISTON ESIMERKKI SOPIMUS\n\nHyväksyt tämän Suomen sopimuksen.",
+            "fr_BE": "SOCIÉTÉ FICTIONNELLE\nEXEMPLE DE CONTRAT DE LOGICIEL\n\nVous acceptez cet accord belge.",
+            "fr_CA": "SOCIÉTÉ FICTIONNELLE\nEXEMPLE DE CONTRAT DE LOGICIEL\n\nVous acceptez cet accord canadien.",
+            "fr_CH": "SOCIÉTÉ FICTIONNELLE\nEXEMPLE DE CONTRAT DE LOGICIEL\n\nVous acceptez cet accord suisse.",
+            "fr_FR": "SOCIÉTÉ FICTIONNELLE\nEXEMPLE DE CONTRAT DE LOGICIEL\n\nVous acceptez cet accord français.",
+            "it_IT": "FICTIONAL CORPORATION\nESEMPIO DI CONTRATTO SOFTWARE\n\nL'utente accetta il presente contratto.",
+            "ja_JP": "架空の企業\nソフトウェア例契約書\n\nあなたはこの契約に同意します。",
+            "ko_KR": "가상의 기업\n소프트웨어 예제 계약\n\n귀하는 본 계약에 동의합니다.",
+            "nb_NO": "FIKTIONAL CORPORATION\nEKSEMPEL AVTALE FOR PROGRAMVARE\n\nDu godtar denne avtalen.",
+            "nl_NL": "FICTIONEEL BEDRIJF\nSOFTWARE VOORBEELDOVEREENKOMST\n\nU gaat akkoord met deze overeenkomst.",
+            "pt_BR": "CORPORAÇÃO FICCIONAL\nEXEMPLO DE CONTRATO DE SOFTWARE\n\nVocê concorda com este acordo brasileiro.",
+            "pt_PT": "CORPORAÇÃO FICCIONAL\nEXEMPLO DE CONTRATO DE SOFTWARE\n\nVocê concorda com este acordo português.",
+            "ru_RU": "ВЫДУМАННАЯ КОРПОРАЦИЯ\nПРИМЕР СОГЛАШЕНИЯ НА ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ\n\nВы соглашаетесь с этим соглашением.",
+            "sv_SE": "FIKTIONELLT FÖRETAG\nPROGRAMVARA EXEMPELAVTAL\n\nDu godkänner detta avtal.",
+            "zh_CN": "虚构公司\n软件示例协议\n\n您同意本协议。",
+            "zh_TW": "虛構公司\n軟體範例協議\n\n您同意此台灣協議。"
+        }
+    },
+    "title": "licenses",
+    "window": {
+        "position": {
+            "x": 100,
+            "y": 100
+        },
+        "size": {
+            "height": 480,
+            "width": 640
+        }
+    }
+}
