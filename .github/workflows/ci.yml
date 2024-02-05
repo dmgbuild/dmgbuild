@@ -5,6 +5,17 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  FORCE_COLOR: "1"
+
 jobs:
   pretest:
     name: Pre-test checks
@@ -30,7 +41,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox
+        pip install -e .[dev]
     - name: Run pre-test checks
       run: |
         tox -e package
@@ -40,8 +51,27 @@ jobs:
     needs: pretest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12-dev"]
-        macOS-version: ["macos-11", "macos-12"]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev" ]
+        macOS-version: [
+            # x86_64 runners
+            "macos-11", "macos-12", "macos-13",
+            # M1 runners
+            "macos-14",
+        ]
+
+        include:
+          - experimental: false
+          - python-version: "3.13-dev"
+            experimental: true
+
+        exclude:
+          # actions/setup-python doesn't provide Python3.8 or 3.9 for M1.
+          - macOS-version: "macos-14"
+            python-version: "3.8"
+
+          - macOS-version: "macos-14"
+            python-version: "3.9"
+
     runs-on: ${{ matrix.macOS-version }}
     steps:
     - uses: actions/checkout@v3.1.0
@@ -52,8 +82,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools
-        python -m pip install --upgrade tox
+        pip install -e .[dev]
     - name: Test
       run: |
         tox -e py

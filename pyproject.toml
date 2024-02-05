@@ -1,12 +1,81 @@
 [build-system]
-requires = ["setuptools>=60"]
+requires = [
+    "setuptools==69.0.0",
+]
 build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "dmgbuild"
+description = "macOS command line utility to build disk images"
+readme = "README.rst"
+requires-python = ">= 3.8"
+license.text = "New BSD"
+authors = [
+    {name="Alastair Houghton", email="alastair@alastairs-place.net"}
+]
+maintainers = [
+    {name="Russell Keith-Magee", email="russell@keith-magee.com"}
+]
+keywords = [
+    "dmg"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Desktop Environment",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "ds_store >= 1.1.0",
+    "mac_alias >= 2.0.1",
+    # importlib.resources wasn't fully featured until Python3.9;
+    # install the backwards compatibility shim from Python3.12.
+    "importlib_resources == 5.9; python_version <= '3.8'",
+]
+
+[project.urls]
+Homepage = "http://alastairs-place.net/projects/dmgbuild"
+Source = "https://github.com/dmgbuild/dmgbuild"
+
+[project.scripts]
+dmgbuild = "dmgbuild.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "coverage == 7.4.1",
+    # Pre-commit 3.6.0 deprecated support for Python 3.8
+    "pre-commit == 3.5.0 ; python_version < '3.9'",
+    "pre-commit == 3.6.0 ; python_version >= '3.9'",
+    "pytest == 8.0.0",
+    "pytest-cov == 4.1.0",
+    "tox == 4.12.1",
+]
+docs = [
+    # Sphinx 7.2 deprecated support for Python 3.8
+    "sphinx == 7.1.2 ; python_version < '3.9'",
+    "sphinx == 7.2.6 ; python_version >= '3.9'",
+    "sphinx-autobuild == 2021.3.14",
+    "sphinx_rtd_theme == 2.0.0"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "dmgbuild.__version__"}
 
 [tool.isort]
 profile = "black"
+split_on_trailing_comma = true
+combine_as_imports = true
 skip_glob = [
     "docs/conf.py",
     "venv*",
     "local",
 ]
-multi_line_output = 3
