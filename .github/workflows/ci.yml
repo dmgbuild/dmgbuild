@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.X"
       - name: Lint with Pre-commit
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@v3.0.1
 
   package:
     name: Package
