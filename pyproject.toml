@@ -57,7 +57,7 @@ dev = [
     "pre-commit == 3.6.1 ; python_version >= '3.9'",
     "pytest == 8.0.0",
     "pytest-cov == 4.1.0",
-    "tox == 4.12.1",
+    "tox == 4.13.0",
 ]
 docs = [
     # Sphinx 7.2 deprecated support for Python 3.8
