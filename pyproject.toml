@@ -65,7 +65,7 @@ docs = [
     "sphinx == 7.2.6 ; python_version >= '3.9'",
     # Sphinx 2024.2.4 deprecated support for Python 3.8
     "sphinx-autobuild == 2021.3.14 ; python_version < '3.9'",
-    "sphinx-autobuild == 2024.2.4 ; python_version >= '3.9'",
+    "sphinx-autobuild == 2024.4.13 ; python_version >= '3.9'",
     "sphinx_rtd_theme == 2.0.0"
 ]
 
