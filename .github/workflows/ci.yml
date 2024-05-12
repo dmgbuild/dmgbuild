@@ -21,7 +21,7 @@ jobs:
     name: Pre-test checks
     runs-on: "macOS-latest"
     steps:
-      - uses: actions/checkout@v4.1.4
+      - uses: actions/checkout@v4.1.5
       - name: Set up Python
         uses: actions/setup-python@v5.1.0
         with:
@@ -33,7 +33,7 @@ jobs:
     name: Package
     runs-on: "macOS-latest"
     steps:
-    - uses: actions/checkout@v4.1.4
+    - uses: actions/checkout@v4.1.5
     - name: Set up Python
       uses: actions/setup-python@v5.1.0
       with:
@@ -74,7 +74,7 @@ jobs:
 
     runs-on: ${{ matrix.macOS-version }}
     steps:
-    - uses: actions/checkout@v4.1.4
+    - uses: actions/checkout@v4.1.5
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5.1.0
       with:
