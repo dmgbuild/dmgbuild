@@ -43,7 +43,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "http://alastairs-place.net/projects/dmgbuild"
+Documentation = "https://dmgbuild.readthedocs.io/en/latest/"
+Homepage = "https://github.com/dmgbuild/dmgbuild"
+Tracker = "https://github.com/dmgbuild/dmgbuild/issues"
 Source = "https://github.com/dmgbuild/dmgbuild"
 
 [project.scripts]
