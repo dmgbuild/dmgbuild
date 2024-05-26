@@ -1,30 +1,28 @@
+.. |pyversions| image:: https://img.shields.io/pypi/pyversions/dmgbuild.svg
+   :target: https://pypi.python.org/pypi/dmgbuild
+   :alt: Python Versions
+
+.. |version| image:: https://img.shields.io/pypi/v/dmgbuild.svg
+   :target: https://pypi.python.org/pypi/dmgbuild
+   :alt: PyPI Version
+
+.. |maturity| image:: https://img.shields.io/pypi/status/dmgbuild.svg
+   :target: https://pypi.python.org/pypi/dmgbuild
+   :alt: Maturity
+
+.. |license| image:: https://img.shields.io/pypi/l/dmgbuild.svg
+   :target: https://github.com/dmgbuild/dmgbuild/blob/main/LICENSE
+   :alt: MIT License
+
+.. |ci| image:: https://github.com/dmgbuild/dmgbuild/workflows/CI/badge.svg?branch=main
+   :target: https://github.com/dmgbuild/dmgbuild/actions
+   :alt: Build Status
+
 ========
 dmgbuild
 ========
 
-.. image:: https://img.shields.io/pypi/pyversions/dmgbuild.svg
-   :target: https://pypi.python.org/pypi/dmgbuild
-   :alt: Python Versions
-
-.. image:: https://img.shields.io/pypi/v/dmgbuild.svg
-   :target: https://pypi.python.org/pypi/dmgbuild
-   :alt: PyPI Version
-
-.. image:: https://img.shields.io/pypi/status/dmgbuild.svg
-   :target: https://pypi.python.org/pypi/dmgbuild
-   :alt: Maturity
-
-.. image:: https://img.shields.io/pypi/l/dmgbuild.svg
-   :target: https://github.com/dmgbuild/dmgbuild/blob/main/LICENSE
-   :alt: MIT License
-
-.. image:: https://github.com/dmgbuild/dmgbuild/workflows/CI/badge.svg?branch=main
-   :target: https://github.com/dmgbuild/dmgbuild/actions
-   :alt: Build Status
-
-.. image:: https://readthedocs.org/projects/dmgbuild/badge/?version=latest
-   :target: http://dmgbuild.readthedocs.io/en/latest/?badge=latest
-   :alt: Docs Build Status
+|pyversions| |version| |maturity| |license| |ci|
 
 What is this?
 -------------
