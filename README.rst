@@ -1,3 +1,7 @@
+========
+dmgbuild
+========
+
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/dmgbuild.svg
    :target: https://pypi.python.org/pypi/dmgbuild
    :alt: Python Versions
@@ -17,10 +21,6 @@
 .. |ci| image:: https://github.com/dmgbuild/dmgbuild/workflows/CI/badge.svg?branch=main
    :target: https://github.com/dmgbuild/dmgbuild/actions
    :alt: Build Status
-
-========
-dmgbuild
-========
 
 |pyversions| |version| |maturity| |license| |ci|
 
