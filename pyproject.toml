@@ -74,6 +74,9 @@ docs = [
 [tool.setuptools.dynamic]
 version = {attr = "dmgbuild.__version__"}
 
+[tool.setuptools.package-data]
+"*" = ["*.tiff"]
+
 [tool.isort]
 profile = "black"
 split_on_trailing_comma = true
