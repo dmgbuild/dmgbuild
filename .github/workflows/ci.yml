@@ -50,17 +50,19 @@ jobs:
     name: Unit tests
     needs: pretest
     strategy:
+      fail-fast: false
       matrix:
         python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev" ]
         macOS-version: [
             # x86_64 runners
-            "macos-11", "macos-12", "macos-13",
+            "macos-12", "macos-13",
             # M1 runners
             "macos-14",
         ]
 
         include:
           - experimental: false
+
           - python-version: "3.13-dev"
             experimental: true
 
