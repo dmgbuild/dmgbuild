@@ -31,6 +31,14 @@ def main():
         default=True,
         help="Do not search for HiDPI versions of the background image (if specified)",
     )
+    parser.add_argument(
+        "--detach-retries",
+        dest="detachRetries",
+        type=int,
+        default=5,
+        choices=range(1, 31),
+        help="Number of attempts to detach disk volume (1 sec. interval)",
+    )
 
     args = parser.parse_args()
 
@@ -51,6 +59,7 @@ def main():
         args.settings,
         defines=defines,
         lookForHiDPI=args.lookForHiDPI,
+        detach_retries=args.detachRetries,
     )
 
 
