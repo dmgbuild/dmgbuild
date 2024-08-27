@@ -99,7 +99,10 @@ def load_json(filename, settings):
     settings["icon_size"] = json_data.get("icon-size", 80)
     wnd = json_data.get(
         "window",
-        {"position": {"x": 100, "y": 100}, "size": {"width": 640, "height": 480}}
+        {
+            "position": {"x": 100, "y": 100},
+            "size": {"width": 640, "height": 480},
+        },
     )
     pos = wnd.get("position", {"x": 100, "y": 100})
     siz = wnd.get("size", {"width": 640, "height": 480})
