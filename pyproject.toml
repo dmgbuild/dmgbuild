@@ -65,7 +65,7 @@ dev = [
 docs = [
     "furo == 2024.8.6",
     "sphinx == 8.0.2",
-    "sphinx-autobuild == 2024.9.3",
+    "sphinx-autobuild == 2024.9.19",
 ]
 
 [tool.setuptools.dynamic]
