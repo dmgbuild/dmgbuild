@@ -63,7 +63,7 @@ jobs:
         include:
           - experimental: false
 
-          - python-version: "3.13-dev"
+          - python-version: "3.13"
             experimental: true
 
         exclude:
