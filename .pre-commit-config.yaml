@@ -17,7 +17,7 @@ repos:
     rev: v3.17.0
     hooks:
       - id: pyupgrade
-        args: [--py38-plus]
+        args: [--py39-plus]
   # Docformatter 1.7.5 isn't compatible with Pre-commit 4.0
   # - repo: https://github.com/myint/docformatter
   #   rev: v1.7.5
