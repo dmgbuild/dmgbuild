@@ -58,7 +58,7 @@ dev = [
 # Docs are always built on Py3.12; see RTD and tox config files.
 docs = [
     "furo == 2024.8.6",
-    "sphinx == 8.0.2",
+    "sphinx == 8.1.2",
     "sphinx-autobuild == 2024.10.3",
 ]
 
