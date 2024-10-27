@@ -53,7 +53,7 @@ dev = [
     "pre-commit == 4.0.1",
     "pytest == 8.3.3",
     "pytest-cov == 5.0.0",
-    "tox == 4.23.0",
+    "tox == 4.23.2",
 ]
 # Docs are always built on Py3.12; see RTD and tox config files.
 docs = [
