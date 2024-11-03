@@ -52,7 +52,6 @@ dev = [
     "coverage == 7.6.4",
     "pre-commit == 4.0.1",
     "pytest == 8.3.3",
-    "pytest-cov == 5.0.0",
     "tox == 4.23.2",
 ]
 # Docs are always built on Py3.12; see RTD and tox config files.
@@ -67,6 +66,29 @@ version = {attr = "dmgbuild.__version__"}
 
 [tool.setuptools.package-data]
 "*" = ["*.tiff"]
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+source_pkgs = ["dmgbuild"]
+
+[tool.coverage.paths]
+source = [
+    "src",
+    "**/site-packages",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+skip_empty = true
+precision = 1
+exclude_lines = [
+    "pragma: no cover",
+    "@(abc\\.)?abstractmethod",
+    "NotImplementedError\\(\\)",
+    "if TYPE_CHECKING:",
+]
 
 [tool.isort]
 profile = "black"
