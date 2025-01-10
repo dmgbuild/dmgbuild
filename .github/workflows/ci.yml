@@ -52,12 +52,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14" ]
         macOS-version: [
             # x86_64 runners
             "macos-13",
             # M1 runners
-            "macos-14",
+            "macos-latest",
         ]
 
         include:
