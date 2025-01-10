@@ -839,7 +839,7 @@ def build_dmg(  # noqa; C901
             break
 
         # Exponentially backoff retries
-        # retry_time *= 1.5
+        retry_time *= 1.5
         time.sleep(retry_time)
 
     if ret:
