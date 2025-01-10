@@ -51,12 +51,17 @@ def hdiutil(cmd, *args, **kwargs):
     all_args.extend(args)
     if plist:
         all_args.append("-plist")
-    p = subprocess.Popen(all_args, stdout=subprocess.PIPE, close_fds=True)
+    p = subprocess.Popen(
+        all_args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        close_fds=True,
+    )
     output, errors = p.communicate()
     if plist:
         results = plistlib.loads(output)
     else:
-        results = output
+        results = output.decode()
     retcode = p.wait()
     return retcode, results
 
@@ -158,7 +163,7 @@ def build_dmg(  # noqa; C901
     settings={},
     defines={},
     lookForHiDPI=True,
-    detach_retries=5,
+    detach_retries=12,
     callback=quiet_callback,
 ):
     options = {
@@ -499,7 +504,7 @@ def build_dmg(  # noqa; C901
     )
 
     if ret:
-        raise DMGError(callback, "Unable to create disk image")
+        raise DMGError(callback, f"Unable to create disk image: {output}")
 
     callback(
         {
@@ -529,7 +534,7 @@ def build_dmg(  # noqa; C901
     )
 
     if ret:
-        raise DMGError(callback, "Unable to attach disk image")
+        raise DMGError(callback, f"Unable to attach disk image: {output}")
 
     callback(
         {
@@ -810,6 +815,7 @@ def build_dmg(  # noqa; C901
     # Flush writes before attempting to detach.
     subprocess.check_call(("sync", "--file-system", mount_point))
 
+    retry_time = 1
     for tries in range(detach_retries):
         callback(
             {
@@ -831,11 +837,14 @@ def build_dmg(  # noqa; C901
 
         if not ret:
             break
-        time.sleep(1)
+
+        # Exponentially backoff retries
+        # retry_time *= 1.5
+        time.sleep(retry_time)
 
     if ret:
         hdiutil("detach", "-force", device, plist=False)
-        raise DMGError(callback, "Unable to detach device cleanly")
+        raise DMGError(callback, f"Unable to detach device cleanly: {output}")
 
     callback(
         {
@@ -859,7 +868,7 @@ def build_dmg(  # noqa; C901
     )
 
     if ret:
-        raise DMGError(callback, "Unable to shrink")
+        raise DMGError(callback, f"Unable to shrink: {output}")
 
     callback(
         {
@@ -906,7 +915,7 @@ def build_dmg(  # noqa; C901
     )
 
     if ret:
-        raise DMGError(callback, "Unable to convert")
+        raise DMGError(callback, f"Unable to convert: {output}")
 
     callback(
         {
@@ -937,7 +946,7 @@ def build_dmg(  # noqa; C901
         os.remove(tempLicenseFile.name)
 
         if ret:
-            raise DMGError(callback, "Unable to add license")
+            raise DMGError(callback, f"Unable to add license: {output}")
 
         callback(
             {
