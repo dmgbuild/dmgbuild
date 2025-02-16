@@ -50,7 +50,7 @@ dmgbuild = "dmgbuild.__main__:main"
 
 [project.optional-dependencies]
 dev = [
-    "coverage == 7.6.11",
+    "coverage == 7.6.12",
     "pre-commit == 4.1.0",
     "pytest == 8.3.4",
     "tox == 4.24.1",
