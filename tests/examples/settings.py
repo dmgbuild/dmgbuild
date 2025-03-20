@@ -202,7 +202,7 @@ license = {
         # RTF (in which case it must start "{\rtf1"), or a path to a file
         # containing the license text.  If you're using RTF,
         # watch out for Python escaping (or read it from a file).
-        "en_GB": b"""{\\rtf1\\ansi\\ansicpg1252\\cocoartf1504\\cocoasubrtf820
+        "en_US": b"""{\\rtf1\\ansi\\ansicpg1252\\cocoartf1504\\cocoasubrtf820
  {\\fonttbl\\f0\\fnil\\fcharset0 Helvetica-Bold;\\f1\\fnil\\fcharset0 Helvetica;}
  {\\colortbl;\\red255\\green255\\blue255;\\red0\\green0\\blue0;}
  {\\*\\expandedcolortbl;;\\cssrgb\\c0\\c0\\c0;}
@@ -250,12 +250,12 @@ license = {
         # You don't need to specify them for those languages; if you fail to
         # specify them for some other language, English will be used instead.
         "en_US": (
-            b"English",
-            b"Agree!",
-            b"Disagree!",
-            b"Print!",
-            b"Save!",
-            b'Do you agree or not? Press "Agree" or "Disagree".',
+            "English",
+            "Agree!",
+            "Disagree!",
+            "Print!",
+            "Save!",
+            'Do you agree or not? Press "Agree" or "Disagree".',
         ),
     },
 }
