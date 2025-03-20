@@ -54,10 +54,10 @@ def hdiutil(cmd, *args, **kwargs):
     p = subprocess.Popen(
         all_args,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=None if plist else subprocess.STDOUT,
         close_fds=True,
     )
-    output, errors = p.communicate()
+    output, _ = p.communicate()
     if plist:
         results = plistlib.loads(output)
     else:
