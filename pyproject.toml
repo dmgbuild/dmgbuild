@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools==76.0.0",
+    "setuptools==77.0.3",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -10,7 +10,10 @@ name = "dmgbuild"
 description = "macOS command line utility to build disk images"
 readme = "README.rst"
 requires-python = ">= 3.9"
-license.text = "New BSD"
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
 authors = [
     {name="Alastair Houghton", email="alastair@alastairs-place.net"}
 ]
@@ -22,7 +25,6 @@ keywords = [
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
