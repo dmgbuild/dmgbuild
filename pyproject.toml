@@ -63,6 +63,9 @@ docs = [
     "sphinx == 8.2.3",
     "sphinx-autobuild == 2024.10.3",
 ]
+badge_icons = [
+    "pyobjc-framework-Quartz >= 3.0.4"
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "dmgbuild.__version__"}
