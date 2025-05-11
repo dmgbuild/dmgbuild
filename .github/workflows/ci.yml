@@ -49,6 +49,7 @@ jobs:
   unit-tests:
     name: Unit tests
     needs: pretest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -63,13 +64,8 @@ jobs:
         include:
           - experimental: false
 
-          - python-version: "3.13"
+          - python-version: "3.14"
             experimental: true
-
-        exclude:
-          # actions/setup-python doesn't provide Python 3.9 for M1.
-          - macOS-version: "macos-14"
-            python-version: "3.9"
 
     runs-on: ${{ matrix.macOS-version }}
     steps:
