@@ -54,7 +54,7 @@ dmgbuild = "dmgbuild.__main__:main"
 dev = [
     "coverage == 7.8.2",
     "pre-commit == 4.2.0",
-    "pytest == 8.3.5",
+    "pytest == 8.4.0",
     "tox == 4.26.0",
 ]
 # Docs are always built on Py3.12; see RTD and tox config files.
