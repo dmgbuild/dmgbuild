@@ -55,7 +55,7 @@ dev = [
     "coverage == 7.10.7",
     "pre-commit == 4.3.0",
     "pytest == 8.4.2",
-    "tox == 4.30.2",
+    "tox == 4.30.3",
 ]
 # Docs are always built on Py3.12; see RTD and tox config files.
 docs = [
