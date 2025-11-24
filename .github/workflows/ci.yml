@@ -19,7 +19,7 @@ env:
 jobs:
   pretest:
     name: Pre-test checks
-    runs-on: "macOS-latest"
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v5.0.0
       - name: Set up Python
