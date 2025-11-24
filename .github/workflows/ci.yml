@@ -19,15 +19,15 @@ env:
 jobs:
   pretest:
     name: Pre-test checks
-    runs-on: "macOS-latest"
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v5.0.0
       - name: Set up Python
         uses: actions/setup-python@v6.0.0
         with:
           python-version: "3.X"
-      - name: Lint with Pre-commit
-        uses: pre-commit/action@v3.0.1
+      - name: Lint with prek
+        uses: j178/prek-action@v1.0.11
 
   package:
     name: Package
