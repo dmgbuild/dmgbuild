@@ -9,7 +9,7 @@ dynamic = ["version"]
 name = "dmgbuild"
 description = "macOS command line utility to build disk images"
 readme = "README.rst"
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 license = "MIT"
 license-files = [
     "LICENSE",
