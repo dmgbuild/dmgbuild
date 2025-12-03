@@ -59,7 +59,7 @@ copyright = "2014, Alastair Houghton"
 # The full version, including alpha/beta/rc tags.
 with open("../src/dmgbuild/__init__.py", encoding="utf8") as version_file:
     version_match = re.search(
-        r"^__version__ = ['\"]([^'\"]*)['\"]", version_file.read(), re.M
+        r"^__version__ = ['\"]([^'\"]*)['\"]", version_file.read(), re.MULTILINE
     )
     if version_match:
         release = version_match.group(1)

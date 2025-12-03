@@ -118,22 +118,21 @@ extend-select = [
     "W",      # pycodestyle
     "F",      # pyflakes
     "UP",     # pyupgrade
-    "B",      # flake8-bugbear
+    # "B",      # flake8-bugbear
     "YTT",    # flake8-2020
     "ASYNC",  # flake8-async
     "C4",     # flake8-comprehensions
     "I",      # isort
-    "RUF",    # ruff-specific rules
+    # "RUF",    # ruff-specific rules
     "PT",     # flake8-pytest-style
     "FURB",   # refurb
     "ISC",    # flake8-implicit-str-concat
     "PGH",    # pygrep-hooks
     "T20",    # flake8-print
     "PIE",    # flake8-pie
-    "SIM",    # flake8-simplify
+    # "SIM",    # flake8-simplify
 ]
 
-ignore = [
-    "SIM105",  # use `contextlib.suppress` (too opinionated)
-    "SIM108",  # replace if-else with ternary operator (too opinionated)
-]
+[tool.ruff.lint.per-file-ignores]
+# E501: line too long
+"tests/examples/settings.py" = ["E501"]
