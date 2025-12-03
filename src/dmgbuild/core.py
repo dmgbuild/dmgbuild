@@ -830,8 +830,8 @@ def build_dmg(  # noqa; C901
             {
                 "type": "command::finished",
                 "command": "hdiutil::detach",
-                "ret:": ret,
-                "output:": output,
+                "ret": ret,
+                "output": output,
             }
         )
 
