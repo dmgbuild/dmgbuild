@@ -16,4 +16,4 @@ build:
       - python -m pip install --group tox
     build:
       html:
-        - python -m tox -e docs
+        - python -m tox -e docs -- $READTHEDOCS_OUTPUT/html/
