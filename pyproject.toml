@@ -56,6 +56,11 @@ badge_icons = [
 ]
 
 [dependency-groups]
+package = [
+    "build == 1.2.1",
+    "twine == 6.1.0",
+]
+
 pre-commit = [
     "prek == 0.2.19",
 ]
