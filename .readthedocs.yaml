@@ -10,20 +10,10 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.12"
-
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-  builder: html
-  configuration: docs/conf.py
-
-# If using Sphinx, optionally build your docs in additional formats such as PDF
-# formats:
-#    - pdf
-
-# Optionally declare the Python requirements required to build your docs
-python:
-  install:
-  - method: pip
-    path: .
-    extra_requirements:
-    - docs
+  jobs:
+    pre_install:
+      - python -m pip install --upgrade pip
+      - python -m pip install --group tox
+    build:
+      html:
+        - python -m tox -e docs -- $READTHEDOCS_OUTPUT/html/
