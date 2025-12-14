@@ -62,7 +62,7 @@ package = [
 ]
 
 pre-commit = [
-    "prek == 0.2.19",
+    "prek == 0.2.22",
 ]
 
 test = [
