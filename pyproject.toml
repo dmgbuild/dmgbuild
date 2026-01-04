@@ -62,11 +62,11 @@ package = [
 ]
 
 pre-commit = [
-    "prek == 0.2.23",
+    "prek == 0.2.25",
 ]
 
 test = [
-    "coverage == 7.13.0",
+    "coverage == 7.13.1",
     "pytest == 9.0.2",
 ]
 
