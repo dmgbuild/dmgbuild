@@ -15,7 +15,7 @@ except ImportError:
     from importlib import resources
 
 from ds_store import DSStore
-from mac_alias import Alias, Bookmark
+from mac_alias import Alias
 
 from . import colors, licensing
 
@@ -156,7 +156,7 @@ def load_json(filename, settings):
     settings["icon_locations"] = icon_locations
 
 
-def build_dmg(  # noqa; C901
+def build_dmg(  # noqa: C901
     filename,
     volume_name,
     settings_file=None,
@@ -570,8 +570,6 @@ def build_dmg(  # noqa; C901
         if icon or badge_icon:
             subprocess.call(["/usr/bin/SetFile", "-a", "C", mount_point])
 
-        background_bmk = None
-
         callback(
             {
                 "type": "operation::start",
@@ -652,7 +650,6 @@ def build_dmg(  # noqa; C901
                     raise ValueError(f'background file "{background}" not found')
 
             alias = Alias.for_file(path_in_image)
-            background_bmk = Bookmark.for_file(path_in_image)
 
             icvp["backgroundType"] = 2
             icvp["backgroundImageAlias"] = alias.to_bytes()
@@ -789,8 +786,6 @@ def build_dmg(  # noqa; C901
             d["."]["bwsp"] = bwsp
             if include_icon_view_settings:
                 d["."]["icvp"] = icvp
-                if background_bmk:
-                    d["."]["pBBk"] = background_bmk
             if include_list_view_settings:
                 d["."]["lsvp"] = lsvp
             d["."]["icvl"] = icvl
