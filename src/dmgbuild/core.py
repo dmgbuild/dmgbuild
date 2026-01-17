@@ -102,6 +102,9 @@ def load_json(filename, settings):
     if bk is not None:
         settings["background"] = bk
     settings["icon_size"] = json_data.get("icon-size", 80)
+    tsize = json_data.get("text-size", None)
+    if tsize is not None:
+        settings["text_size"] = tsize
     wnd = json_data.get(
         "window",
         {
