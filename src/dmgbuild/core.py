@@ -25,8 +25,6 @@ except ImportError:
     badge = None
 
 
-_hexcolor_re = re.compile(r"#[0-9a-f]{3}(?:[0-9a-f]{3})?")
-
 # The first element in the platform.mac_ver() tuple is a string containing the
 # macOS version (e.g., '10.15.6'). Parse into an integer tuple.
 MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split("."))
