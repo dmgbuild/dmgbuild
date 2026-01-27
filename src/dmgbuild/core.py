@@ -120,6 +120,7 @@ def load_json(filename, settings):
     settings["filesystem"] = json_data.get("filesystem", "HFS+")
     settings["compression_level"] = json_data.get("compression-level", None)
     settings["license"] = json_data.get("license", None)
+    settings["size"] = json_data.get("size", None)
     files = []
     hide = []
     hide_extensions = []
