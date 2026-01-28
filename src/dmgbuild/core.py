@@ -121,6 +121,7 @@ def load_json(filename, settings):
     settings["compression_level"] = json_data.get("compression-level", None)
     settings["license"] = json_data.get("license", None)
     settings["size"] = json_data.get("size", None)
+    settings["shrink"] = json_data.get("shrink", True)
     files = []
     hide = []
     hide_extensions = []
@@ -180,6 +181,7 @@ def build_dmg(  # noqa: C901
         "filesystem": "HFS+",
         "compression_level": None,
         "size": None,
+        "shrink": True,
         "files": [],
         "symlinks": {},
         "hide": [],
@@ -850,29 +852,30 @@ def build_dmg(  # noqa: C901
         hdiutil("detach", "-force", device, plist=False)
         raise DMGError(callback, f"Unable to detach device cleanly: {output}")
 
-    callback(
-        {
-            "type": "command::start",
-            "command": "hdiutil::resize",
-        }
-    )
-
     # Shrink the output to the minimum possible size
-    ret, output = hdiutil(
-        "resize", "-quiet", "-sectors", "min", writableFile.name, plist=False
-    )
+    if options["shrink"]:
+        callback(
+            {
+                "type": "command::start",
+                "command": "hdiutil::resize",
+            }
+        )
 
-    callback(
-        {
-            "type": "command::finished",
-            "command": "hdiutil::resize",
-            "ret": ret,
-            "output": output,
-        }
-    )
+        ret, output = hdiutil(
+            "resize", "-quiet", "-sectors", "min", writableFile.name, plist=False
+        )
 
-    if ret:
-        raise DMGError(callback, f"Unable to shrink: {output}")
+        callback(
+            {
+                "type": "command::finished",
+                "command": "hdiutil::resize",
+                "ret": ret,
+                "output": output,
+            }
+        )
+
+        if ret:
+            raise DMGError(callback, f"Unable to shrink: {output}")
 
     callback(
         {

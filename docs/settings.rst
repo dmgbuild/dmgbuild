@@ -78,6 +78,13 @@ Disk Image Settings
    't', 'p' and 'e' for bytes, kilobytes, megabytes, gigabytes, terabytes,
    exabytes and petabytes respectively.
 
+.. py:data:: shrink
+
+   If set to ``False``, ``dmgbuild`` will not shrink the filesystem to
+   the minimum size after copying files. This is useful when you want to
+   preserve the explicit ``size`` you specified for the mounted volume.
+   Defaults to ``True``.
+
 Content Settings
 ----------------
 
