@@ -3,6 +3,8 @@
     "background": "builtin-arrow",
     "format": "UDZO",
     "compression-level": 9,
+    "size": "50m",
+    "shrink": false,
     "window": { "position": { "x": 100, "y": 100 },
                 "size": { "width": 640, "height": 280 } },
     "contents": [
