@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.X"
       - name: Lint with prek
-        uses: j178/prek-action@v2.0.1
+        uses: j178/prek-action@v2.0.3
 
   package:
     name: Package
