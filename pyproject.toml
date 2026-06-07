@@ -62,16 +62,16 @@ package = [
 ]
 
 pre-commit = [
-    "prek == 0.3.11",
+    "prek == 0.4.4",
 ]
 
 test = [
-    "coverage == 7.13.5",
+    "coverage == 7.14.1",
     "pytest == 9.0.3",
 ]
 
 tox = [
-    "tox-uv == 1.35.1"
+    "tox-uv == 1.35.2"
 ]
 
 dev = [

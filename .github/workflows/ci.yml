@@ -21,19 +21,19 @@ jobs:
     name: Pre-test checks
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - name: Set up Python
         uses: actions/setup-python@v6.2.0
         with:
           python-version: "3.X"
       - name: Lint with prek
-        uses: j178/prek-action@v2.0.3
+        uses: j178/prek-action@v2.0.4
 
   package:
     name: Package
     runs-on: "macOS-latest"
     steps:
-    - uses: actions/checkout@v6.0.2
+    - uses: actions/checkout@v6.0.3
     - name: Set up Python
       uses: actions/setup-python@v6.2.0
       with:
@@ -62,7 +62,7 @@ jobs:
 
     runs-on: ${{ matrix.macOS-version }}
     steps:
-    - uses: actions/checkout@v6.0.2
+    - uses: actions/checkout@v6.0.3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6.2.0
       with:
