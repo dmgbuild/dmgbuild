@@ -23,11 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.0
       - name: Set up Python
-        uses: actions/setup-python@v6.2.0
+        uses: actions/setup-python@v6.3.0
         with:
           python-version: "3.X"
       - name: Lint with prek
-        uses: j178/prek-action@v2.0.4
+        uses: j178/prek-action@v2.0.5
 
   package:
     name: Package
@@ -35,7 +35,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7.0.0
     - name: Set up Python
-      uses: actions/setup-python@v6.2.0
+      uses: actions/setup-python@v6.3.0
       with:
         python-version: "3.x"
     - name: Install dependencies
@@ -64,7 +64,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7.0.0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6.2.0
+      uses: actions/setup-python@v6.3.0
       with:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
