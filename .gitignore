@@ -5,6 +5,7 @@
 .eggs
 .idea
 .tox
+/.vscode
 *.egg
 *.egg-info
 *.pyc

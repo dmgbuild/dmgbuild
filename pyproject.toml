@@ -140,3 +140,6 @@ extend-select = [
 [tool.ruff.lint.per-file-ignores]
 # E501: line too long
 "tests/examples/settings.py" = ["E501"]
+# Exclusions needed to pass the Ruff 0.16 update.
+"src/dmgbuild/licensing.py" = ["TRY002"]
+"src/dmgbuild/core.py" = ["BLE001", "SIM115", "S102"]
