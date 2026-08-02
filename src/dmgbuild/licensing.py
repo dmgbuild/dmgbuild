@@ -119,7 +119,7 @@ default_buttons = {
         "同意しません",
         "印刷する",
         "保存...",
-        "本ソフトウエア使用許諾契約の条件に同意される場合には、ソフトウエアをインストールするために「同意します」を押してください。\u3000同意されない場合には、「同意しません」を押してください。",  # noqa: E501
+        "本ソフトウエア使用許諾契約の条件に同意される場合には、ソフトウエアをインストールするために「同意します」を押してください。\u3000同意されない場合には、「同意しません」を押してください。",
     ),
     "Dutch": (
         "Nederlands",
@@ -159,7 +159,7 @@ default_buttons = {
         "不同意",
         "打印",
         "存储…",
-        "如果您同意本许可协议的条款，请按“同意”来安装此软件。如果您不同意，请按“不同意”。",  # noqa: E501
+        "如果您同意本许可协议的条款，请按“同意”来安装此软件。如果您不同意，请按“不同意”。",
     ),
     "Traditional Chinese": (
         "漢語",
@@ -167,7 +167,7 @@ default_buttons = {
         "不同意",
         "列印",
         "儲存…",
-        "如果您同意本許可證裡的條款，請按“同意”以安裝軟體。如果不同意，請按“不同意”。",  # noqa: E501
+        "如果您同意本許可證裡的條款，請按“同意”以安裝軟體。如果不同意，請按“不同意”。",
     ),
     "Danish": (
         "Dansk",
@@ -318,7 +318,7 @@ def build_license(license_info):
         # Mapping field 2: local resource ID minus 5000
         lpic += int(resource_id - 5000).to_bytes(2, "big")
         # Mapping field 3: 2-byte language?
-        lpic += int(1 if multibyte_encoding else 0).to_bytes(2, "big")
+        lpic += (1 if multibyte_encoding else 0).to_bytes(2, "big")
 
     xml["LPic"] = [
         {

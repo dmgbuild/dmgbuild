@@ -159,7 +159,7 @@ def load_json(filename, settings):
     settings["icon_locations"] = icon_locations
 
 
-def build_dmg(  # noqa: C901
+def build_dmg(
     filename,
     volume_name,
     settings_file=None,
@@ -634,7 +634,7 @@ def build_dmg(  # noqa: C901
                             output.seek(0)
                             raise ValueError(
                                 f"unable to compile combined HiDPI file {background!r} "
-                                f"got error: {str(e)}\noutput: {output.read()}"
+                                f"got error: {e!s}\noutput: {output.read()}"
                             )
 
                 _, kind = os.path.splitext(background)
@@ -647,9 +647,11 @@ def build_dmg(  # noqa: C901
                 )
                 if bg_resource.is_file():
                     path_in_image = os.path.join(mount_point, ".background.tiff")
-                    with bg_resource.open("rb") as in_file:
-                        with open(path_in_image, "wb") as out_file:
-                            out_file.write(in_file.read())
+                    with (
+                        bg_resource.open("rb") as in_file,
+                        open(path_in_image, "wb") as out_file,
+                    ):
+                        out_file.write(in_file.read())
                 else:
                     raise ValueError(f'background file "{background}" not found')
 
