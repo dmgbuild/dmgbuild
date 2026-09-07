@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools==83.0.0",
+    "setuptools==84.0.0",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -57,16 +57,16 @@ badge_icons = [
 
 [dependency-groups]
 package = [
-    "build == 1.5.0",
+    "build == 1.6.0",
     "twine == 7.0.0",
 ]
 
 pre-commit = [
-    "prek == 0.4.11",
+    "prek == 0.5.2",
 ]
 
 test = [
-    "coverage == 7.15.2",
+    "coverage == 7.16.0",
     "pytest == 9.1.1",
 ]
 
