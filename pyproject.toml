@@ -57,16 +57,16 @@ badge_icons = [
 
 [dependency-groups]
 package = [
-    "build == 1.6.0",
+    "build == 1.6.1",
     "twine == 7.0.0",
 ]
 
 pre-commit = [
-    "prek == 0.5.2",
+    "prek == 0.5.4",
 ]
 
 test = [
-    "coverage == 7.16.0",
+    "coverage == 7.16.2",
     "pytest == 9.1.1",
 ]
 
