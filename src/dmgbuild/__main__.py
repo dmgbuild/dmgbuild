@@ -37,7 +37,7 @@ def main():
         "--detach-retries",
         dest="detachRetries",
         type=int,
-        default=5,
+        default=12,
         choices=range(1, 31),
         help="Number of attempts to detach disk volume (1 sec. interval)",
     )
