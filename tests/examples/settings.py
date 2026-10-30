@@ -14,7 +14,7 @@ import plistlib
 
 # .. Useful stuff ..............................................................
 
-application = defines.get("app", "/System/Applications/TextEdit.app")  # noqa: F821
+application = defines.get("app", "./tests/examples/Hello World.app")  # noqa: F821
 appname = os.path.basename(application)
 
 

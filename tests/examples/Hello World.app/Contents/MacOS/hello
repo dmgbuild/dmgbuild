@@ -1,0 +1,3 @@
+#!/bin/sh
+# Minimal test application used by the dmgbuild test suite.
+exec /usr/bin/osascript -e 'display dialog "Hello, World!" with title "Hello World" buttons {"OK"} default button "OK" giving up after 10'
