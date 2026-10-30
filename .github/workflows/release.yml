@@ -25,7 +25,7 @@ jobs:
     secrets:
       RTD_API_TOKEN: ${{ secrets.RTD_API_TOKEN }}
     with:
-      project-name: "xbuild"
+      project-name: "dmgbuild"
       project-version: ${{ github.ref_name }}
 
   release:
