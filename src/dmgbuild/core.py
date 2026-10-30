@@ -118,6 +118,7 @@ def load_json(filename, settings):
     )
     settings["format"] = json_data.get("format", "UDZO")
     settings["filesystem"] = json_data.get("filesystem", "HFS+")
+    settings["layout"] = json_data.get("layout", "NONE")
     settings["compression_level"] = json_data.get("compression-level", None)
     settings["license"] = json_data.get("license", None)
     settings["size"] = json_data.get("size", None)
@@ -179,6 +180,7 @@ def build_dmg(
         "volume_name": volume_name,
         "format": "UDBZ",
         "filesystem": "HFS+",
+        "layout": "NONE",
         "compression_level": None,
         "size": None,
         "shrink": True,
@@ -500,6 +502,8 @@ def build_dmg(
         filesystem,
         "-fsargs",
         fs_args,
+        "-layout",
+        options["layout"],
         "-size",
         total_size,
         writableFile.name,
@@ -692,7 +696,17 @@ def build_dmg(
             )
 
             # use system ditto command to preserve code signing, etc.
-            subprocess.call(["/usr/bin/ditto", f, f_in_image])
+            p = subprocess.run(
+                ["/usr/bin/ditto", f, f_in_image],
+                check=False,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if p.returncode:
+                raise DMGError(
+                    callback,
+                    f"Unable to copy {f!r} into disk image: {p.stderr.strip()}",
+                )
 
             callback(
                 {

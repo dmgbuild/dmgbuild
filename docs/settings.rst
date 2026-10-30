@@ -66,6 +66,22 @@ Disk Image Settings
    Specifies the filesystem for the output disk image.  Must be
    either 'HFS+' (the default) or 'APFS' (macOS 10.13+ only).
 
+.. py:data:: layout
+
+   Specifies the partition layout of the disk image, as passed to the
+   ``-layout`` argument of ``hdiutil create``.  The default, 'NONE',
+   creates an image with no partition map, so the filesystem occupies
+   the whole image.  If you need a partition map, you can use any of
+   the other layouts listed by ``hdiutil create -help``; for example,
+   'GPTSPUD' (a GUID partition map with a single partition) is the
+   layout ``hdiutil`` uses when none is specified.
+
+   A partition map uses space in the image that the automatic size
+   calculation does not account for, so if you use one you may also
+   need to set :data:`size`.  Conversely, ``hdiutil`` cannot shrink an
+   APFS image that has no partition map, so with 'NONE', :data:`shrink`
+   has no effect when :data:`filesystem` is 'APFS'.
+
 .. py:data:: size
 
    If defined, specifies the size of the filesystem within the image.
