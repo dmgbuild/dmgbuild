@@ -68,8 +68,7 @@ jobs:
         # installed from a wheel with setuptools_scm not present.
         run: |
           set -x
-          test $(xvenv --version | awk '{print $2}') = $VERSION
-          test $(xbuild --version | awk '{print $2}') = $VERSION
+          test $(dmgbuild --version | awk '{print $2}') = $VERSION
 
       - name: Create release
         env:

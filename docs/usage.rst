@@ -13,3 +13,6 @@ the volume name and the name of the output file respectively.
 these can be used from within the settings file, for instance so that
 you can write a single settings file for multiple disk images, or so
 that you can easily alter settings at build time.
+
+To display the version of ``dmgbuild`` that is installed, run
+``dmgbuild --version``.
