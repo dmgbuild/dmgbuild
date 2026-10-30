@@ -12,10 +12,8 @@
 {% for text, values in sections[section][category].items() %}
 * {{ text }} ({{ values|join(', ') }})
 {% endfor %}
-
 {% else %}
 * {{ sections[section][category]['']|join(', ') }}
-
 {% endif %}
 {% if sections[section][category]|length == 0 %}
 No significant changes.
