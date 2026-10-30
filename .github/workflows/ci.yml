@@ -59,7 +59,7 @@ jobs:
       tox-source: "--group tox"
 
   package:
-    name: Package xbuild
+    name: Package dmgbuild
     needs: [ pre-commit, towncrier ]
     permissions:
       id-token: write
