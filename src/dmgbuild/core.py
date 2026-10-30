@@ -15,7 +15,7 @@ except ImportError:
     from importlib import resources
 
 from ds_store import DSStore
-from mac_alias import Alias, Bookmark
+from mac_alias import Alias
 
 from . import colors, licensing
 
@@ -24,8 +24,6 @@ try:
 except ImportError:
     badge = None
 
-
-_hexcolor_re = re.compile(r"#[0-9a-f]{3}(?:[0-9a-f]{3})?")
 
 # The first element in the platform.mac_ver() tuple is a string containing the
 # macOS version (e.g., '10.15.6'). Parse into an integer tuple.
@@ -51,12 +49,17 @@ def hdiutil(cmd, *args, **kwargs):
     all_args.extend(args)
     if plist:
         all_args.append("-plist")
-    p = subprocess.Popen(all_args, stdout=subprocess.PIPE, close_fds=True)
-    output, errors = p.communicate()
+    p = subprocess.Popen(
+        all_args,
+        stdout=subprocess.PIPE,
+        stderr=None if plist else subprocess.STDOUT,
+        close_fds=True,
+    )
+    output, _ = p.communicate()
     if plist:
         results = plistlib.loads(output)
     else:
-        results = output
+        results = output.decode()
     retcode = p.wait()
     return retcode, results
 
@@ -97,7 +100,16 @@ def load_json(filename, settings):
     if bk is not None:
         settings["background"] = bk
     settings["icon_size"] = json_data.get("icon-size", 80)
-    wnd = json_data.get("window", {"position": (100, 100), "size": (640, 480)})
+    tsize = json_data.get("text-size", None)
+    if tsize is not None:
+        settings["text_size"] = tsize
+    wnd = json_data.get(
+        "window",
+        {
+            "position": {"x": 100, "y": 100},
+            "size": {"width": 640, "height": 480},
+        },
+    )
     pos = wnd.get("position", {"x": 100, "y": 100})
     siz = wnd.get("size", {"width": 640, "height": 480})
     settings["window_rect"] = (
@@ -106,8 +118,11 @@ def load_json(filename, settings):
     )
     settings["format"] = json_data.get("format", "UDZO")
     settings["filesystem"] = json_data.get("filesystem", "HFS+")
+    settings["layout"] = json_data.get("layout", "NONE")
     settings["compression_level"] = json_data.get("compression-level", None)
     settings["license"] = json_data.get("license", None)
+    settings["size"] = json_data.get("size", None)
+    settings["shrink"] = json_data.get("shrink", True)
     files = []
     hide = []
     hide_extensions = []
@@ -145,24 +160,30 @@ def load_json(filename, settings):
     settings["icon_locations"] = icon_locations
 
 
-def build_dmg(  # noqa; C901
+def build_dmg(
     filename,
     volume_name,
     settings_file=None,
-    settings={},
-    defines={},
+    settings=None,
+    defines=None,
     lookForHiDPI=True,
-    detach_retries=5,
+    detach_retries=12,
     callback=quiet_callback,
 ):
+    if defines is None:
+        defines = {}
+    if settings is None:
+        settings = {}
     options = {
         # Default settings
         "filename": filename,
         "volume_name": volume_name,
         "format": "UDBZ",
         "filesystem": "HFS+",
+        "layout": "NONE",
         "compression_level": None,
         "size": None,
+        "shrink": True,
         "files": [],
         "symlinks": {},
         "hide": [],
@@ -255,8 +276,8 @@ def build_dmg(  # noqa; C901
     # Set up the finder data
     bounds = options["window_rect"]
 
-    bounds_string = "{{{{{}, {}}}, {{{}, {}}}}}".format(
-        bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]
+    bounds_string = (
+        f"{{{{{bounds[0][0]}, {bounds[0][1]}}}, {{{bounds[1][0]}, {bounds[1][1]}}}}}"
     )
     bwsp = {
         "ShowStatusBar": options["show_status_bar"],
@@ -359,8 +380,11 @@ def build_dmg(  # noqa; C901
     for n, column in enumerate(options["list_columns"]):
         cndx[column] = n
         width = options["list_column_widths"].get(column, default_widths[column])
-        asc = "ascending" == options["list_column_sort_directions"].get(
-            column, default_sort_directions[column]
+        asc = (
+            options["list_column_sort_directions"].get(
+                column, default_sort_directions[column]
+            )
+            == "ascending"
         )
 
         lsvp["columns"][columns[column]] = {
@@ -373,10 +397,10 @@ def build_dmg(  # noqa; C901
 
     n = len(options["list_columns"])
     for k in columns:
-        if cndx.get(k, None) is None:
+        if cndx.get(k) is None:
             cndx[k] = n
             width = default_widths[k]
-            asc = "ascending" == default_sort_directions[k]
+            asc = default_sort_directions[k] == "ascending"
 
         lsvp["columns"][columns[column]] = {
             "index": n,
@@ -439,7 +463,7 @@ def build_dmg(  # noqa; C901
                 path = path[0]
 
             if not os.path.islink(path) and os.path.isdir(path):
-                for dirpath, dirnames, filenames in os.walk(path):
+                for dirpath, _dirnames, filenames in os.walk(path):
                     for f in filenames:
                         fp = os.path.join(dirpath, f)
                         total_size += roundup(os.lstat(fp).st_size, 4096)
@@ -478,6 +502,8 @@ def build_dmg(  # noqa; C901
         filesystem,
         "-fsargs",
         fs_args,
+        "-layout",
+        options["layout"],
         "-size",
         total_size,
         writableFile.name,
@@ -493,7 +519,7 @@ def build_dmg(  # noqa; C901
     )
 
     if ret:
-        raise DMGError(callback, "Unable to create disk image")
+        raise DMGError(callback, f"Unable to create disk image: {output}")
 
     callback(
         {
@@ -523,7 +549,7 @@ def build_dmg(  # noqa; C901
     )
 
     if ret:
-        raise DMGError(callback, "Unable to attach disk image")
+        raise DMGError(callback, f"Unable to attach disk image: {output}")
 
     callback(
         {
@@ -550,9 +576,7 @@ def build_dmg(  # noqa; C901
             badge.badge_disk_icon(badge_icon, icon_target_path)
 
         if icon or badge_icon:
-            subprocess.check_call(["/usr/bin/SetFile", "-a", "C", mount_point])
-
-        background_bmk = None
+            subprocess.call(["/usr/bin/SetFile", "-a", "C", mount_point])
 
         callback(
             {
@@ -613,8 +637,8 @@ def build_dmg(  # noqa; C901
                         except Exception as e:
                             output.seek(0)
                             raise ValueError(
-                                'unable to compile combined HiDPI file "%s" got error: %s\noutput: %s'
-                                % (background, str(e), output.read())
+                                f"unable to compile combined HiDPI file {background!r} "
+                                f"got error: {e!s}\noutput: {output.read()}"
                             )
 
                 _, kind = os.path.splitext(background)
@@ -627,14 +651,15 @@ def build_dmg(  # noqa; C901
                 )
                 if bg_resource.is_file():
                     path_in_image = os.path.join(mount_point, ".background.tiff")
-                    with bg_resource.open("rb") as in_file:
-                        with open(path_in_image, "wb") as out_file:
-                            out_file.write(in_file.read())
+                    with (
+                        bg_resource.open("rb") as in_file,
+                        open(path_in_image, "wb") as out_file,
+                    ):
+                        out_file.write(in_file.read())
                 else:
-                    raise ValueError('background file "%s" not found' % background)
+                    raise ValueError(f'background file "{background}" not found')
 
             alias = Alias.for_file(path_in_image)
-            background_bmk = Bookmark.for_file(path_in_image)
 
             icvp["backgroundType"] = 2
             icvp["backgroundImageAlias"] = alias.to_bytes()
@@ -671,7 +696,17 @@ def build_dmg(  # noqa; C901
             )
 
             # use system ditto command to preserve code signing, etc.
-            subprocess.check_call(["/usr/bin/ditto", f, f_in_image])
+            p = subprocess.run(
+                ["/usr/bin/ditto", f, f_in_image],
+                check=False,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if p.returncode:
+                raise DMGError(
+                    callback,
+                    f"Unable to copy {f!r} into disk image: {p.stderr.strip()}",
+                )
 
             callback(
                 {
@@ -753,7 +788,7 @@ def build_dmg(  # noqa; C901
             }
         )
 
-        userfn = options.get("create_hook", None)
+        userfn = options.get("create_hook")
         if callable(userfn):
             userfn(mount_point, options)
 
@@ -771,8 +806,6 @@ def build_dmg(  # noqa; C901
             d["."]["bwsp"] = bwsp
             if include_icon_view_settings:
                 d["."]["icvp"] = icvp
-                if background_bmk:
-                    d["."]["pBBk"] = background_bmk
             if include_list_view_settings:
                 d["."]["lsvp"] = lsvp
             d["."]["icvl"] = icvl
@@ -804,7 +837,8 @@ def build_dmg(  # noqa; C901
     # Flush writes before attempting to detach.
     subprocess.check_call(("sync", "--file-system", mount_point))
 
-    for tries in range(detach_retries):
+    retry_time = 1
+    for _ in range(detach_retries):
         callback(
             {
                 "type": "command::start",
@@ -818,42 +852,46 @@ def build_dmg(  # noqa; C901
             {
                 "type": "command::finished",
                 "command": "hdiutil::detach",
-                "ret:": ret,
-                "output:": output,
+                "ret": ret,
+                "output": output,
             }
         )
 
         if not ret:
             break
-        time.sleep(1)
+
+        # Exponentially backoff retries
+        retry_time *= 1.5
+        time.sleep(retry_time)
 
     if ret:
         hdiutil("detach", "-force", device, plist=False)
-        raise DMGError(callback, "Unable to detach device cleanly")
-
-    callback(
-        {
-            "type": "command::start",
-            "command": "hdiutil::resize",
-        }
-    )
+        raise DMGError(callback, f"Unable to detach device cleanly: {output}")
 
     # Shrink the output to the minimum possible size
-    ret, output = hdiutil(
-        "resize", "-quiet", "-sectors", "min", writableFile.name, plist=False
-    )
+    if options["shrink"]:
+        callback(
+            {
+                "type": "command::start",
+                "command": "hdiutil::resize",
+            }
+        )
 
-    callback(
-        {
-            "type": "command::finished",
-            "command": "hdiutil::resize",
-            "ret": ret,
-            "output": output,
-        }
-    )
+        ret, output = hdiutil(
+            "resize", "-quiet", "-sectors", "min", writableFile.name, plist=False
+        )
 
-    if ret:
-        raise DMGError(callback, "Unable to shrink")
+        callback(
+            {
+                "type": "command::finished",
+                "command": "hdiutil::resize",
+                "ret": ret,
+                "output": output,
+            }
+        )
+
+        if ret:
+            raise DMGError(callback, f"Unable to shrink: {output}")
 
     callback(
         {
@@ -900,7 +938,7 @@ def build_dmg(  # noqa; C901
     )
 
     if ret:
-        raise DMGError(callback, "Unable to convert")
+        raise DMGError(callback, f"Unable to convert: {output}")
 
     callback(
         {
@@ -931,7 +969,7 @@ def build_dmg(  # noqa; C901
         os.remove(tempLicenseFile.name)
 
         if ret:
-            raise DMGError(callback, "Unable to add license")
+            raise DMGError(callback, f"Unable to add license: {output}")
 
         callback(
             {

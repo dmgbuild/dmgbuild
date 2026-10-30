@@ -1,7 +1,6 @@
-#! /usr/bin/env python
 import argparse
 
-from .core import build_dmg
+from . import __version__, build_dmg
 
 
 def main():
@@ -9,7 +8,10 @@ def main():
     parser.add_argument(
         "volume_name",
         metavar="volume-name",
-        help="The name to give to the volume (this will appear in the title bar when the user mounts the disk image).",
+        help=(
+            "The name to give to the volume (this will appear in the title "
+            "bar when the user mounts the disk image)."
+        ),
     )
     parser.add_argument(
         "filename",
@@ -31,6 +33,19 @@ def main():
         default=True,
         help="Do not search for HiDPI versions of the background image (if specified)",
     )
+    parser.add_argument(
+        "--detach-retries",
+        dest="detachRetries",
+        type=int,
+        default=12,
+        choices=range(1, 31),
+        help="Number of attempts to detach disk volume (1 sec. interval)",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"dmgbuild {__version__}",
+    )
 
     args = parser.parse_args()
 
@@ -51,6 +66,7 @@ def main():
         args.settings,
         defines=defines,
         lookForHiDPI=args.lookForHiDPI,
+        detach_retries=args.detachRetries,
     )
 
 

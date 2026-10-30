@@ -4,56 +4,104 @@ on:
   push:
     branches:
       - main
+  workflow_call:
+    inputs:
+      attest-package:
+        description: "Create GitHub provenance attestation for the package."
+        default: "false"
+        type: string
+    outputs:
+      artifact-basename:
+        description: "Base name of the uploaded artifacts; use for artifact retrieval."
+        value: ${{ jobs.package.outputs.artifact-basename }}
+
+# Cancel active CI runs for a PR before starting another run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  FORCE_COLOR: "1"
 
 jobs:
-  pretest:
-    name: Pre-test checks
-    runs-on: "macOS-latest"
+  pre-commit:
+    name: Pre-commit checks
+    runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3.1.0
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
       - name: Set up Python
-        uses: actions/setup-python@v4.3.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: "3.X"
-      - name: Lint with Pre-commit
-        uses: pre-commit/action@v3.0.0
+
+      - name: Lint with prek
+        uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d  # v3.1.0
+
+  towncrier:
+    name: Check towncrier
+    uses: beeware/.github/.github/workflows/towncrier-run.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+    with:
+      tox-source: "--group tox"
 
   package:
-    name: Package
-    runs-on: "macOS-latest"
-    steps:
-    - uses: actions/checkout@v3.1.0
-    - name: Set up Python
-      uses: actions/setup-python@v4.3.0
-      with:
-        python-version: "3.X"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install tox
-    - name: Run pre-test checks
-      run: |
-        tox -e package
+    name: Package dmgbuild
+    needs: [ pre-commit, towncrier ]
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    uses: beeware/.github/.github/workflows/python-package-create.yml@main
+    with:
+      attest: ${{ inputs.attest-package }}
 
   unit-tests:
     name: Unit tests
-    needs: pretest
+    needs: package
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12-dev"]
-        macOS-version: ["macos-11", "macos-12"]
+        python-version: [ "3.11", "3.12", "3.13", "3.14", "3.15" ]
+        macOS-version: [
+            # x86_64 runners
+            "macos-15-intel",
+            # M1 runners
+            "macos-latest",
+        ]
+
     runs-on: ${{ matrix.macOS-version }}
     steps:
-    - uses: actions/checkout@v3.1.0
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.3.0
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools
-        python -m pip install --upgrade tox
-    - name: Test
-      run: |
-        tox -e py
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --group tox
+
+      - name: Test
+        run: |
+          tox -e py
