@@ -576,7 +576,7 @@ def build_dmg(
             badge.badge_disk_icon(badge_icon, icon_target_path)
 
         if icon or badge_icon:
-            subprocess.call(["/usr/bin/SetFile", "-a", "C", mount_point])
+            subprocess.check_call(["/usr/bin/SetFile", "-a", "C", mount_point])
 
         callback(
             {
@@ -771,7 +771,7 @@ def build_dmg(
             to_hide.append(name_in_image)
 
         if to_hide:
-            subprocess.call(["/usr/bin/SetFile", "-a", "E"] + to_hide)
+            subprocess.check_call(["/usr/bin/SetFile", "-a", "E"] + to_hide)
 
         to_hide = []
         for name in options["hide"]:
@@ -779,7 +779,7 @@ def build_dmg(
             to_hide.append(name_in_image)
 
         if to_hide:
-            subprocess.call(["/usr/bin/SetFile", "-a", "V"] + to_hide)
+            subprocess.check_call(["/usr/bin/SetFile", "-a", "V"] + to_hide)
 
         callback(
             {
