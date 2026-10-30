@@ -576,7 +576,7 @@ def build_dmg(
             badge.badge_disk_icon(badge_icon, icon_target_path)
 
         if icon or badge_icon:
-            subprocess.call(["/usr/bin/SetFile", "-a", "C", mount_point])
+            subprocess.check_call(["/usr/bin/SetFile", "-a", "C", mount_point])
 
         callback(
             {
