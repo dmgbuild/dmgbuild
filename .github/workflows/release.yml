@@ -1,0 +1,88 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  ci:
+    name: CI
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+      pull-requests: write
+    uses: $/.github/workflows/ci.yml
+    with:
+      attest-package: "true"
+
+  docs:
+    permissions:
+      contents: read
+    name: Verify Docs Build
+    uses: beeware/.github/.github/workflows/docs-build-verify.yml@main
+    secrets:
+      RTD_API_TOKEN: ${{ secrets.RTD_API_TOKEN }}
+    with:
+      project-name: "xbuild"
+      project-version: ${{ github.ref_name }}
+
+  release:
+    name: Create Release
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # This permission is required for trusted publishing.
+      id-token: write
+    steps:
+      - name: Set build variables
+        run: |
+          echo "VERSION=${GITHUB_REF_NAME#v}" | tee -a $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.x"
+
+      - name: Get packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          pattern: Packages-*
+          merge-multiple: true
+          path: dist
+
+      - name: Install packages
+        run: pip install dist/*.whl
+
+      - name: Check version number
+        # Check that the setuptools_scm-generated version number is still the same when
+        # installed from a wheel with setuptools_scm not present.
+        run: |
+          set -x
+          test $(xvenv --version | awk '{print $2}') = $VERSION
+          test $(xbuild --version | awk '{print $2}') = $VERSION
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "$VERSION" \
+            --draft \
+            --verify-tag \
+            dist/*
+
+      - name: Publish release to Test PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # v1.14.2
+        with:
+          repository-url: https://test.pypi.org/legacy/
