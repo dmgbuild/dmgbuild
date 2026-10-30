@@ -493,9 +493,6 @@ def build_dmg(
     filesystem = options["filesystem"].upper()
     fs_args = "-c c=64,a=16,e=16" if filesystem != "APFS" else ""
 
-    # A partition map takes space the size estimate above doesn't allow for
-    # (on GPT, an EFI System Partition once the image is large enough), so by
-    # default the filesystem occupies the whole image.
     ret, output = hdiutil(
         "create",
         "-ov",
