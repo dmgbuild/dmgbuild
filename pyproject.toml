@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools==84.1.0",
+    "setuptools==84.2.1",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -61,7 +61,7 @@ package = [
 ]
 
 pre-commit = [
-    "prek == 0.5.4",
+    "prek == 0.5.7",
 ]
 
 towncrier = [
@@ -69,12 +69,12 @@ towncrier = [
 ]
 
 test = [
-    "coverage == 7.16.2",
+    "coverage == 7.17.0",
     "pytest == 9.1.1",
 ]
 
 tox = [
-    "tox-uv == 1.36.0"
+    "tox-uv == 1.37.0"
 ]
 
 dev = [
@@ -86,7 +86,7 @@ dev = [
 # Docs are always built on Py3.12; see RTD and tox config files.
 docs = [
     "furo == 2025.12.19",
-    "sphinx == 8.2.3",
+    "sphinx == 9.0.4",
 ]
 
 [tool.setuptools.dynamic]
