@@ -9,7 +9,7 @@ from dmgbuild.core import DMGError
 
 
 def build_and_get_attached_entities(target, settings=None):
-    """Build an empty image; return the entities hdiutil attached while building."""
+    """Build an empty image; return the entities attached while building."""
     events = []
     dmgbuild.build_dmg(str(target), "Test", settings=settings, callback=events.append)
 
@@ -17,7 +17,7 @@ def build_and_get_attached_entities(target, settings=None):
         event
         for event in events
         if event["type"] == "command::finished"
-        and event.get("command") == "hdiutil::attach"
+        and event.get("command") == "diskutil::attach"
     )
     return attach["output"]["system-entities"]
 
@@ -131,3 +131,42 @@ def test_compression_level_ignored(tmp_path):
         dmgbuild.build_dmg(str(target), "Test", settings={"compression_level": 9})
 
     assert target.exists()
+
+
+def test_apfs_no_partition_map(tmp_path):
+    """An APFS image is created without a partition map."""
+    entities = build_and_get_attached_entities(
+        tmp_path / "out.dmg", settings={"filesystem": "APFS"}
+    )
+
+    content_hints = [entity.get("content-hint") for entity in entities]
+    assert "GUID_partition_scheme" not in content_hints
+    assert any(entity.get("mount-point") for entity in entities)
+
+
+def test_no_hdiutil(tmp_path, monkeypatch):
+    """Without a license, the build doesn't use the deprecated hdiutil."""
+    real_run = subprocess.run
+    tools = []
+
+    def recording_run(args, *posargs, **kwargs):
+        tools.append(args[0])
+        return real_run(args, *posargs, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", recording_run)
+
+    target = tmp_path / "out.dmg"
+    dmgbuild.build_dmg(str(target), "Test")
+
+    assert target.exists()
+    assert "/usr/sbin/diskutil" in tools
+    assert "/usr/bin/hdiutil" not in tools
+
+
+def test_output_overwritten(tmp_path):
+    """An existing file at the output path is replaced."""
+    target = tmp_path / "out.dmg"
+    target.write_bytes(b"not a disk image")
+    dmgbuild.build_dmg(str(target), "Test")
+
+    assert image_format(target) == "ULFO"
