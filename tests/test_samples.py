@@ -127,7 +127,7 @@ def test_unsupported_filesystem(tmp_path):
 def test_compression_level_ignored(tmp_path):
     """Setting compression_level warns, but the build still succeeds."""
     target = tmp_path / "out.dmg"
-    with pytest.warns(UserWarning, match="compression_level"):
+    with pytest.warns(FutureWarning, match="compression_level"):
         dmgbuild.build_dmg(str(target), "Test", settings={"compression_level": 9})
 
     assert target.exists()

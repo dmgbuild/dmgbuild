@@ -318,14 +318,14 @@ def build_dmg(
         warnings.warn(
             "The compression_level setting is no longer supported, "
             "and will be ignored.",
-            UserWarning,
+            FutureWarning,
             stacklevel=2,
         )
 
     if options["license"]:
         warnings.warn(
             "Apple has deprecated the mechanism used to embed license agreements "
-            "in disk images. The license setting will be removed in a future "
+            "in disk images. The license setting may be removed in a future "
             "release of dmgbuild.",
             FutureWarning,
             stacklevel=2,
