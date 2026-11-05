@@ -79,15 +79,18 @@ def eject(device, force=False):
 def newfs_command(filesystem, volume_name, device):
     """Return the command that creates ``filesystem`` on the whole of ``device``."""
     if filesystem == "APFS":
-        return ["/sbin/newfs_apfs", "-v", volume_name, f"/dev/{device}"]
-    return [
-        "/sbin/newfs_hfs",
-        "-v",
-        volume_name,
-        "-c",
-        "c=64,a=16,e=16",
-        f"/dev/r{device}",
-    ]
+        cmd = ["/sbin/newfs_apfs", "-v", volume_name, f"/dev/{device}"]
+    else:
+        cmd = [
+            "/sbin/newfs_hfs",
+            "-v",
+            volume_name,
+            "-c",
+            "c=64,a=16,e=16",
+            f"/dev/r{device}",
+        ]
+
+    return run_tool(cmd, plist=False)
 
 
 def load_settings(filename, settings):
@@ -593,12 +596,10 @@ def build_dmg(
         raise DMGError(callback, f"Unable to attach disk image: {output}")
 
     device = output["system-entities"][0]["dev-entry"]
-    ret, output = run_tool(newfs_command(filesystem, volume_name, device), plist=False)
+    ret, output = newfs_command(filesystem, volume_name, device)
     if ret:
         eject(device, force=True)
         raise DMGError(callback, f"Unable to create {filesystem} filesystem: {output}")
-
-    ret, eject_output = eject(device)
 
     callback(
         {
@@ -609,9 +610,10 @@ def build_dmg(
         }
     )
 
+    ret, output = eject(device)
     if ret:
         eject(device, force=True)
-        raise DMGError(callback, f"Unable to detach disk image: {eject_output}")
+        raise DMGError(callback, f"Unable to detach disk image: {output}")
 
     callback(
         {
