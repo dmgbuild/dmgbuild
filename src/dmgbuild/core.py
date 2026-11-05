@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import time
 import tokenize
+import warnings
 
 try:
     import importlib_resources as resources
@@ -28,6 +29,12 @@ except ImportError:
 # The first element in the platform.mac_ver() tuple is a string containing the
 # macOS version (e.g., '10.15.6'). Parse into an integer tuple.
 MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split("."))
+
+# The output formats that ``diskutil image create from`` can produce.
+SUPPORTED_FORMATS = ("UDRO", "UDZO", "ULFO", "ULMO", "UDSB", "RAW", "ASIF")
+
+# The filesystems dmgbuild can create in the image.
+SUPPORTED_FILESYSTEMS = ("HFS+", "APFS")
 
 
 class DMGError(Exception):
@@ -118,7 +125,6 @@ def load_json(filename, settings):
     )
     settings["format"] = json_data.get("format", "UDZO")
     settings["filesystem"] = json_data.get("filesystem", "HFS+")
-    settings["layout"] = json_data.get("layout", "NONE")
     settings["compression_level"] = json_data.get("compression-level", None)
     settings["license"] = json_data.get("license", None)
     settings["size"] = json_data.get("size", None)
@@ -178,9 +184,8 @@ def build_dmg(
         # Default settings
         "filename": filename,
         "volume_name": volume_name,
-        "format": "UDBZ",
+        "format": "ULFO",
         "filesystem": "HFS+",
-        "layout": "NONE",
         "compression_level": None,
         "size": None,
         "shrink": True,
@@ -272,6 +277,40 @@ def build_dmg(
 
     # Add any overrides
     options.update(settings)
+
+    # Validate the settings before doing any work.
+    filesystem = str(options["filesystem"]).upper()
+    if filesystem not in SUPPORTED_FILESYSTEMS:
+        raise DMGError(
+            callback,
+            f"Unsupported filesystem {options['filesystem']!r}; "
+            f"must be one of {', '.join(SUPPORTED_FILESYSTEMS)}",
+        )
+
+    image_format = options["format"]
+    if image_format not in SUPPORTED_FORMATS:
+        raise DMGError(
+            callback,
+            f"Unsupported format {image_format!r}; "
+            f"must be one of {', '.join(SUPPORTED_FORMATS)}",
+        )
+
+    if options["compression_level"]:
+        warnings.warn(
+            "The compression_level setting is no longer supported, "
+            "and will be ignored.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+    if options["license"]:
+        warnings.warn(
+            "Apple has deprecated the mechanism used to embed license agreements "
+            "in disk images. The license setting will be removed in a future "
+            "release of dmgbuild.",
+            FutureWarning,
+            stacklevel=2,
+        )
 
     # Set up the finder data
     bounds = options["window_rect"]
@@ -490,7 +529,6 @@ def build_dmg(
         }
     )
 
-    filesystem = options["filesystem"].upper()
     fs_args = "-c c=64,a=16,e=16" if filesystem != "APFS" else ""
 
     ret, output = hdiutil(
@@ -503,7 +541,7 @@ def build_dmg(
         "-fsargs",
         fs_args,
         "-layout",
-        options["layout"],
+        "NONE",
         "-size",
         total_size,
         writableFile.name,
@@ -900,16 +938,6 @@ def build_dmg(
         }
     )
 
-    key_prefix = {"UDZO": "zlib", "UDBZ": "bzip2", "ULFO": "lzfse", "ULMO": "lzma"}
-    compression_level = options["compression_level"]
-    if options["format"] in key_prefix and compression_level:
-        compression_args = [
-            "-imagekey",
-            key_prefix[options["format"]] + "-level=" + str(compression_level),
-        ]
-    else:
-        compression_args = []
-
     callback(
         {
             "type": "command::start",
@@ -921,11 +949,10 @@ def build_dmg(
         "convert",
         writableFile.name,
         "-format",
-        options["format"],
+        image_format,
         "-ov",
         "-o",
         filename,
-        *compression_args,
     )
 
     callback(
