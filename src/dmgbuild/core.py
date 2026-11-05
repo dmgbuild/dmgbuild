@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import plistlib
 import re
 import shutil
@@ -33,6 +34,8 @@ SUPPORTED_FORMATS = ("UDRO", "UDZO", "ULFO", "ULMO", "UDSB", "RAW", "ASIF")
 
 # The filesystems dmgbuild can create in the image.
 SUPPORTED_FILESYSTEMS = ("HFS+", "APFS")
+
+MACOS_VER = int(platform.mac_ver()[0].split(".")[0])
 
 
 class DMGError(Exception):
@@ -552,7 +555,9 @@ def build_dmg(
     )
 
     # Create a raw image with no filesystem (and no partition map); the
-    # filesystem is created on the whole disk below.
+    # filesystem is created on the whole disk below. On macOS 14 and 15, the
+    # `--fs` option doesn't exist, so a filesystem is created and then thrown
+    # away in the format step.
     ret, output = run_tool(
         [
             DISKUTIL,
@@ -562,8 +567,9 @@ def build_dmg(
             "--plist",
             "--format",
             "RAW",
-            "--fs",
-            "None",
+        ]
+        + (["--fs", "None"] if MACOS_VER > 15 else [])
+        + [
             "--size",
             str(total_size),
             writableFile.name,
