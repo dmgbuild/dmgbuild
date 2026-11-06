@@ -35,11 +35,10 @@ def main():
     )
     parser.add_argument(
         "--detach-retries",
-        dest="detachRetries",
+        dest="detach_retries",
         type=int,
         default=12,
-        choices=range(1, 31),
-        help="Number of attempts to detach disk volume (1 sec. interval)",
+        help="Number of attempts to detach disk volume (with exponential backoff)",
     )
     parser.add_argument(
         "--version",
@@ -66,7 +65,7 @@ def main():
         args.settings,
         defines=defines,
         lookForHiDPI=args.lookForHiDPI,
-        detach_retries=args.detachRetries,
+        detach_retries=args.detach_retries,
     )
 
 

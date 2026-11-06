@@ -76,12 +76,19 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ "3.11", "3.12", "3.13", "3.14", "3.15", "3.16" ]
-        macOS-version: [
-            # x86_64 runners
-            "macos-15-intel",
-            # M1 runners
-            "macos-latest",
-        ]
+        include:
+          # Run all Python versions on M1
+          - macOS-version: "macos-26"
+
+          # Run the most recent Python on macOS 15 M1
+          - python-version: "3.x"
+            macOS-version: "macos-15"
+          # Run the most recent Python on macOS 15 intel
+          - python-version: "3.x"
+            macOS-version: "macos-15-intel"
+          # Run the most recent Python on macOS 27
+          - python-version: "3.x"
+            macOS-version: "xcode-27"
 
     runs-on: ${{ matrix.macOS-version }}
     steps:
