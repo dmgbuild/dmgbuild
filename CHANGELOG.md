@@ -2,6 +2,39 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 (2026-11-11)
+
+### Features
+
+* JSON configuration files now support the `size` setting. ([#279](https://github.com/dmgbuild/dmgbuild/issues/279))
+* A `shrink` setting was added, allowing the filesystem to retain an explicitly specified size rather than being shrunk to the minimum size after files are copied. ([#280](https://github.com/dmgbuild/dmgbuild/issues/280))
+* A `--version` option was added to the command line interface. ([#297](https://github.com/dmgbuild/dmgbuild/issues/297))
+* Support for Python 3.16 was added. ([#301](https://github.com/dmgbuild/dmgbuild/issues/301))
+* Use of `hdiutil`, deprecated in macOS 27, has been replaced with the equivalent calls to `diskutil`. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
+
+### Bugfixes
+
+* JSON configuration files now honor the `text-size` setting. ([#276](https://github.com/dmgbuild/dmgbuild/issues/276))
+* Hex color definitions (e.g., `#FFFFFF`) are now case insensitive. ([#277](https://github.com/dmgbuild/dmgbuild/issues/277))
+* The build now fails with an error if a file cannot be copied into the disk image, rather than silently producing an incomplete image. ([#283](https://github.com/dmgbuild/dmgbuild/issues/283))
+* The default number of detach retries used by the command line interface now matches the default used by the Python API (12). ([#294](https://github.com/dmgbuild/dmgbuild/issues/294))
+* Failures during calls to subprocesses are now caught, rather than being silently ignored. ([#299](https://github.com/dmgbuild/dmgbuild/issues/299))
+
+### Backward Incompatible Changes
+
+* Support for Python 3.10 was dropped. ([#297](https://github.com/dmgbuild/dmgbuild/issues/297))
+* macOS 14 or later is now required. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
+* Disk images are now created with no partition map. ([#295](https://github.com/dmgbuild/dmgbuild/issues/295))
+* The `compression_level` setting is no longer supported; if it is used, a warning is raised and the setting is ignored. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
+* When specifying `size`, the suffixes `k`, `m`, `g` and `t` are now interpreted as decimal (powers of 1000), and `KiB`, `MiB`, `GiB` and `TiB` are binary (powers of 1024). The `b`, `p` and `e` suffixes are no longer supported. Previously, `size` values were interpreted as 1024-based values, so the same size definitions will produce a slightly smaller image. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
+* The command names reported to build callbacks have changed from `hdiutil::*` to `diskutil::*`, and a new `diskutil::format` command is reported. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
+* The default `format` is now `ULFO`. The supported formats are now `UDRO`, `UDZO`, `ULFO`, `ULMO`, `UDSB`, `RAW` and `ASIF`; other formats (including the previous default, `UDBZ`) now raise an error. If you were previously using `UDRW` to produce a writable image, use the `RAW` format. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
+* The `license` setting is deprecated, because Apple has deprecated the mechanism used to embed license agreements in disk images. It will be removed in a future release. If you need the user to acknowledge a license, consider using a PKG installer instead of a DMG. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
+
+### Misc
+
+* [#266](https://github.com/dmgbuild/dmgbuild/issues/266), [#281](https://github.com/dmgbuild/dmgbuild/issues/281), [#282](https://github.com/dmgbuild/dmgbuild/issues/282), [#284](https://github.com/dmgbuild/dmgbuild/issues/284), [#285](https://github.com/dmgbuild/dmgbuild/issues/285), [#286](https://github.com/dmgbuild/dmgbuild/issues/286), [#288](https://github.com/dmgbuild/dmgbuild/issues/288), [#289](https://github.com/dmgbuild/dmgbuild/issues/289), [#291](https://github.com/dmgbuild/dmgbuild/issues/291), [#292](https://github.com/dmgbuild/dmgbuild/issues/292), [#293](https://github.com/dmgbuild/dmgbuild/issues/293), [#298](https://github.com/dmgbuild/dmgbuild/issues/298), [#300](https://github.com/dmgbuild/dmgbuild/issues/300), [#304](https://github.com/dmgbuild/dmgbuild/issues/304)
+
 ## 1.6.7 (2026-01-16)
 
 ### Bugfixes

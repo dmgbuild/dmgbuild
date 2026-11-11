@@ -35,8 +35,6 @@ SUPPORTED_FORMATS = ("UDRO", "UDZO", "ULFO", "ULMO", "UDSB", "RAW", "ASIF")
 # The filesystems dmgbuild can create in the image.
 SUPPORTED_FILESYSTEMS = ("HFS+", "APFS")
 
-MACOS_VER = int(platform.mac_ver()[0].split(".")[0])
-
 
 class DMGError(Exception):
     def __init__(self, callback, message):
@@ -558,6 +556,8 @@ def build_dmg(
     # filesystem is created on the whole disk below. On macOS 14 and 15, the
     # `--fs` option doesn't exist, so a filesystem is created and then thrown
     # away in the format step.
+    MACOS_VER = int(platform.mac_ver()[0].split(".")[0])
+
     ret, output = run_tool(
         [
             DISKUTIL,
