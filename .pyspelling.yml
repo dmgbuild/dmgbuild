@@ -24,7 +24,7 @@ matrix:
       - pymdownx.blocks.caption
       - pymdownx.blocks.tab
   - pyspelling.filters.html:
-      comments: true
+      comments: false
       attributes:
         - title
         - alt

@@ -98,7 +98,7 @@ As an alternative to the above, if you set `badge_icon` to the path of an icon f
 badge_icon = "/Applications/TextEdit.app/Contents/Resources/Edit.icns"
 ```
 
-The use of badge icons requires that `dmgbuild` be installed with the `badge_icons` extra; i.e., you need to install dmgbuild using:
+The use of badge icons requires that `dmgbuild` be installed with the `badge_icons` extra; i.e., you need to install `dmgbuild` using:
 
 ```console
 pip install "dmgbuild[badge_icons]"
