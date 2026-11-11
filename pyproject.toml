@@ -1,6 +1,7 @@
 [build-system]
 requires = [
     "setuptools==84.0.0",
+    "setuptools_scm==10.3.4",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -90,8 +91,8 @@ docs = [
     "sphinx == 8.2.3",
 ]
 
-[tool.setuptools.dynamic]
-version = {attr = "dmgbuild.__version__"}
+[tool.setuptools_scm]
+# An empty table is needed to enable setuptools_scm
 
 [tool.setuptools.package-data]
 "*" = ["*.tiff"]
