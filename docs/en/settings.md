@@ -291,7 +291,7 @@ A dictionary specifying the sort direction (either 'ascending', or 'descending')
 
 `dmgbuild` can attach license text to your disk image; this will be displayed automatically when the user tries to open your disk image.
 
-Note that license text is either RTF, or it must be encoded in the legacy Mac encoding matching its language; `dmgbuild` will *try* to do this, but the built-in set of codecs in Python doesn't cover all the Mac encodings, so in some cases you will need to encode the data and use a byte string.
+Note that license text is either RTF, or it must be encoded in the legacy macOS encoding matching its language; `dmgbuild` will *try* to do this, but the built-in set of codecs in Python doesn't cover all the macOS encodings, so in some cases you will need to encode the data and use a byte string.
 
 ### `license` { #license }
 
