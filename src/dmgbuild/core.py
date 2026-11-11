@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import time
 import tokenize
+import warnings
 
 try:
     import importlib_resources as resources
@@ -25,9 +26,16 @@ except ImportError:
     badge = None
 
 
-# The first element in the platform.mac_ver() tuple is a string containing the
-# macOS version (e.g., '10.15.6'). Parse into an integer tuple.
-MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split("."))
+DISKUTIL = "/usr/sbin/diskutil"
+HDIUTIL = "/usr/bin/hdiutil"
+
+# The output formats that ``diskutil image create from`` can produce.
+SUPPORTED_FORMATS = ("UDRO", "UDZO", "ULFO", "ULMO", "UDSB", "RAW", "ASIF")
+
+# The filesystems dmgbuild can create in the image.
+SUPPORTED_FILESYSTEMS = ("HFS+", "APFS")
+
+MACOS_VER = int(platform.mac_ver()[0].split(".")[0])
 
 
 class DMGError(Exception):
@@ -43,25 +51,49 @@ def quiet_callback(info):
     pass
 
 
-def hdiutil(cmd, *args, **kwargs):
-    plist = kwargs.get("plist", True)
-    all_args = ["/usr/bin/hdiutil", cmd]
-    all_args.extend(args)
-    if plist:
-        all_args.append("-plist")
-    p = subprocess.Popen(
-        all_args,
+def run_tool(args, plist=True):
+    """Run a command line tool, returning ``(retcode, output)``.
+
+    If ``plist`` is true and the tool succeeds, ``output`` is the tool's standard
+    output parsed as a plist. Otherwise, ``output`` is the tool's text output
+    (standard output followed by standard error).
+    """
+    p = subprocess.run(
+        args,
         stdout=subprocess.PIPE,
-        stderr=None if plist else subprocess.STDOUT,
-        close_fds=True,
+        stderr=subprocess.PIPE if plist else subprocess.STDOUT,
+        check=False,
     )
-    output, _ = p.communicate()
-    if plist:
-        results = plistlib.loads(output)
+    if plist and p.returncode == 0:
+        return p.returncode, plistlib.loads(p.stdout)
+    output = p.stdout + (p.stderr or b"")
+    return p.returncode, output.decode(errors="replace")
+
+
+def eject(device, force=False):
+    """Eject a disk, and everything on it, given its name (e.g. ``disk5``)."""
+    args = [DISKUTIL, "eject"]
+    if force:
+        args.append("force")
+    args.append(device)
+    return run_tool(args, plist=False)
+
+
+def newfs_command(filesystem, volume_name, device):
+    """Return the command that creates ``filesystem`` on the whole of ``device``."""
+    if filesystem == "APFS":
+        cmd = ["/sbin/newfs_apfs", "-v", volume_name, f"/dev/{device}"]
     else:
-        results = output.decode()
-    retcode = p.wait()
-    return retcode, results
+        cmd = [
+            "/sbin/newfs_hfs",
+            "-v",
+            volume_name,
+            "-c",
+            "c=64,a=16,e=16",
+            f"/dev/r{device}",
+        ]
+
+    return run_tool(cmd, plist=False)
 
 
 def load_settings(filename, settings):
@@ -118,7 +150,6 @@ def load_json(filename, settings):
     )
     settings["format"] = json_data.get("format", "UDZO")
     settings["filesystem"] = json_data.get("filesystem", "HFS+")
-    settings["layout"] = json_data.get("layout", "NONE")
     settings["compression_level"] = json_data.get("compression-level", None)
     settings["license"] = json_data.get("license", None)
     settings["size"] = json_data.get("size", None)
@@ -178,9 +209,8 @@ def build_dmg(
         # Default settings
         "filename": filename,
         "volume_name": volume_name,
-        "format": "UDBZ",
+        "format": "ULFO",
         "filesystem": "HFS+",
-        "layout": "NONE",
         "compression_level": None,
         "size": None,
         "shrink": True,
@@ -272,6 +302,40 @@ def build_dmg(
 
     # Add any overrides
     options.update(settings)
+
+    # Validate the settings before doing any work.
+    filesystem = str(options["filesystem"]).upper()
+    if filesystem not in SUPPORTED_FILESYSTEMS:
+        raise DMGError(
+            callback,
+            f"Unsupported filesystem {options['filesystem']!r}; "
+            f"must be one of {', '.join(SUPPORTED_FILESYSTEMS)}",
+        )
+
+    image_format = options["format"]
+    if image_format not in SUPPORTED_FORMATS:
+        raise DMGError(
+            callback,
+            f"Unsupported format {image_format!r}; "
+            f"must be one of {', '.join(SUPPORTED_FORMATS)}",
+        )
+
+    if options["compression_level"]:
+        warnings.warn(
+            "The compression_level setting is no longer supported, "
+            "and will be ignored.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
+    if options["license"]:
+        warnings.warn(
+            "Apple has deprecated the mechanism used to embed license agreements "
+            "in disk images. The license setting may be removed in a future "
+            "release of dmgbuild.",
+            FutureWarning,
+            stacklevel=2,
+        )
 
     # Set up the finder data
     bounds = options["window_rect"]
@@ -473,7 +537,7 @@ def build_dmg(
         for name, target in options["symlinks"].items():
             total_size += 4096
 
-        total_size = str(max(total_size / 1000, 1024)) + "K"
+        total_size = str(total_size)
 
     callback(
         {
@@ -486,33 +550,36 @@ def build_dmg(
     callback(
         {
             "type": "command::start",
-            "command": "hdiutil::create",
+            "command": "diskutil::create",
         }
     )
 
-    filesystem = options["filesystem"].upper()
-    fs_args = "-c c=64,a=16,e=16" if filesystem != "APFS" else ""
-
-    ret, output = hdiutil(
-        "create",
-        "-ov",
-        "-volname",
-        volume_name,
-        "-fs",
-        filesystem,
-        "-fsargs",
-        fs_args,
-        "-layout",
-        options["layout"],
-        "-size",
-        total_size,
-        writableFile.name,
+    # Create a raw image with no filesystem (and no partition map); the
+    # filesystem is created on the whole disk below. On macOS 14 and 15, the
+    # `--fs` option doesn't exist, so a filesystem is created and then thrown
+    # away in the format step.
+    ret, output = run_tool(
+        [
+            DISKUTIL,
+            "image",
+            "create",
+            "blank",
+            "--plist",
+            "--format",
+            "RAW",
+        ]
+        + (["--fs", "None"] if MACOS_VER > 15 else [])
+        + [
+            "--size",
+            str(total_size),
+            writableFile.name,
+        ]
     )
 
     callback(
         {
             "type": "command::finished",
-            "command": "hdiutil::create",
+            "command": "diskutil::create",
             "ret": ret,
             "output": output,
         }
@@ -524,25 +591,60 @@ def build_dmg(
     callback(
         {
             "type": "command::start",
-            "command": "hdiutil::attach",
+            "command": "diskutil::format",
         }
     )
 
-    # IDME was deprecated in macOS 10.15/Catalina; as a result, use of -noidme
-    # started raising a warning.
-    if MACOS_VERSION >= (10, 15):
-        ret, output = hdiutil(
-            "attach", "-nobrowse", "-owners", "off", writableFile.name
-        )
-    else:
-        ret, output = hdiutil(
-            "attach", "-nobrowse", "-owners", "off", "-noidme", writableFile.name
-        )
+    ret, output = run_tool(
+        [DISKUTIL, "image", "attach", "--plist", "--noMount", writableFile.name]
+    )
+    if ret:
+        raise DMGError(callback, f"Unable to attach disk image: {output}")
+
+    device = output["system-entities"][0]["dev-entry"]
+    ret, output = newfs_command(filesystem, volume_name, device)
+    if ret:
+        eject(device, force=True)
+        raise DMGError(callback, f"Unable to create {filesystem} filesystem: {output}")
 
     callback(
         {
             "type": "command::finished",
-            "command": "hdiutil::attach",
+            "command": "diskutil::format",
+            "ret": ret,
+            "output": output,
+        }
+    )
+
+    ret, output = eject(device)
+    if ret:
+        eject(device, force=True)
+        raise DMGError(callback, f"Unable to detach disk image: {output}")
+
+    callback(
+        {
+            "type": "command::start",
+            "command": "diskutil::attach",
+        }
+    )
+
+    ret, output = run_tool(
+        [
+            DISKUTIL,
+            "image",
+            "attach",
+            "--plist",
+            "--nobrowse",
+            "--mountOptions",
+            "noowners",
+            writableFile.name,
+        ]
+    )
+
+    callback(
+        {
+            "type": "command::finished",
+            "command": "diskutil::attach",
             "ret": ret,
             "output": output,
         }
@@ -550,6 +652,10 @@ def build_dmg(
 
     if ret:
         raise DMGError(callback, f"Unable to attach disk image: {output}")
+
+    # The first entity is the image's whole disk; ejecting it also ejects any
+    # volumes on it (including APFS volumes, which are on a synthesized disk).
+    device = output["system-entities"][0]["dev-entry"]
 
     callback(
         {
@@ -559,10 +665,14 @@ def build_dmg(
     )
 
     try:
-        for info in output["system-entities"]:
-            if info.get("mount-point", None):
-                device = info["dev-entry"]
-                mount_point = info["mount-point"]
+        mount_points = [
+            info["mount-point"]
+            for info in output["system-entities"]
+            if info.get("mount-point")
+        ]
+        if not mount_points:
+            raise DMGError(callback, f"Disk image was not mounted: {output}")
+        mount_point = mount_points[0]
 
         icon = options["icon"]
         if badge:
@@ -824,7 +934,7 @@ def build_dmg(
         shutil.rmtree(os.path.join(mount_point, ".Trashes"), True)
     except Exception:
         # Always try to detach
-        hdiutil("detach", "-force", device, plist=False)
+        eject(device, force=True)
         raise
 
     callback(
@@ -842,16 +952,16 @@ def build_dmg(
         callback(
             {
                 "type": "command::start",
-                "command": "hdiutil::detach",
+                "command": "diskutil::detach",
             }
         )
 
-        ret, output = hdiutil("detach", device, plist=False)
+        ret, output = eject(device)
 
         callback(
             {
                 "type": "command::finished",
-                "command": "hdiutil::detach",
+                "command": "diskutil::detach",
                 "ret": ret,
                 "output": output,
             }
@@ -865,7 +975,7 @@ def build_dmg(
         time.sleep(retry_time)
 
     if ret:
-        hdiutil("detach", "-force", device, plist=False)
+        eject(device, force=True)
         raise DMGError(callback, f"Unable to detach device cleanly: {output}")
 
     # Shrink the output to the minimum possible size
@@ -873,18 +983,19 @@ def build_dmg(
         callback(
             {
                 "type": "command::start",
-                "command": "hdiutil::resize",
+                "command": "diskutil::resize",
             }
         )
 
-        ret, output = hdiutil(
-            "resize", "-quiet", "-sectors", "min", writableFile.name, plist=False
+        ret, output = run_tool(
+            [DISKUTIL, "image", "resize", "--size", "min", writableFile.name],
+            plist=False,
         )
 
         callback(
             {
                 "type": "command::finished",
-                "command": "hdiutil::resize",
+                "command": "diskutil::resize",
                 "ret": ret,
                 "output": output,
             }
@@ -900,38 +1011,35 @@ def build_dmg(
         }
     )
 
-    key_prefix = {"UDZO": "zlib", "UDBZ": "bzip2", "ULFO": "lzfse", "ULMO": "lzma"}
-    compression_level = options["compression_level"]
-    if options["format"] in key_prefix and compression_level:
-        compression_args = [
-            "-imagekey",
-            key_prefix[options["format"]] + "-level=" + str(compression_level),
-        ]
-    else:
-        compression_args = []
-
     callback(
         {
             "type": "command::start",
-            "command": "hdiutil::convert",
+            "command": "diskutil::convert",
         }
     )
 
-    ret, output = hdiutil(
-        "convert",
-        writableFile.name,
-        "-format",
-        options["format"],
-        "-ov",
-        "-o",
-        filename,
-        *compression_args,
+    # diskutil can't overwrite an existing image.
+    if os.path.isfile(filename) or os.path.islink(filename):
+        os.remove(filename)
+
+    ret, output = run_tool(
+        [
+            DISKUTIL,
+            "image",
+            "create",
+            "from",
+            "--plist",
+            "--format",
+            image_format,
+            writableFile.name,
+            filename,
+        ]
     )
 
     callback(
         {
             "type": "command::finished",
-            "command": "hdiutil::convert",
+            "command": "diskutil::convert",
             "ret": ret,
             "output": output,
         }
@@ -962,8 +1070,17 @@ def build_dmg(
         tempLicenseFile.close()
 
         # see https://developer.apple.com/forums/thread/668084
-        ret, output = hdiutil(
-            "udifrez", "-xml", tempLicenseFile.name, "", "-quiet", filename, plist=False
+        ret, output = run_tool(
+            [
+                HDIUTIL,
+                "udifrez",
+                "-xml",
+                tempLicenseFile.name,
+                "",
+                "-quiet",
+                filename,
+            ],
+            plist=False,
         )
 
         os.remove(tempLicenseFile.name)

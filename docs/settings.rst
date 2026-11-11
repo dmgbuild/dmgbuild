@@ -32,55 +32,27 @@ Disk Image Settings
 .. py:data:: format
 
    Specifies the format code for the final output disk image.  Must be
-   one of the types supported by ``hdiutil`` on the build system;
-   currently the list includes
+   one of the formats supported by ``diskutil image create from``:
 
-   ====  =========================
+   ====  ===================================
    Code  Meaning
-   ====  =========================
-   UDRO  Read-only
-   UDCO  Compressed (ADC)
-   UDZO  Compressed (gzip)
-   UDBZ  Compressed (bzip2)
-   ULFO  Compressed (lzfse - macOS 10.11+ only)
-   ULMO  Compressed (lzma - macOS 10.15+ only)
-   UFBI  Entire device
-   IPOD  iPod image
-   UDxx  UDIF stub
+   ====  ===================================
+   ULFO  Compressed (lzfse); the default
+   ULMO  Compressed (lzma)
+   UDZO  Compressed (zlib)
+   UDRO  Read-only, uncompressed
    UDSB  Sparse bundle
-   UDSP  Sparse
-   UDRW  Read/write
-   UDTO  DVD/CD master
-   DC42  Disk Copy 4.2
-   RdWr  NDIF read/write
-   Rdxx  NDIF read-only
-   ROCo  NDIF Compressed
-   Rken  NDIF Compressed (KenCode)
-   ====  =========================
+   RAW   Raw, uncompressed
+   ASIF  Apple Sparse Image Format
+   ====  ===================================
 
    For disk images you intend to distribute over the Internet, you
-   should probably stick to 'UDZO' and 'UDBZ'.
+   should use one of the compressed formats: 'ULFO', 'ULMO' or 'UDZO'.
 
 .. py:data:: filesystem
 
    Specifies the filesystem for the output disk image.  Must be
-   either 'HFS+' (the default) or 'APFS' (macOS 10.13+ only).
-
-.. py:data:: layout
-
-   Specifies the partition layout of the disk image, as passed to the
-   ``-layout`` argument of ``hdiutil create``.  The default, 'NONE',
-   creates an image with no partition map, so the filesystem occupies
-   the whole image.  If you need a partition map, you can use any of
-   the other layouts listed by ``hdiutil create -help``; for example,
-   'GPTSPUD' (a GUID partition map with a single partition) is the
-   layout ``hdiutil`` uses when none is specified.
-
-   A partition map uses space in the image that the automatic size
-   calculation does not account for, so if you use one you may also
-   need to set :data:`size`.  Conversely, ``hdiutil`` cannot shrink an
-   APFS image that has no partition map, so with 'NONE', :data:`shrink`
-   has no effect when :data:`filesystem` is 'APFS'.
+   either 'HFS+' (the default) or 'APFS'.
 
 .. py:data:: size
 
@@ -89,10 +61,11 @@ Disk Image Settings
    reasonable size for the image.
 
    If you set this, you should set it large enough to hold the files you
-   intend to copy into the image.  The syntax is the same as for the ``-size``
-   argument to ``hdiutil``, i.e. you can use the suffixes 'b', 'k', 'm', 'g',
-   't', 'p' and 'e' for bytes, kilobytes, megabytes, gigabytes, terabytes,
-   exabytes and petabytes respectively.
+   intend to copy into the image.  The value is passed to the ``--size``
+   argument of ``diskutil image create blank``: a number without a suffix
+   is a size in bytes; the suffixes 'k', 'm', 'g' and 't' are decimal units
+   (powers of 1000); and the suffixes 'KiB', 'MiB', 'GiB' and 'TiB' are
+   binary units (powers of 1024).
 
 .. py:data:: shrink
 
@@ -404,6 +377,15 @@ In list view, the following columns are available:
 License Settings
 ----------------
 
+.. warning::
+
+   The ``license`` setting will be removed in a future release of ``dmgbuild``.
+
+   Apple has deprecated the tool used to embed license agreements in disk
+   images, and does not appear to be providing an alternate method for
+   embedding licenses. If you need the user to acknowledge a license,
+   consider using a PKG installer instead of a DMG.
+
 ``dmgbuild`` can attach license text to your disk image; this will be
 displayed automatically when the user tries to open your disk image.
 
@@ -433,12 +415,6 @@ some cases you will need to encode the data and use a byte string.
    |                  |          | a sequence of user interface strings.     |
    +------------------+----------+-------------------------------------------+
 
-   Recognized languages are:
-
-      da_DK, de_AT, de_CH, de_DE, en_AU, en_GB, en_IE, en_SG, en_US, es_ES,
-      fi_FI, fr_BE, fr_FR, fr_CA, fr_CH, it_IT, ja_JP, ko_KR, nb_NO, nl_BE,
-      nl_NL, pt_BR, pt_PT, ru_RU, sv_SE, zh_CN, zh_TW,
-
    The user interface strings are as follows:
 
    +-------+-----------------------+-----------------------------------------+
@@ -462,11 +438,22 @@ some cases you will need to encode the data and use a byte string.
 
    There are built-in user interface strings for the following languages:
 
-     English (en_US, en_AU, en_GB, en_SG), German (de_DE, de_AT, de_CH), Spanish
-     (es_ES), French (fr_FR, fr_BE, fr_CH), Italian (it_IT), Japanese (ja_JP),
-     Dutch (nl_NL), Swedish (sv_SE), Brazilian Portuguese (pt_BR), Simplified
-     Chinese (zh_CN), Traditional Chinese (zh_TW), Danish (da_DK), Finnish
-     (fi_FI), Korean (ko_KR), Norwegian (nb_NO), Russian (ru_RU)
+    * Danish (da_DK)
+    * German (de_DE, de_AT, de_CH)
+    * English (en_US, en_AU, en_IE, en_GB, en_SG)
+    * Spanish (es_ES)
+    * Finnish (fi_FI)
+    * French (fr_FR, fr_BE, fr_CA, fr_CH)
+    * Italian (it_IT)
+    * Japanese (ja_JP)
+    * Korean (ko_KR)
+    * Norwegian (nb_NO)
+    * Dutch (nl_NL, nl_BE)
+    * Portuguese (pt_BR, pt_PT)
+    * Russian (ru_RU)
+    * Swedish (sv_SE)
+    * Simplified Chinese (zh_CN)
+    * Traditional Chinese (zh_TW)
 
    For other languages, if you don't specify a suitable set, ``dmgbuild`` will
    use the English defaults instead.
