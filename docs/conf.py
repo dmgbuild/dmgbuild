@@ -13,8 +13,7 @@
 
 import os
 import sys
-
-import dmgbuild
+from importlib.metadata import version
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -58,7 +57,7 @@ copyright = "2014, Alastair Houghton"
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = dmgbuild.__version__
+release = version("dmgbuild")
 
 # The short X.Y version.
 version = ".".join(release.split(".")[:2])
