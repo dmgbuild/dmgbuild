@@ -1,8 +1,8 @@
 # Settings
 
-DMGBuild accepts, as one of its arguments, a settings file. This is in fact a Python script, which means anything you can do in Python code, you can do in your settings file. This makes it easy for you to customize the behavior of DMGBuild.
+dmgbuild accepts, as one of its arguments, a settings file. This is in fact a Python script, which means anything you can do in Python code, you can do in your settings file. This makes it easy for you to customize the behavior of dmgbuild.
 
-Each of the available settings is documented below; all of them are optional; the DMGBuild program has defaults for those that matter. The default values *are* visible from within your settings file, if you want to examine or alter them rather than replacing them completely.
+Each of the available settings is documented below; all of them are optional; the dmgbuild program has defaults for those that matter. The default values *are* visible from within your settings file, if you want to examine or alter them rather than replacing them completely.
 
 If any `-D key=value` settings have been made on the command line, they are visible in a dictionary named `defines` within the settings file.
 
@@ -38,13 +38,13 @@ Specifies the file system for the output disk image. Must be either 'HFS+' (the 
 
 ### `size` { #size }
 
-If defined, specifies the size of the file system within the image. If this is not defined, DMGBuild will attempt to determine a reasonable size for the image.
+If defined, specifies the size of the file system within the image. If this is not defined, dmgbuild will attempt to determine a reasonable size for the image.
 
 If you set this, you should set it large enough to hold the files you intend to copy into the image. The value is passed to the `--size` argument of`diskutil image create blank`: a number without a suffix is a size in bytes; the suffixes 'k', 'm', 'g' and 't' are decimal units (powers of 1000); and the suffixes 'KiB', 'MiB', 'GiB' and 'TiB' are binary units (powers of 1024).
 
 ### `shrink` { #shrink }
 
-If set to `False`, DMGBuild will not shrink the file system to the minimum size after copying files. This is useful when you want to preserve the explicit `size` you specified for the mounted volume. Defaults to `True`.
+If set to `False`, dmgbuild will not shrink the file system to the minimum size after copying files. This is useful when you want to preserve the explicit `size` you specified for the mounted volume. Defaults to `True`.
 
 ## Content Settings
 
@@ -98,7 +98,7 @@ As an alternative to the above, if you set `badge_icon` to the path of an icon f
 badge_icon = "/Applications/TextEdit.app/Contents/Resources/Edit.icns"
 ```
 
-The use of badge icons requires that DMGBuild be installed with the `badge_icons` extra; i.e., you need to install DMGBuild using:
+The use of badge icons requires that dmgbuild be installed with the `badge_icons` extra; i.e., you need to install dmgbuild using:
 
 ```console
 pip install "dmgbuild[badge_icons]"
@@ -175,7 +175,7 @@ Whether or not to show icon previews for the contents of the disk image (default
 
 ### `include_list_view_settings` { #include_list_view_settings }
 
-Set these to `True` to force inclusion of the icon/list view settings respectively. By default, DMGBuild will only include settings for the default view type.
+Set these to `True` to force inclusion of the icon/list view settings respectively. By default, dmgbuild will only include settings for the default view type.
 
 ## Icon View Settings
 
@@ -194,7 +194,7 @@ If set, indicates that the Finder should arrange the icons in the icon view acco
 | `kind`             |
 | `label`            |
 
-Any other value disables automatic icon arrangement (which is the default, since the main use-case for DMGBuild is building application distribution images, where icon positioning is an important part of the design).
+Any other value disables automatic icon arrangement (which is the default, since the main use-case for dmgbuild is building application distribution images, where icon positioning is an important part of the design).
 
 ### `grid_offset` { #grid_offset }
 
@@ -285,13 +285,13 @@ A dictionary specifying the sort direction (either 'ascending', or 'descending')
 
 !!! warning
 
-    The `license` setting will be removed in a future release of DMGBuild.
+    The `license` setting will be removed in a future release of dmgbuild.
 
     Apple has deprecated the tool used to embed license agreements in disk images, and does not appear to be providing an alternate method for embedding licenses. If you need the user to acknowledge a license, consider using a PKG installer instead of a DMG.
 
-DMGBuild can attach license text to your disk image; this will be displayed automatically when the user tries to open your disk image.
+dmgbuild can attach license text to your disk image; this will be displayed automatically when the user tries to open your disk image.
 
-Note that license text is either RTF, or it must be encoded in the legacy macOS encoding matching its language; DMGBuild will *try* to do this, but the built-in set of codecs in Python doesn't cover all the macOS encodings, so in some cases you will need to encode the data and use a byte string.
+Note that license text is either RTF, or it must be encoded in the legacy macOS encoding matching its language; dmgbuild will *try* to do this, but the built-in set of codecs in Python doesn't cover all the macOS encodings, so in some cases you will need to encode the data and use a byte string.
 
 ### `license` { #license }
 
@@ -333,6 +333,6 @@ There are built-in user interface strings for the following languages:
 - Simplified Chinese (`zh_CN`)
 - Traditional Chinese (`zh_TW`)
 
-For other languages, if you don't specify a suitable set, DMGBuild will use the English defaults instead.
+For other languages, if you don't specify a suitable set, dmgbuild will use the English defaults instead.
 
-DMGBuild will auto-detect RTF data by looking for the string `{\rtf1` at the start of the data. If it does not find this string, it will assume that you have supplied plain text.
+dmgbuild will auto-detect RTF data by looking for the string `{\rtf1` at the start of the data. If it does not find this string, it will assume that you have supplied plain text.

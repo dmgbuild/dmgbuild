@@ -24,7 +24,7 @@ watch = [
 ]
 
 nav = [
-  { "Home" = "index.md" },
+  { "dmgbuild (v{{ release }})" = "index.md" },
   { "Usage" = "usage.md" },
   { "Settings" = "settings.md" },
   { "Example Settings File" = "example.md" },
