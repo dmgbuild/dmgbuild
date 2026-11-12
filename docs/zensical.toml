@@ -1,0 +1,105 @@
+[project]
+site_name = "dmgbuild"
+site_description = "macOS command line utility to build disk images"
+site_author = "Alastair Houghton"
+site_url = "https://dmgbuild.readthedocs.io/en/latest/"
+copyright = "&copy; Alastair Houghton"
+repo_url = "https://github.com/dmgbuild/dmgbuild"
+repo_name = "dmgbuild/dmgbuild"
+
+docs_dir = "en"
+site_dir = "site"
+
+# macros.py provides template variables; it is not documentation content.
+# superpowers/ holds local (git-ignored) planning notes.
+exclude_docs = """
+/macros.py
+__pycache__/
+/superpowers/
+"""
+
+# The example settings file is embedded into example.md with Snippets.
+watch = [
+  "../tests/examples",
+]
+
+nav = [
+  { "dmgbuild (v{{ release }})" = "index.md" },
+  { "Usage" = "usage.md" },
+  { "Settings" = "settings.md" },
+  { "Example Settings File" = "example.md" },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.code.copy",
+  "navigation.footer",
+  "navigation.instant",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.plugins.macros]
+module_name = "macros"
+# Only render Jinja on pages that opt in with `render_macros: true`.
+render_by_default = false
+on_error_fail = true
+on_undefined = "strict"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+def_list = {}
+tables = {}
+toc.permalink = true
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+# Snippet paths are relative to the repository root. Snippets resolves
+# base_path against the working directory (not this file), so allow building
+# from either the repository root (as tox does) or the docs directory.
+pymdownx.snippets.base_path = [".", ".."]
+pymdownx.snippets.check_paths = true
+pymdownx.superfences = {}
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "sphinx"
+extensions = ["griffe_sphinx"]
+allow_inspection = false
+show_source = false
+members_order = "alphabetical"
+annotations_path = "brief"
+merge_init_into_class = true
+separate_signature = false
+show_signature_annotations = true
+signature_crossrefs = true
+show_root_heading = true
+docstring_section_style = "spacy"
+line_length = 80
+show_symbol_type_toc = true
+show_symbol_type_heading = true
+show_attribute_values = false
+heading_level = 3

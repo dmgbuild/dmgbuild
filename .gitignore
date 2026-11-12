@@ -11,8 +11,11 @@
 *.pyc
 *#
 *~
-build
+build/
 coverage.xml
-dist
-venv*
-docs/_build
+dist/
+venv*/
+docs/superpowers/
+docs/site/
+local/
+.worktrees/
