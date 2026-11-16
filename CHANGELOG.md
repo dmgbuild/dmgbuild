@@ -31,6 +31,10 @@
 * The default `format` is now `ULFO`. The supported formats are now `UDRO`, `UDZO`, `ULFO`, `ULMO`, `UDSB`, `RAW` and `ASIF`; other formats (including the previous default, `UDBZ`) now raise an error. If you were previously using `UDRW` to produce a writable image, use the `RAW` format. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
 * The `license` setting is deprecated, because Apple has deprecated the mechanism used to embed license agreements in disk images. It will be removed in a future release. If you need the user to acknowledge a license, consider using a PKG installer instead of a DMG. ([#302](https://github.com/dmgbuild/dmgbuild/issues/302))
 
+### Documentation
+
+* The documentation has been converted from Sphinx reStructuredText to Zensical Markdown. ([#305](https://github.com/dmgbuild/dmgbuild/issues/305))
+
 ### Misc
 
 * [#266](https://github.com/dmgbuild/dmgbuild/issues/266), [#281](https://github.com/dmgbuild/dmgbuild/issues/281), [#282](https://github.com/dmgbuild/dmgbuild/issues/282), [#284](https://github.com/dmgbuild/dmgbuild/issues/284), [#285](https://github.com/dmgbuild/dmgbuild/issues/285), [#286](https://github.com/dmgbuild/dmgbuild/issues/286), [#288](https://github.com/dmgbuild/dmgbuild/issues/288), [#289](https://github.com/dmgbuild/dmgbuild/issues/289), [#291](https://github.com/dmgbuild/dmgbuild/issues/291), [#292](https://github.com/dmgbuild/dmgbuild/issues/292), [#293](https://github.com/dmgbuild/dmgbuild/issues/293), [#298](https://github.com/dmgbuild/dmgbuild/issues/298), [#300](https://github.com/dmgbuild/dmgbuild/issues/300), [#304](https://github.com/dmgbuild/dmgbuild/issues/304)
